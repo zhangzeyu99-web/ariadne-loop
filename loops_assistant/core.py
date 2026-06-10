@@ -191,6 +191,58 @@ Return JSON only. Do not add prose outside the JSON.
 """
 
 
+def write_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
+    loop = build_loop(snapshot)
+    clarity = _score_loop_clarity(loop, snapshot)
+    return {
+        "loop": loop,
+        "clarity": clarity,
+        "patterns": _design_patterns(loop),
+        "tightened_brief": _tightened_brief(loop),
+        "agent_packet": render_agent_packet(loop),
+    }
+
+
+def render_loop_writing_report(package: dict[str, Any]) -> str:
+    loop = package["loop"]
+    clarity = package["clarity"]
+    prompt = package["patterns"]["prompt"]
+    harness = package["patterns"]["harness"]
+    eval_pattern = package["patterns"]["eval"]
+
+    missing = clarity.get("missing_inputs", [])
+    missing_lines = _markdown_list(missing) if missing else "- None"
+    dimension_lines = "\n".join(
+        f"- {name}: {value}" for name, value in clarity["dimensions"].items()
+    )
+    assertions = "\n".join(f"- {item}" for item in eval_pattern["assertions"])
+
+    return f"""# Loop Writing Assistant
+
+## Clear Loop
+- Name: {loop['name']}
+- Goal: {loop['goal']}
+- Current State: {loop['context']['current_state']}
+- Tightened Brief: {package['tightened_brief']}
+
+## Clarity Score
+- Score: {clarity['score']}/100
+{dimension_lines}
+
+## Missing Inputs
+{missing_lines}
+
+## Borrowed Structures
+- Prompt pattern: {', '.join(prompt['sections'])}
+- Harness pattern: {', '.join(harness['requires'])}
+- Eval pattern:
+{assertions}
+
+## Agent Packet
+{package['agent_packet']}
+"""
+
+
 def parse_agent_report(text: str) -> dict[str, Any]:
     payload = _extract_json_object(text)
     report = json.loads(payload)
@@ -204,6 +256,110 @@ def parse_agent_report(text: str) -> dict[str, Any]:
     if not isinstance(report["evidence"], list) or not report["evidence"]:
         raise ValueError("agent report evidence must be a non-empty list")
     return report
+
+
+def _score_loop_clarity(
+    loop: dict[str, Any], original_snapshot: dict[str, Any]
+) -> dict[str, Any]:
+    missing: list[str] = []
+    score = 100
+
+    goal = _clean_text(original_snapshot.get("goal"))
+    current_state = _clean_text(
+        original_snapshot.get("current_state") or original_snapshot.get("status")
+    )
+    constraints = _string_list(original_snapshot.get("constraints"))
+    verifiers = _string_list(original_snapshot.get("verifiers"))
+    external_effects = _string_list(original_snapshot.get("external_effects"))
+
+    goal_specificity = "strong"
+    if not goal or goal in {"让 AI 帮我做完", "做好", "继续推进"} or len(goal) < 12:
+        goal_specificity = "weak"
+        score -= 20
+        missing.append("goal: 写清楚最终状态、对象和完成标准")
+
+    state_grounding = "strong"
+    if not current_state:
+        state_grounding = "weak"
+        score -= 15
+        missing.append("current_state: 补充当前进度、已有产物和未解决缺口")
+
+    verifier_strength = "strong"
+    if not verifiers:
+        verifier_strength = "weak"
+        score -= 25
+        missing.append("verifier: 至少写一个能产生外部证据的验证器")
+
+    constraint_quality = "strong"
+    if not constraints:
+        constraint_quality = "weak"
+        score -= 10
+        missing.append("constraints: 写出不做事项、权限边界和风险动作")
+
+    stop_safety = "strong" if loop.get("stop_rules") and loop.get("rollback") else "weak"
+    if stop_safety == "weak":
+        score -= 20
+        missing.append("stop_rules: 写清楚何时停止、回滚或请求确认")
+
+    ai_contract = "strong" if loop.get("agent_contract") else "weak"
+    if ai_contract == "weak":
+        score -= 10
+        missing.append("agent_contract: 约束 AI 返回结构化报告")
+
+    if external_effects and not loop.get("human_gates"):
+        score -= 10
+        missing.append("human_gate: 外部影响动作前必须有人工确认")
+
+    return {
+        "score": max(0, score),
+        "dimensions": {
+            "goal_specificity": goal_specificity,
+            "state_grounding": state_grounding,
+            "verifier_strength": verifier_strength,
+            "constraint_quality": constraint_quality,
+            "stop_safety": stop_safety,
+            "ai_contract": ai_contract,
+        },
+        "missing_inputs": missing,
+    }
+
+
+def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "prompt": {
+            "source": "high-star prompt libraries",
+            "sections": [
+                "role",
+                "task",
+                "context",
+                "constraints",
+                "output_contract",
+            ],
+            "instruction": "把 Loop 写成 AI 能执行的任务说明，而不是只写愿望。",
+        },
+        "harness": {
+            "source": "agent harness projects",
+            "requires": ["state", "tools", "memory", "checkpoints", "budget"],
+            "instruction": "把上下文、工具、状态、预算和检查点放进执行环境。",
+        },
+        "eval": {
+            "source": "LLM eval harnesses",
+            "assertions": [
+                "loop has inspect/act/verify/decide cycle",
+                "each verifier has observable evidence",
+                "stop and rollback are explicit",
+                "agent report is machine-checkable JSON",
+            ],
+        },
+    }
+
+
+def _tightened_brief(loop: dict[str, Any]) -> str:
+    return (
+        f"围绕“{loop['goal']}”运行一个有状态闭环：先读取真实上下文，"
+        "再执行最小必要动作，用 verifier 逐项验证；验证失败就回滚或收窄，"
+        "触碰外部状态前请求人工确认。"
+    )
 
 
 def _build_cycle(goal: str, verifier_inputs: list[str]) -> list[dict[str, str]]:
@@ -353,4 +509,3 @@ def _extract_json_object(text: str) -> str:
     if fenced:
         return fenced.group(1)
     raise ValueError("agent report must contain a JSON object")
-

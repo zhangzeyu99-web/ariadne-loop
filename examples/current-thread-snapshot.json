@@ -1,0 +1,30 @@
+{
+  "title": "当前线程：增强 Loops Assistant",
+  "goal": "基于高星 prompt、eval 和 harness 项目的结构，把 Loops Assistant 升级成能帮用户写清楚 Loop 的助手，并测试、AI smoke、发布到 GitHub",
+  "current_state": "已有 make/check/report 命令和 GitHub 首版；本轮要新增 write 命令、清晰度评分、参考结构说明、本线程 Loop 样例和发布验证",
+  "recent_progress": [
+    "已调研 f/prompts.chat、promptfoo、langgraph、openai/evals、lm-evaluation-harness",
+    "已建立 TDD 红灯测试",
+    "已有 Codex smoke 脚本验证 AI 可读取 Agent Packet"
+  ],
+  "constraints": [
+    "先写失败测试再实现",
+    "不把建议停在文档，要落到 CLI 和样例",
+    "不复制第三方项目内容，只借鉴结构",
+    "发布前必须跑完整测试和远端读回"
+  ],
+  "verifiers": [
+    "pytest",
+    "compileall",
+    "output_quality_gate README.md",
+    "write 命令生成 current-thread-loop-report.md",
+    "Codex AI smoke 返回 valid report",
+    "GitHub 远端 main SHA 与本地一致"
+  ],
+  "external_effects": [
+    "commit",
+    "push"
+  ],
+  "risk": "medium"
+}
+

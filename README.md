@@ -7,6 +7,7 @@
 ## 能做什么
 
 - 从 JSON 或 Markdown 现状记录生成 Loop 规范。
+- 把粗糙想法改写成更清楚的 Loop Writing Report，包含清晰度评分、缺口问题和 AI 执行包。
 - 校验一份 Loop 是否真的包含 cycle、verifier、stop rule、rollback、budget 和 AI report contract。
 - 生成 AI 可读的 Markdown packet，要求 AI 每轮只返回结构化 JSON。
 - 校验 AI 返回的执行报告，避免 AI 用自然语言绕过闭环。
@@ -18,6 +19,7 @@ python -m pytest -q
 python -m loops_assistant make --input examples/openclaw-snapshot.json --output examples/generated/openclaw-loop.json --format json
 python -m loops_assistant make --input examples/openclaw-snapshot.json --output examples/generated/openclaw-agent-packet.md --format markdown
 python -m loops_assistant check --input examples/generated/openclaw-loop.json
+python -m loops_assistant write --input examples/current-thread-snapshot.json --output examples/generated/current-thread-loop-report.md --format markdown
 ```
 
 把 `examples/generated/openclaw-agent-packet.md` 的内容交给 AI，它需要按下面结构返回：
@@ -69,6 +71,18 @@ python -m loops_assistant report --input tmp/ai-report.json
 - agent contract，约束 AI 返回结构化报告。
 
 缺少 verifier 或 stop rule 的内容只算 prompt，不算 Loop。
+
+## 写清楚 Loop
+
+`write` 命令会输出一份面向人的报告：
+
+- Clear Loop：目标、当前状态和收紧后的 brief。
+- Clarity Score：目标、状态、验证器、约束、停止规则、AI contract 的评分。
+- Missing Inputs：还缺哪些信息，尤其是 verifier、当前状态和权限边界。
+- Borrowed Structures：把 prompt 项目的结构、harness 项目的状态管理、eval 项目的断言合成一张写 Loop 的清单。
+- Agent Packet：可以直接贴给 AI 执行的任务包。
+
+本项目参考的开源结构记录在 `docs/reference-patterns.md`。
 
 ## 用 Codex 做 AI smoke test
 

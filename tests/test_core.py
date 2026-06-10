@@ -6,7 +6,9 @@ from loops_assistant import (
     build_loop,
     parse_agent_report,
     render_agent_packet,
+    render_loop_writing_report,
     validate_loop,
+    write_loop,
 )
 
 
@@ -102,3 +104,53 @@ def test_render_agent_packet_contains_execution_contract_and_parseable_report():
     assert report["status"] == "continue"
     assert report["evidence"]
 
+
+def test_write_loop_adds_clarity_review_and_design_patterns():
+    draft = {
+        "title": "当前线程",
+        "goal": "继续增强 loops assistant，参考高星 prompt 和 harness 项目并发布",
+        "current_state": "已有 make/check/report，下一步要把 Loop 写清楚",
+        "constraints": ["先写测试", "不把建议停在文档"],
+        "verifiers": ["pytest", "AI smoke", "GitHub 远端读回"],
+        "external_effects": ["commit", "push"],
+        "risk": "medium",
+    }
+
+    package = write_loop(draft)
+
+    assert validate_loop(package["loop"]) == []
+    assert package["clarity"]["score"] >= 80
+    assert package["clarity"]["dimensions"]["verifier_strength"] == "strong"
+    assert package["patterns"]["prompt"]["sections"] == [
+        "role",
+        "task",
+        "context",
+        "constraints",
+        "output_contract",
+    ]
+    assert package["patterns"]["harness"]["requires"] == [
+        "state",
+        "tools",
+        "memory",
+        "checkpoints",
+        "budget",
+    ]
+    assert package["patterns"]["eval"]["assertions"]
+    assert "Return JSON only" in package["agent_packet"]
+
+
+def test_render_loop_writing_report_surfaces_missing_inputs():
+    package = write_loop(
+        {
+            "title": "粗略想法",
+            "goal": "让 AI 帮我做完",
+        }
+    )
+
+    report = render_loop_writing_report(package)
+
+    assert "# Loop Writing Assistant" in report
+    assert "Clarity Score" in report
+    assert "Missing Inputs" in report
+    assert "verifier" in report.lower()
+    assert "Agent Packet" in report

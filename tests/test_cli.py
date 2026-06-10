@@ -124,3 +124,47 @@ def test_cli_report_validates_agent_json_report(tmp_path):
 
     assert result.returncode == 0
     assert "valid" in result.stdout
+
+
+def test_cli_write_outputs_human_readable_loop_report(tmp_path):
+    input_path = tmp_path / "rough.json"
+    output_path = tmp_path / "loop-report.md"
+    input_path.write_text(
+        json.dumps(
+            {
+                "title": "当前线程",
+                "goal": "继续增强 loops assistant，参考高星项目并发布",
+                "current_state": "已有 make/check/report",
+                "constraints": ["先写测试", "不只输出建议"],
+                "verifiers": ["pytest", "AI smoke", "GitHub 远端读回"],
+                "external_effects": ["commit", "push"],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "write",
+            "--input",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--format",
+            "markdown",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    report = output_path.read_text(encoding="utf-8")
+    assert "# Loop Writing Assistant" in report
+    assert "当前线程 Loop" in report
+    assert "Clarity Score" in report
+    assert "Agent Packet" in report
