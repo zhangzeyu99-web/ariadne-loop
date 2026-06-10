@@ -11,6 +11,7 @@ from .core import (
     parse_agent_report,
     render_loop_writing_report,
     render_agent_packet,
+    supervise_loop,
     validate_loop,
     write_loop,
 )
@@ -52,6 +53,15 @@ def main(argv: list[str] | None = None) -> int:
         "report", help="Validate an AI agent JSON report."
     )
     report_parser.add_argument("--input", required=True, help="Agent report file.")
+
+    supervise_parser = subparsers.add_parser(
+        "supervise", help="Guard an ongoing loop using JSONL agent reports."
+    )
+    supervise_parser.add_argument("--loop", required=True, help="Loop spec JSON file.")
+    supervise_parser.add_argument(
+        "--reports", required=True, help="Agent report JSONL file."
+    )
+    supervise_parser.add_argument("--output", required=True, help="Decision JSON file.")
 
     args = parser.parse_args(argv)
 
@@ -111,4 +121,31 @@ def main(argv: list[str] | None = None) -> int:
         print("valid")
         return 0
 
+    if args.command == "supervise":
+        loop = json.loads(Path(args.loop).read_text(encoding="utf-8"))
+        reports = _load_jsonl(Path(args.reports))
+        decision = supervise_loop(loop, reports)
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            json.dumps(decision, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(str(output_path))
+        return 0
+
     return 2
+
+
+def _load_jsonl(path: Path) -> list[dict]:
+    reports: list[dict] = []
+    for line_number, line in enumerate(
+        path.read_text(encoding="utf-8-sig").splitlines(), 1
+    ):
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise ValueError(f"line {line_number} is not a JSON object")
+        reports.append(value)
+    return reports

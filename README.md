@@ -11,6 +11,7 @@
 - 校验一份 Loop 是否真的包含 cycle、verifier、stop rule、rollback、budget 和 AI report contract。
 - 生成 AI 可读的 Markdown packet，要求 AI 每轮只返回结构化 JSON。
 - 校验 AI 返回的执行报告，避免 AI 用自然语言绕过闭环。
+- 护航持续运行的 Loop：读取每轮 AI report，判断继续、停止、回滚或请求人工确认。
 
 ## 快速开始
 
@@ -20,6 +21,7 @@ python -m loops_assistant make --input examples/openclaw-snapshot.json --output 
 python -m loops_assistant make --input examples/openclaw-snapshot.json --output examples/generated/openclaw-agent-packet.md --format markdown
 python -m loops_assistant check --input examples/generated/openclaw-loop.json
 python -m loops_assistant write --input examples/current-thread-snapshot.json --output examples/generated/current-thread-loop-report.md --format markdown
+python -m loops_assistant supervise --loop examples/generated/openclaw-loop.json --reports examples/openclaw-reports.jsonl --output examples/generated/openclaw-decision.json
 ```
 
 把 `examples/generated/openclaw-agent-packet.md` 的内容交给 AI，它需要按下面结构返回：
@@ -94,3 +96,27 @@ python -m loops_assistant report --input tmp/ai-report.json
 ```
 
 这一步不要求 AI 完成真实运维任务，只验证任务包能被 AI 读懂，并能按 contract 返回可校验报告。
+
+## 持续护航
+
+持续跑 Loop 时，不应该让 AI 自己决定无限继续。`supervise` 命令读取 Loop JSON 和每轮 AI report 的 JSONL 日志，输出护航决策：
+
+- `continue`：继续下一步。
+- `stop`：预算耗尽或所有 verifier 已通过。
+- `rollback`：同一 verifier 连续失败，需要回滚或收窄。
+- `needs_human`：AI 自报需要人、下一步触碰 `commit/push/send/delete/payment` 等外部影响动作，或 Loop 本身无效。
+
+用于护航的 AI report 必须带 `passed_verifiers` 和 `failed_verifiers`，没有通过或失败项时填空数组：
+
+```json
+{
+  "action_id": "verify",
+  "status": "continue",
+  "evidence": ["pytest passed"],
+  "next_step": "push to GitHub",
+  "passed_verifiers": ["gate-1"],
+  "failed_verifiers": []
+}
+```
+
+这个项目不自动执行外部动作；它只给出护航决策，让外层 harness 或人类接管下一步。

@@ -8,6 +8,21 @@ from typing import Any
 
 ALLOWED_REPORT_STATUSES = {"continue", "stop", "needs_human", "rollback"}
 REQUIRED_STEP_IDS = {"inspect", "act", "verify", "decide"}
+EXTERNAL_EFFECT_WORDS = {
+    "commit",
+    "push",
+    "publish",
+    "release",
+    "deploy",
+    "send",
+    "delete",
+    "payment",
+    "付款",
+    "删除",
+    "发送",
+    "发布",
+    "推送",
+}
 
 
 def load_snapshot(path: str | Path) -> dict[str, Any]:
@@ -185,7 +200,9 @@ Return JSON only. Do not add prose outside the JSON.
   "action_id": "inspect|act|verify|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
-  "next_step": "the next concrete action"
+  "next_step": "the next concrete action",
+  "passed_verifiers": ["gate ids that passed in this turn"],
+  "failed_verifiers": ["gate ids that failed in this turn"]
 }}
 ```
 """
@@ -258,6 +275,108 @@ def parse_agent_report(text: str) -> dict[str, Any]:
     return report
 
 
+def supervise_loop(
+    loop: dict[str, Any], reports: list[dict[str, Any]]
+) -> dict[str, Any]:
+    errors = validate_loop(loop)
+    if errors:
+        return {
+            "decision": "needs_human",
+            "next_action_id": "inspect",
+            "reasons": ["invalid loop: " + "; ".join(errors)],
+            "iteration": len(reports),
+        }
+
+    if not reports:
+        return {
+            "decision": "continue",
+            "next_action_id": "inspect",
+            "reasons": ["no reports yet; start with inspect"],
+            "iteration": 0,
+            "covered_verifiers": [],
+            "failed_verifiers": [],
+        }
+
+    normalized_reports = [_normalize_report(report) for report in reports]
+    latest = normalized_reports[-1]
+    iteration = len(normalized_reports)
+    covered = _unique_items(
+        item for report in normalized_reports for item in report["passed_verifiers"]
+    )
+    failed = _unique_items(
+        item for report in normalized_reports for item in report["failed_verifiers"]
+    )
+
+    latest_status = latest["status"]
+    if latest_status in {"stop", "needs_human", "rollback"}:
+        return {
+            "decision": latest_status,
+            "next_action_id": "decide" if latest_status == "needs_human" else "inspect",
+            "reasons": [f"agent reported {latest_status}"],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+        }
+
+    repeated_failure = _first_repeated_failure(normalized_reports, threshold=2)
+    if repeated_failure:
+        return {
+            "decision": "rollback",
+            "next_action_id": "inspect",
+            "reasons": [
+                f"{repeated_failure} failed in two consecutive reports; rollback and narrow scope"
+            ],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+        }
+
+    if _has_external_effect_request(loop, latest["next_step"]):
+        return {
+            "decision": "needs_human",
+            "next_action_id": "decide",
+            "reasons": ["external effect requested; human confirmation required"],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+        }
+
+    max_iterations = int(loop.get("budget", {}).get("max_iterations", 0))
+    if max_iterations and iteration >= max_iterations:
+        return {
+            "decision": "stop",
+            "next_action_id": "decide",
+            "reasons": [f"budget exhausted at {iteration} iterations"],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+        }
+
+    verifier_ids = [gate["id"] for gate in loop.get("verifiers", [])]
+    if verifier_ids and set(verifier_ids).issubset(set(covered)):
+        return {
+            "decision": "stop",
+            "next_action_id": "decide",
+            "reasons": ["all verifiers passed"],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+        }
+
+    reasons = []
+    if _evidence_is_weak(latest["evidence"]):
+        reasons.append("latest report evidence is weak; require concrete readback evidence")
+
+    return {
+        "decision": "continue",
+        "next_action_id": _next_action_id(latest["action_id"]),
+        "reasons": reasons or ["guardrails clear for next iteration"],
+        "iteration": iteration,
+        "covered_verifiers": covered,
+        "failed_verifiers": failed,
+    }
+
+
 def _score_loop_clarity(
     loop: dict[str, Any], original_snapshot: dict[str, Any]
 ) -> dict[str, Any]:
@@ -322,6 +441,62 @@ def _score_loop_clarity(
         },
         "missing_inputs": missing,
     }
+
+
+def _normalize_report(report: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(report)
+    normalized["passed_verifiers"] = _string_list(normalized.get("passed_verifiers"))
+    normalized["failed_verifiers"] = _string_list(normalized.get("failed_verifiers"))
+    normalized["evidence"] = _string_list(normalized.get("evidence"))
+    normalized["next_step"] = _clean_text(normalized.get("next_step"))
+    normalized["action_id"] = _clean_text(normalized.get("action_id")) or "inspect"
+    normalized["status"] = _clean_text(normalized.get("status")) or "continue"
+    return normalized
+
+
+def _first_repeated_failure(reports: list[dict[str, Any]], threshold: int) -> str:
+    if len(reports) < threshold:
+        return ""
+    recent = reports[-threshold:]
+    common = set(recent[0]["failed_verifiers"])
+    for report in recent[1:]:
+        common &= set(report["failed_verifiers"])
+    return sorted(common)[0] if common else ""
+
+
+def _has_external_effect_request(loop: dict[str, Any], next_step: str) -> bool:
+    lowered = next_step.lower()
+    configured = [
+        str(item).lower()
+        for item in loop.get("context", {}).get("external_effects", [])
+    ]
+    words = set(configured) | EXTERNAL_EFFECT_WORDS
+    return any(word and word in lowered for word in words)
+
+
+def _evidence_is_weak(evidence: list[str]) -> bool:
+    if not evidence:
+        return True
+    weak_terms = {"done", "ok", "looks good", "完成", "好了", "通过"}
+    return all(item.strip().lower() in weak_terms for item in evidence)
+
+
+def _next_action_id(action_id: str) -> str:
+    order = ["inspect", "act", "verify", "decide"]
+    if action_id not in order:
+        return "inspect"
+    return order[(order.index(action_id) + 1) % len(order)]
+
+
+def _unique_items(values: Any) -> list[str]:
+    seen: set[str] = set()
+    output: list[str] = []
+    for value in values:
+        text = str(value).strip()
+        if text and text not in seen:
+            output.append(text)
+            seen.add(text)
+    return output
 
 
 def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:

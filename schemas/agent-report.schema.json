@@ -3,7 +3,14 @@
   "title": "Loops Assistant Agent Report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["action_id", "status", "evidence", "next_step"],
+  "required": [
+    "action_id",
+    "status",
+    "evidence",
+    "next_step",
+    "passed_verifiers",
+    "failed_verifiers"
+  ],
   "properties": {
     "action_id": {
       "type": "string",
@@ -24,7 +31,20 @@
     "next_step": {
       "type": "string",
       "minLength": 1
+    },
+    "passed_verifiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "failed_verifiers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     }
   }
 }
-

@@ -7,6 +7,7 @@ from loops_assistant import (
     parse_agent_report,
     render_agent_packet,
     render_loop_writing_report,
+    supervise_loop,
     validate_loop,
     write_loop,
 )
@@ -99,6 +100,8 @@ def test_render_agent_packet_contains_execution_contract_and_parseable_report():
 
     assert "Return JSON only" in packet
     assert "action_id" in packet
+    assert "passed_verifiers" in packet
+    assert "failed_verifiers" in packet
     assert "Gateway 端口" in packet
     assert report["action_id"] == "verify"
     assert report["status"] == "continue"
@@ -154,3 +157,95 @@ def test_render_loop_writing_report_surfaces_missing_inputs():
     assert "Missing Inputs" in report
     assert "verifier" in report.lower()
     assert "Agent Packet" in report
+
+
+def test_supervise_loop_starts_and_blocks_external_effects():
+    loop = build_loop(
+        {
+            "title": "发布护航",
+            "goal": "持续运行并发布结果",
+            "current_state": "等待第一轮",
+            "verifiers": ["pytest", "GitHub 远端读回"],
+            "external_effects": ["push"],
+            "risk": "medium",
+        }
+    )
+
+    first_decision = supervise_loop(loop, [])
+    push_decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["pytest passed"],
+                "next_step": "push to GitHub",
+                "passed_verifiers": ["gate-1"],
+            }
+        ],
+    )
+
+    assert first_decision["decision"] == "continue"
+    assert first_decision["next_action_id"] == "inspect"
+    assert push_decision["decision"] == "needs_human"
+    assert any("external effect" in reason for reason in push_decision["reasons"])
+
+
+def test_supervise_loop_stops_on_repeated_failed_verifier():
+    loop = build_loop(
+        {
+            "title": "测试护航",
+            "goal": "修复测试直到通过",
+            "current_state": "pytest 失败",
+            "verifiers": ["pytest", "AI smoke"],
+        }
+    )
+    reports = [
+        {
+            "action_id": "verify",
+            "status": "continue",
+            "evidence": ["pytest failed: assertion error"],
+            "next_step": "retry pytest",
+            "failed_verifiers": ["gate-1"],
+        },
+        {
+            "action_id": "verify",
+            "status": "continue",
+            "evidence": ["pytest failed: same assertion error"],
+            "next_step": "retry pytest again",
+            "failed_verifiers": ["gate-1"],
+        },
+    ]
+
+    decision = supervise_loop(loop, reports)
+
+    assert decision["decision"] == "rollback"
+    assert decision["next_action_id"] == "inspect"
+    assert "gate-1" in decision["reasons"][0]
+
+
+def test_supervise_loop_stops_when_all_verifiers_pass():
+    loop = build_loop(
+        {
+            "title": "完成护航",
+            "goal": "所有验证通过后停止",
+            "current_state": "验证中",
+            "verifiers": ["pytest", "AI smoke"],
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["pytest passed", "AI smoke valid"],
+                "next_step": "summarize",
+                "passed_verifiers": ["gate-1", "gate-2"],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "stop"
+    assert any("all verifiers passed" in reason for reason in decision["reasons"])

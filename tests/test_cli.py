@@ -168,3 +168,148 @@ def test_cli_write_outputs_human_readable_loop_report(tmp_path):
     assert "当前线程 Loop" in report
     assert "Clarity Score" in report
     assert "Agent Packet" in report
+
+
+def test_cli_supervise_outputs_guardrail_decision(tmp_path):
+    loop_path = tmp_path / "loop.json"
+    reports_path = tmp_path / "reports.jsonl"
+    output_path = tmp_path / "decision.json"
+    snapshot_path = tmp_path / "snapshot.json"
+    snapshot_path.write_text(
+        json.dumps(
+            {
+                "title": "发布护航",
+                "goal": "持续运行并发布结果",
+                "current_state": "等待验证",
+                "verifiers": ["pytest", "GitHub 远端读回"],
+                "external_effects": ["push"],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "make",
+            "--input",
+            str(snapshot_path),
+            "--output",
+            str(loop_path),
+            "--format",
+            "json",
+        ],
+        check=True,
+    )
+    reports_path.write_text(
+        json.dumps(
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["pytest passed"],
+                "next_step": "push to GitHub",
+                "passed_verifiers": ["gate-1"],
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "supervise",
+            "--loop",
+            str(loop_path),
+            "--reports",
+            str(reports_path),
+            "--output",
+            str(output_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    decision = json.loads(output_path.read_text(encoding="utf-8"))
+    assert decision["decision"] == "needs_human"
+    assert decision["next_action_id"] == "decide"
+
+
+def test_cli_supervise_accepts_utf8_bom_jsonl(tmp_path):
+    loop_path = tmp_path / "loop.json"
+    reports_path = tmp_path / "reports.jsonl"
+    output_path = tmp_path / "decision.json"
+    loop_path.write_text(
+        json.dumps(
+            {
+                "version": "1.0",
+                "name": "BOM Loop",
+                "goal": "Handle Windows logs",
+                "context": {"external_effects": []},
+                "cycle": [
+                    {"id": "inspect", "instruction": "inspect"},
+                    {"id": "act", "instruction": "act"},
+                    {"id": "verify", "instruction": "verify"},
+                    {"id": "decide", "instruction": "decide"},
+                ],
+                "verifiers": [{"id": "gate-1", "instruction": "pytest"}],
+                "stop_rules": ["stop when done"],
+                "rollback": {"action": "rollback"},
+                "budget": {"max_iterations": 3},
+                "agent_contract": {
+                    "required_fields": [
+                        "action_id",
+                        "status",
+                        "evidence",
+                        "next_step",
+                    ]
+                },
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    reports_path.write_bytes(
+        b"\xef\xbb\xbf"
+        + json.dumps(
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["pytest passed"],
+                "next_step": "decide",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            },
+            ensure_ascii=False,
+        ).encode("utf-8")
+        + b"\n"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "supervise",
+            "--loop",
+            str(loop_path),
+            "--reports",
+            str(reports_path),
+            "--output",
+            str(output_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    decision = json.loads(output_path.read_text(encoding="utf-8"))
+    assert decision["decision"] == "stop"

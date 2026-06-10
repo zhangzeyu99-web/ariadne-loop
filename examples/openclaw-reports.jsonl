@@ -1,0 +1,2 @@
+{"action_id":"inspect","status":"continue","evidence":["Gateway context loaded","backup policy loaded"],"next_step":"run read-only verifier checks","passed_verifiers":[],"failed_verifiers":[]}
+{"action_id":"verify","status":"continue","evidence":["Gateway port responded","cron ok","backup verify passed","doctor no error"],"next_step":"summarize result","passed_verifiers":["gate-1","gate-2","gate-3","gate-4"],"failed_verifiers":[]}
