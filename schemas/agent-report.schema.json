@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Loops Assistant Agent Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["action_id", "status", "evidence", "next_step"],
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "enum": ["inspect", "act", "verify", "decide"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["continue", "stop", "needs_human", "rollback"]
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+

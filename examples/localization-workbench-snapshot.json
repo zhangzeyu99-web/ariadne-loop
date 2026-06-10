@@ -1,0 +1,32 @@
+{
+  "title": "本地化工作台工程优化",
+  "goal": "继续拆分 translation.py，并保持现有本地化行为不回归",
+  "current_state": "workflow/main/provider/subprocess/errors 已拆分，下一步处理批次编排",
+  "recent_progress": [
+    "pytest 114 passed",
+    "compileall 通过",
+    "ruff 通过",
+    "npm build 通过",
+    "E2E 17 passed",
+    "禁外部机翻扫描无命中"
+  ],
+  "constraints": [
+    "每轮只处理一个小模块",
+    "不引入 Google 翻译依赖",
+    "触碰业务行为或 UI 前停止确认"
+  ],
+  "verifiers": [
+    "pytest",
+    "compileall",
+    "ruff",
+    "npm build",
+    "E2E",
+    "禁外部机翻扫描"
+  ],
+  "external_effects": [
+    "commit",
+    "push"
+  ],
+  "risk": "medium"
+}
+

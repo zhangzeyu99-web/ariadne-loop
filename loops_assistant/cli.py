@@ -1,0 +1,83 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from .core import (
+    build_loop,
+    load_snapshot,
+    parse_agent_report,
+    render_agent_packet,
+    validate_loop,
+)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="loops-assistant",
+        description="Generate and validate Loop Engineering specs.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    make_parser = subparsers.add_parser("make", help="Generate a loop spec or AI packet.")
+    make_parser.add_argument("--input", required=True, help="Thread or project snapshot file.")
+    make_parser.add_argument("--output", required=True, help="Output file path.")
+    make_parser.add_argument(
+        "--format",
+        choices=["json", "markdown"],
+        default="markdown",
+        help="Output format.",
+    )
+
+    check_parser = subparsers.add_parser("check", help="Validate a loop spec JSON file.")
+    check_parser.add_argument("--input", required=True, help="Loop spec JSON file.")
+
+    report_parser = subparsers.add_parser(
+        "report", help="Validate an AI agent JSON report."
+    )
+    report_parser.add_argument("--input", required=True, help="Agent report file.")
+
+    args = parser.parse_args(argv)
+
+    if args.command == "make":
+        snapshot = load_snapshot(args.input)
+        loop = build_loop(snapshot)
+        errors = validate_loop(loop)
+        if errors:
+            for error in errors:
+                print(error, file=sys.stderr)
+            return 1
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        if args.format == "json":
+            output_path.write_text(
+                json.dumps(loop, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        else:
+            output_path.write_text(render_agent_packet(loop), encoding="utf-8")
+        print(str(output_path))
+        return 0
+
+    if args.command == "check":
+        loop = json.loads(Path(args.input).read_text(encoding="utf-8"))
+        errors = validate_loop(loop)
+        if errors:
+            for error in errors:
+                print(error, file=sys.stderr)
+            return 1
+        print("valid")
+        return 0
+
+    if args.command == "report":
+        try:
+            parse_agent_report(Path(args.input).read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        print("valid")
+        return 0
+
+    return 2
