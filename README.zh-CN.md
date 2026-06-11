@@ -34,6 +34,15 @@ ariadne-loop init --preset refactor --output refactor-loop.json
 ariadne-loop init --preset agent-handoff --output handoff-loop.json
 ```
 
+也可以把 GitHub issue 正文转换成 snapshot：
+
+```bash
+ariadne-loop from-issue \
+  --title "Fix stale generated examples" \
+  --body-file issue.md \
+  --output issue-loop.json
+```
+
 生成 JSON loop：
 
 ```bash

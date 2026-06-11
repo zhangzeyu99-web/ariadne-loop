@@ -20,6 +20,16 @@ Good verifiers are observable:
 - the generated artifact validates,
 - the remote issue, PR, release, or page was read back.
 
+If the work starts from a GitHub issue, keep the issue body in a local Markdown
+file and generate the snapshot from it:
+
+```bash
+ariadne-loop from-issue \
+  --title "Fix stale generated examples" \
+  --body-file issue.md \
+  --output .ariadne/issue-snapshot.json
+```
+
 ## 2. Generate an Agent Packet
 
 ```bash

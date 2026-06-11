@@ -12,6 +12,7 @@ from .core import (
     parse_agent_report,
     render_loop_writing_report,
     render_agent_packet,
+    snapshot_from_issue,
     starter_preset_names,
     starter_snapshot,
     supervise_loop,
@@ -76,6 +77,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     init_parser.add_argument("--output", required=True, help="Snapshot JSON output file.")
     init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite the output file if it already exists.",
+    )
+
+    issue_parser = subparsers.add_parser(
+        "from-issue", help="Create a snapshot from a GitHub issue title and body file."
+    )
+    issue_parser.add_argument("--title", required=True, help="Issue title.")
+    issue_parser.add_argument("--body-file", required=True, help="Markdown issue body.")
+    issue_parser.add_argument("--output", required=True, help="Snapshot JSON output file.")
+    issue_parser.add_argument(
         "--force",
         action="store_true",
         help="Overwrite the output file if it already exists.",
@@ -156,6 +169,25 @@ def main(argv: list[str] | None = None) -> int:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(
             json.dumps(starter_snapshot(args.preset), ensure_ascii=False, indent=2)
+            + "\n",
+            encoding="utf-8",
+        )
+        print(str(output_path))
+        return 0
+
+    if args.command == "from-issue":
+        output_path = Path(args.output)
+        if output_path.exists() and not args.force:
+            print(f"{output_path} already exists; pass --force to overwrite", file=sys.stderr)
+            return 1
+        body = Path(args.body_file).read_text(encoding="utf-8")
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            json.dumps(
+                snapshot_from_issue(args.title, body),
+                ensure_ascii=False,
+                indent=2,
+            )
             + "\n",
             encoding="utf-8",
         )

@@ -122,6 +122,45 @@ def starter_snapshot(preset: str = "bugfix") -> dict[str, Any]:
     return deepcopy(STARTER_SNAPSHOTS[key])
 
 
+def snapshot_from_issue(title: str, body: str) -> dict[str, Any]:
+    sections = _markdown_sections(body)
+    goal = _first_section(
+        sections,
+        ["goal", "objective", "desired outcome", "expected behavior"],
+    )
+    current_state = _first_section(
+        sections,
+        ["current state", "status", "context", "actual behavior", "problem"],
+    )
+    constraints = _section_items(
+        sections,
+        ["constraints", "non-goals", "boundaries", "out of scope"],
+    )
+    verifiers = _section_items(
+        sections,
+        ["verifiers", "acceptance criteria", "checks", "validation"],
+    )
+    recent_progress = _section_items(sections, ["evidence", "progress", "notes"])
+    open_questions = _section_items(
+        sections,
+        ["open questions", "questions", "blockers"],
+    )
+
+    return {
+        "title": _clean_text(title) or "GitHub issue",
+        "goal": goal or _clean_text(title) or "Resolve the GitHub issue",
+        "current_state": current_state
+        or "Issue body provided. Inspect the repository and current issue state before acting.",
+        "recent_progress": recent_progress,
+        "constraints": constraints,
+        "verifiers": verifiers
+        or ["Acceptance criteria from the issue are satisfied with current evidence"],
+        "open_questions": open_questions,
+        "external_effects": ["commit", "push", "pull request"],
+        "risk": "medium",
+    }
+
+
 def load_snapshot(path: str | Path) -> dict[str, Any]:
     source = Path(path)
     text = source.read_text(encoding="utf-8")
@@ -739,6 +778,63 @@ def _snapshot_from_text(text: str, fallback_title: str) -> dict[str, Any]:
         "verifiers": verifiers,
         "recent_progress": lines[1:],
     }
+
+
+def _markdown_sections(text: str) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {"": []}
+    current = ""
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        heading = _markdown_heading(line)
+        if heading:
+            current = _normalize_heading(heading)
+            sections.setdefault(current, [])
+            continue
+        if line:
+            sections.setdefault(current, []).append(line)
+    return sections
+
+
+def _markdown_heading(line: str) -> str:
+    heading = re.match(r"^#{1,6}\s+(.+?)\s*$", line)
+    if heading:
+        return heading.group(1)
+    bold = re.match(r"^\*\*(.+?)\*\*:?\s*$", line)
+    if bold:
+        return bold.group(1)
+    if line.endswith(":") and len(line) <= 60:
+        return line[:-1]
+    return ""
+
+
+def _normalize_heading(value: str) -> str:
+    return re.sub(r"\s+", " ", value.strip().lower())
+
+
+def _first_section(sections: dict[str, list[str]], names: list[str]) -> str:
+    for name in names:
+        items = sections.get(_normalize_heading(name), [])
+        if items:
+            return " ".join(_clean_list_marker(item) for item in items).strip()
+    return ""
+
+
+def _section_items(sections: dict[str, list[str]], names: list[str]) -> list[str]:
+    output: list[str] = []
+    for name in names:
+        output.extend(
+            _clean_list_marker(item)
+            for item in sections.get(_normalize_heading(name), [])
+        )
+    return [item for item in output if item]
+
+
+def _clean_list_marker(value: str) -> str:
+    text = value.strip()
+    text = re.sub(r"^[-*+]\s+\[[ xX]\]\s+", "", text)
+    text = re.sub(r"^[-*+]\s+", "", text)
+    text = re.sub(r"^\d+[.)]\s+", "", text)
+    return text.strip()
 
 
 def _find_prefixed(lines: list[str], prefixes: list[str]) -> str:

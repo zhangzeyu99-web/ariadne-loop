@@ -142,6 +142,15 @@ ariadne-loop init --preset refactor --output refactor-loop.json
 ariadne-loop init --preset agent-handoff --output handoff-loop.json
 ```
 
+You can also turn a GitHub issue body into the same snapshot shape:
+
+```bash
+ariadne-loop from-issue \
+  --title "Fix stale generated examples" \
+  --body-file issue.md \
+  --output issue-loop.json
+```
+
 ## What Ariadne Writes
 
 A valid loop includes:

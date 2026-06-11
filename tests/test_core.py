@@ -7,6 +7,7 @@ from loops_assistant import (
     parse_agent_report,
     render_agent_packet,
     render_loop_writing_report,
+    snapshot_from_issue,
     supervise_loop,
     validate_loop,
     write_loop,
@@ -140,6 +141,36 @@ def test_write_loop_adds_clarity_review_and_design_patterns():
     ]
     assert package["patterns"]["eval"]["assertions"]
     assert "Return JSON only" in package["agent_packet"]
+
+
+def test_snapshot_from_issue_extracts_markdown_sections():
+    snapshot = snapshot_from_issue(
+        "Fix report validation for empty verifier arrays",
+        """
+## Context
+The report validator accepts reports that omit failed verifier ids.
+
+## Constraints
+- Do not change the JSON report field names.
+- Keep backward-compatible CLI behavior.
+
+## Acceptance Criteria
+- [ ] Reports with missing failed_verifiers are normalized.
+- [ ] Existing report command tests still pass.
+
+## Open Questions
+- Should empty verifier arrays be allowed?
+""",
+    )
+
+    loop = build_loop(snapshot)
+
+    assert snapshot["goal"] == "Fix report validation for empty verifier arrays"
+    assert "validator accepts reports" in snapshot["current_state"]
+    assert "Do not change the JSON report field names." in snapshot["constraints"]
+    assert "Reports with missing failed_verifiers are normalized." in snapshot["verifiers"]
+    assert "Should empty verifier arrays be allowed?" in snapshot["open_questions"]
+    assert validate_loop(loop) == []
 
 
 def test_render_loop_writing_report_surfaces_missing_inputs():

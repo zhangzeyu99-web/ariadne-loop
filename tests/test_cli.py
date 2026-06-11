@@ -154,6 +154,84 @@ def test_cli_init_does_not_overwrite_without_force(tmp_path):
     assert json.loads(snapshot_path.read_text(encoding="utf-8"))["title"] == "keep me"
 
 
+def test_cli_from_issue_creates_checkable_snapshot(tmp_path):
+    issue_body = tmp_path / "issue.md"
+    snapshot_path = tmp_path / "snapshot.json"
+    loop_path = tmp_path / "loop.json"
+    issue_body.write_text(
+        """
+## Current State
+The quick start still requires users to write JSON by hand.
+
+## Constraints
+- Keep the CLI dependency-free.
+- Do not require a GitHub token.
+
+## Acceptance Criteria
+- A generated snapshot can be edited by a user.
+- The generated loop passes ariadne-loop check.
+""",
+        encoding="utf-8",
+    )
+
+    from_issue_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "from-issue",
+            "--title",
+            "Add starter snapshots",
+            "--body-file",
+            str(issue_body),
+            "--output",
+            str(snapshot_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    make_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "make",
+            "--input",
+            str(snapshot_path),
+            "--output",
+            str(loop_path),
+            "--format",
+            "json",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    check_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "check",
+            "--input",
+            str(loop_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+
+    assert from_issue_result.returncode == 0, from_issue_result.stderr
+    assert make_result.returncode == 0, make_result.stderr
+    assert check_result.returncode == 0, check_result.stderr
+    assert snapshot["title"] == "Add starter snapshots"
+    assert "dependency-free" in snapshot["constraints"][0]
+    assert "generated loop passes" in " ".join(snapshot["verifiers"])
+
+
 def test_cli_check_rejects_invalid_loop(tmp_path):
     invalid_path = tmp_path / "invalid.json"
     invalid_path.write_text(

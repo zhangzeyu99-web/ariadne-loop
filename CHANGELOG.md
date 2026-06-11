@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 - 2026-06-11
+
+- Added `ariadne-loop from-issue` to convert a GitHub issue title and Markdown body into a loop snapshot.
+- Added Markdown issue-section parsing for current state, constraints, acceptance criteria, evidence, and open questions.
+- Added tests proving issue-derived snapshots can generate valid loop specs.
+- Documented the issue-to-loop workflow.
+
 ## 0.4.0 - 2026-06-11
 
 - Added `ariadne-loop init` to create editable starter snapshots.
