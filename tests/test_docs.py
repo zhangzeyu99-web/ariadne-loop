@@ -16,9 +16,10 @@ def test_homepage_links_to_browser_builder():
     assert "./openclaw.html" in index
     assert "OpenClaw guide" in index
     assert "造梦师" in index
-    assert "Give agents a loop that closes" in index
+    assert "Give Agents a Loop That Closes" in index
     assert "给 Agent 一个能收口的循环" in index
     assert "Give agents a loop that closes." not in index
+    assert "Give Agents a Loop That Closes." not in index
     assert "给 Agent 一个能收口的循环。" not in index
     assert 'data-i18n="openTemplate"' not in index
     assert 'data-i18n="openClawGuide"' not in index
