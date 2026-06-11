@@ -13,7 +13,11 @@ license = { text = "MIT" }
 keywords = [
     "ai-agents",
     "agent-workflows",
+    "coding-agents",
+    "codex",
+    "claude-code",
     "loop-engineering",
+    "openclaw",
     "prompt-engineering",
     "verification",
 ]

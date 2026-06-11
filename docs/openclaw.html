@@ -9,12 +9,15 @@
     />
     <meta
       name="keywords"
-      content="OpenClaw, Ariadne Loop, Loop Engineering, OpenClaw workflow, AI agent verifier, agent operations"
+      content="OpenClaw, Ariadne Loop, Loop Engineering, OpenClaw workflow, OpenClaw skill, AI agent verifier, agent operations, JSON agent report"
     />
+    <meta name="author" content="Aaron Zhang" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
     <link
       rel="canonical"
       href="https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html"
     />
+    <link rel="alternate" type="text/plain" href="https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" />
     <meta property="og:site_name" content="Ariadne Loop" />
     <meta property="og:title" content="Ariadne Loop for OpenClaw" />
     <meta
@@ -52,7 +55,8 @@
           "@type": "Person",
           "name": "Aaron Zhang"
         },
-        "about": ["OpenClaw", "Loop Engineering", "AI agent operations"]
+        "about": ["OpenClaw", "Loop Engineering", "AI agent operations"],
+        "keywords": "OpenClaw skill, Loop Engineering, agent verifier, JSON agent report"
       }
     </script>
     <style>
@@ -236,6 +240,7 @@
         <a class="brand" href="./">Ariadne Loop</a>
         <div class="nav-links">
           <a href="./playground.html">Builder</a>
+          <a href="./agent-loop-template.html">Template</a>
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
           <a href="https://github.com/openclaw/openclaw">OpenClaw</a>
         </div>
@@ -275,8 +280,12 @@
 
       <section>
         <h2>Setup</h2>
-        <p>Generate a packet, then paste it into OpenClaw as the task contract.</p>
-        <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
+        <p>Install the skill or generate a packet, then paste it into OpenClaw as the task contract.</p>
+        <pre><code>mkdir -p ~/.openclaw/skills/ariadne-loop
+curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/skills/ariadne-loop/SKILL.md \
+  -o ~/.openclaw/skills/ariadne-loop/SKILL.md
+
+python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output openclaw-loop-demo
 # give openclaw-loop-demo/agent-packet.md to OpenClaw</code></pre>
         <p>The packet follows inspect -> act -> verify -> decide, then returns a JSON-only status report.</p>

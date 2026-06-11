@@ -1,22 +1,26 @@
 ---
 name: ariadne-loop
-description: Use when a user wants to turn a GitHub issue, rough task, release plan, refactor, bugfix, or long coding-agent thread into a verifiable Loop Engineering contract with inspect/act/verify/decide steps, human gates, rollback rules, and JSON agent reports.
+description: Write verifiable Loop Engineering specs for Codex, Claude Code, OpenClaw, and AI coding agents.
+version: 0.10.3
 metadata:
   short-description: Write verifiable loop specs for coding agents
+  openclaw:
+    homepage: https://github.com/zhangzeyu99-web/ariadne-loop
+    skillKey: ariadne-loop
 ---
 
 # Ariadne Loop
 
-Use this skill to turn vague agent work into a bounded loop contract. The goal
-is not to make a longer prompt. The goal is to make the next agent turn
-verifiable.
+Use this skill to turn vague agent work into a bounded loop contract for
+OpenClaw, Codex, Claude Code, or another coding agent. The goal is not to make
+a longer prompt. The goal is to make the next agent turn verifiable.
 
 ## When to Use
 
 Use this skill when the user asks for any of these:
 
 - a loop, agent loop, or Loop Engineering spec,
-- a resumable handoff for Codex, Claude Code, or another coding agent,
+- a resumable handoff for OpenClaw, Codex, Claude Code, or another coding agent,
 - a GitHub issue converted into an executable agent task,
 - release, refactor, bugfix, or documentation work that needs explicit gates,
 - supervision rules for repeated agent reports.

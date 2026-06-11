@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Release](https://img.shields.io/github/v/release/zhangzeyu99-web/ariadne-loop?sort=semver)](https://github.com/zhangzeyu99-web/ariadne-loop/releases)
 
-Write the thread your AI agent can follow.
+Write verifiable Loop Engineering specs for Codex, Claude Code, OpenClaw, and AI coding agents.
 
 Ariadne Loop turns messy project notes, issue context, or an active coding-agent thread into a verifiable Loop Engineering spec: goal, state, cycle, verifiers, stop rules, rollback, budget, supervision rules, and a JSON report contract.
 
@@ -59,6 +59,14 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
   --name ariadne-loop
 ```
 
+Install the OpenClaw skill manually:
+
+```bash
+mkdir -p ~/.openclaw/skills/ariadne-loop
+curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/skills/ariadne-loop/SKILL.md \
+  -o ~/.openclaw/skills/ariadne-loop/SKILL.md
+```
+
 Use the Claude Code slash command:
 
 ```bash
@@ -75,6 +83,8 @@ Claude Code.
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
 If you want a copy-paste starting point for Codex or Claude Code, start with
 [Agent Recipes](docs/agent-recipes.md).
+If you want a reusable loop prompt template, use the
+[Agent Loop Template](https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html).
 AI agents and search crawlers can start from
 [llms.txt](https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt).
 
@@ -249,6 +259,7 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 - [Release readiness loop report](examples/generated/release-readiness-loop-report.md)
 - [Codex issue repair agent packet](examples/generated/codex-issue-repair-agent-packet.md)
 - [Browser loop builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)
+- [Agent loop template](https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html)
 - [OpenClaw agent packet](examples/generated/openclaw-agent-packet.md)
 - [Coding agent workflow](docs/coding-agent-workflow.md)
 - [Agent recipes](docs/agent-recipes.md)

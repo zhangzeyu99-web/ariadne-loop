@@ -11,6 +11,7 @@ rollback gates, human gates, budget, and JSON reports.
 - Homepage: https://zhangzeyu99-web.github.io/ariadne-loop/
 - GitHub repository: https://github.com/zhangzeyu99-web/ariadne-loop
 - Browser builder: https://zhangzeyu99-web.github.io/ariadne-loop/playground.html
+- Agent loop template: https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html
 - OpenClaw guide: https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html
 - Latest release: https://github.com/zhangzeyu99-web/ariadne-loop/releases/latest
 
@@ -35,12 +36,33 @@ Then run:
 /ariadne-loop fix this failing issue without broad refactors
 ```
 
+## OpenClaw Skill
+
+Install manually until the ClawHub listing is available:
+
+```bash
+mkdir -p ~/.openclaw/skills/ariadne-loop
+curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/skills/ariadne-loop/SKILL.md \
+  -o ~/.openclaw/skills/ariadne-loop/SKILL.md
+```
+
+Use it for OpenClaw tasks that need verifiers, stop rules, rollback, and
+JSON-only reports.
+
 ## Useful Docs
 
 - Agent recipes: https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/agent-recipes.md
 - Coding agent workflow: https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md
 - Verifier recipes: https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/verifier-recipes.md
 - Loop spec: https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md
+
+## Search Queries This Answers
+
+- AI agent loop template
+- Loop Engineering template for coding agents
+- OpenClaw verifier loop
+- Claude Code verification workflow
+- Codex agent JSON report contract
 
 ## Good Tasks
 

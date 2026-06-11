@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Ariadne Loop turns rough project context into verifiable Loop Engineering specs and AI-ready execution packets."
+      content="Ariadne Loop writes verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta
       name="keywords"
-      content="Ariadne Loop, Loop Engineering, AI coding agent workflow, Codex, Claude Code, agent verification"
+      content="Ariadne Loop, Loop Engineering, AI agent loop template, AI coding agent workflow, Codex workflow, Claude Code command, OpenClaw skill, agent verification, JSON agent reports"
     />
+    <meta name="author" content="Aaron Zhang" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
     <link rel="canonical" href="https://zhangzeyu99-web.github.io/ariadne-loop/" />
+    <link rel="alternate" type="text/plain" href="https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" />
     <meta property="og:site_name" content="Ariadne Loop" />
-    <meta property="og:title" content="Ariadne Loop" />
+    <meta property="og:title" content="Ariadne Loop - Loop Engineering for AI Coding Agents" />
     <meta
       property="og:description"
-      content="Write verifiable Loop Engineering specs for Codex, Claude Code, and AI coding agents."
+      content="Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zhangzeyu99-web.github.io/ariadne-loop/" />
@@ -25,28 +28,77 @@
       content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ariadne Loop" />
+    <meta name="twitter:title" content="Ariadne Loop - Loop Engineering for AI Coding Agents" />
     <meta
       name="twitter:description"
-      content="Write verifiable Loop Engineering specs for Codex, Claude Code, and AI coding agents."
+      content="Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta
       name="twitter:image"
       content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
     />
-    <title>Ariadne Loop</title>
+    <title>Ariadne Loop - Loop Engineering for AI Coding Agents</title>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "Ariadne Loop",
-        "description": "Write verifiable Loop Engineering specs for Codex, Claude Code, and AI coding agents.",
+        "description": "Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents.",
+        "url": "https://zhangzeyu99-web.github.io/ariadne-loop/",
         "codeRepository": "https://github.com/zhangzeyu99-web/ariadne-loop",
         "programmingLanguage": "Python",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Windows, macOS, Linux",
         "softwareVersion": "0.10.3",
-        "license": "https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/LICENSE"
+        "license": "https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/LICENSE",
+        "keywords": "Loop Engineering, AI agent loop template, Codex, Claude Code, OpenClaw, coding agents, verifier gates, JSON reports",
+        "author": {
+          "@type": "Person",
+          "name": "Aaron Zhang"
+        },
+        "sameAs": [
+          "https://github.com/zhangzeyu99-web/ariadne-loop"
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Ariadne Loop?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ariadne Loop is a local-first workbench that turns rough project context into verifiable Loop Engineering specs for AI coding agents."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What does Ariadne Loop generate?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It generates loop specs, agent packets, verifier gates, stop rules, rollback rules, and JSON report contracts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Ariadne Loop work with OpenClaw?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. OpenClaw users can install the Ariadne Loop skill and use the OpenClaw guide to wrap recurring agent tasks in evidence-first loops."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Ariadne Loop execute external actions?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Ariadne Loop writes and validates the contract; the human or outer agent decides whether to commit, push, publish, deploy, or roll back."
+            }
+          }
+        ]
       }
     </script>
     <style>
@@ -291,6 +343,7 @@
         <div class="nav-links">
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
           <a href="./playground.html">Builder</a>
+          <a href="./agent-loop-template.html">Template</a>
           <a href="./openclaw.html">OpenClaw</a>
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md">Spec</a>
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md">Use cases</a>
@@ -306,13 +359,14 @@
           <h1>Write the thread your AI agent can follow.</h1>
           <p class="lead">
             Ariadne Loop turns rough context into verifiable Loop Engineering specs:
-            cycle, state, verifiers, stop rules, rollback, budget, and JSON agent reports.
+            cycle, state, verifiers, stop rules, rollback, budget, and JSON agent reports
+            for Codex, Claude Code, OpenClaw, and other coding agents.
           </p>
           <div class="actions">
             <a class="button primary" href="./playground.html">Open Builder</a>
+            <a class="button" href="./agent-loop-template.html">Agent loop template</a>
             <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop">View on GitHub</a>
             <a class="button" href="./openclaw.html">OpenClaw guide</a>
-            <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start">Quick start</a>
           </div>
           <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output .ariadne/quickstart
