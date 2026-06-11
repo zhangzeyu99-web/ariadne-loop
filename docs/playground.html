@@ -457,7 +457,7 @@
       <nav class="shell">
         <a class="brand" href="./playground.html" aria-label="Ariadne Loop Builder">
           Ariadne Loop Builder
-          <span data-i18n="brandSub">造梦师构建器</span>
+          <span data-i18n="brandSub">造梦构建器</span>
         </a>
         <div class="nav-row">
           <div class="nav-links">
@@ -476,24 +476,24 @@
     <main class="shell">
       <section class="intro">
         <div class="eyebrow" data-i18n="eyebrow">Local loop snapshot builder</div>
-        <h1 data-i18n="title">Build the guardrails before the agent runs.</h1>
+        <h1 data-i18n="title">Shape the loop before the agent runs.</h1>
         <p class="lead" data-i18n="lead">
-          Fill the fields once, then copy snapshot JSON or a ready-to-paste agent packet. The page runs locally and keeps your context in the browser.
+          Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.
         </p>
       </section>
 
       <section class="summary-strip" aria-label="Builder benefits">
         <div class="summary-item">
-          <strong data-i18n="summaryLocalTitle">Local only</strong>
-          <span data-i18n="summaryLocalBody">No account, upload, or server round trip.</span>
+          <strong data-i18n="summaryLocalTitle">Local</strong>
+          <span data-i18n="summaryLocalBody">No account. No upload.</span>
         </div>
         <div class="summary-item">
-          <strong data-i18n="summaryLoopTitle">Loop-shaped</strong>
-          <span data-i18n="summaryLoopBody">Goal, state, constraints, verifiers, and external effects stay together.</span>
+          <strong data-i18n="summaryLoopTitle">Loop first</strong>
+          <span data-i18n="summaryLoopBody">Goal, state, limits, checks, effects.</span>
         </div>
         <div class="summary-item">
-          <strong data-i18n="summaryAgentTitle">Agent-ready</strong>
-          <span data-i18n="summaryAgentBody">Copy JSON, make a loop, then supervise reports.</span>
+          <strong data-i18n="summaryAgentTitle">Ready to hand off</strong>
+          <span data-i18n="summaryAgentBody">Copy JSON or a packet.</span>
         </div>
       </section>
 
@@ -501,7 +501,7 @@
         <div class="panel">
           <h2 data-i18n="inputsTitle">Inputs</h2>
           <p class="panel-note" data-i18n="inputsNote">
-            Start with a preset, then replace the generic text with the real state of your thread.
+            Pick a preset, then replace the defaults with the real thread state.
           </p>
           <div class="metrics">
             <div class="metric"><strong id="verifierCount">0</strong><span data-i18n="metricVerifiers">verifiers</span></div>
@@ -575,7 +575,7 @@
           </div>
           <h2 id="outputTitle" data-i18n="outputTitle">Snapshot JSON</h2>
           <p class="panel-note" data-i18n="outputNote">
-            This is the portable handoff state. Save it, then run the commands below.
+            Copy this into Ariadne Loop or your coding agent.
           </p>
           <textarea id="output" class="output" readonly></textarea>
           <div class="actions">
@@ -586,7 +586,7 @@
           <p class="status" id="status" aria-live="polite"></p>
           <pre class="commands"><code id="commands"></code></pre>
           <p class="hint" data-i18n="hint">
-            Save the JSON as loop-snapshot.json, edit it if needed, then run the commands above.
+            Save as loop-snapshot.json, then run the commands above.
           </p>
         </div>
       </section>
@@ -595,22 +595,22 @@
     <script>
       const ui = {
         en: {
-          brandSub: "造梦师构建器",
+          brandSub: "造梦构建器",
           navHome: "Home",
           navWorkflow: "Workflow",
           eyebrow: "Local loop snapshot builder",
-          title: "Build the guardrails before the agent runs.",
+          title: "Shape the loop before the agent runs.",
           lead:
-            "Fill the fields once, then copy snapshot JSON or a ready-to-paste agent packet. The page runs locally and keeps your context in the browser.",
-          summaryLocalTitle: "Local only",
-          summaryLocalBody: "No account, upload, or server round trip.",
-          summaryLoopTitle: "Loop-shaped",
-          summaryLoopBody: "Goal, state, constraints, verifiers, and external effects stay together.",
-          summaryAgentTitle: "Agent-ready",
-          summaryAgentBody: "Copy JSON, make a loop, then supervise reports.",
+            "Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.",
+          summaryLocalTitle: "Local",
+          summaryLocalBody: "No account. No upload.",
+          summaryLoopTitle: "Loop first",
+          summaryLoopBody: "Goal, state, limits, checks, effects.",
+          summaryAgentTitle: "Ready to hand off",
+          summaryAgentBody: "Copy JSON or a packet.",
           inputsTitle: "Inputs",
           inputsNote:
-            "Start with a preset, then replace the generic text with the real state of your thread.",
+            "Pick a preset, then replace the defaults with the real thread state.",
           metricVerifiers: "verifiers",
           metricConstraints: "constraints",
           metricEffects: "external effects",
@@ -625,7 +625,7 @@
           labelRisk: "Risk",
           labelOutputMode: "Output",
           outputTitle: "Snapshot JSON",
-          outputNote: "This is the portable handoff state. Save it, then run the commands below.",
+          outputNote: "Copy this into Ariadne Loop or your coding agent.",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent packet",
           copyButton: "Copy JSON",
@@ -635,7 +635,7 @@
           downloadJson: "Download JSON",
           downloadPacket: "Download packet",
           resetButton: "Reset preset",
-          hint: "Save the JSON as loop-snapshot.json, edit it if needed, then run the commands above.",
+          hint: "Save as loop-snapshot.json, then run the commands above.",
           copiedJson: "Copied JSON to clipboard.",
           copiedPacket: "Copied agent packet to clipboard.",
           downloadedJson: "Downloaded loop-snapshot.json.",
@@ -650,21 +650,21 @@
           riskHigh: "high"
         },
         zh: {
-          brandSub: "造梦师构建器",
+          brandSub: "造梦构建器",
           navHome: "首页",
           navWorkflow: "工作流",
           eyebrow: "本地 Loop Snapshot 构建器",
-          title: "先把护栏写清楚，再让 Agent 开跑。",
+          title: "先写清循环，再让 Agent 开跑。",
           lead:
-            "填一次字段，复制 snapshot JSON 或可直接交给 Agent 的 packet。整个页面只在浏览器本地运行，不上传你的上下文。",
-          summaryLocalTitle: "本地运行",
-          summaryLocalBody: "不需要账号，不上传，也不走服务器。",
-          summaryLoopTitle: "按 Loop 组织",
-          summaryLoopBody: "目标、状态、限制、验证器和外部影响放在同一份状态里。",
-          summaryAgentTitle: "Agent 可执行",
-          summaryAgentBody: "复制 JSON，生成 loop，再用报告持续护航。",
+            "填一次。复制 snapshot JSON 或 Agent Packet。内容只留在浏览器里。",
+          summaryLocalTitle: "本地",
+          summaryLocalBody: "不用账号，不上传。",
+          summaryLoopTitle: "先写循环",
+          summaryLoopBody: "目标、状态、限制、验证和外部影响放一起。",
+          summaryAgentTitle: "可交接",
+          summaryAgentBody: "复制 JSON 或 Agent Packet。",
           inputsTitle: "输入",
-          inputsNote: "先选模板，再把泛化文本替换成当前线程的真实状态。",
+          inputsNote: "选模板，再换成当前线程的真实状态。",
           metricVerifiers: "验证器",
           metricConstraints: "限制",
           metricEffects: "外部影响",
@@ -679,7 +679,7 @@
           labelRisk: "风险",
           labelOutputMode: "输出",
           outputTitle: "Snapshot JSON",
-          outputNote: "这是可交接的状态包。保存后运行下面的命令。",
+          outputNote: "复制给 Ariadne Loop 或 Coding Agent。",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent Packet",
           copyButton: "复制 JSON",
@@ -689,7 +689,7 @@
           downloadJson: "下载 JSON",
           downloadPacket: "下载 Agent Packet",
           resetButton: "重置模板",
-          hint: "把 JSON 保存为 loop-snapshot.json，必要时再编辑，然后运行上面的命令。",
+          hint: "保存为 loop-snapshot.json，再运行上面的命令。",
           copiedJson: "已复制 JSON。",
           copiedPacket: "已复制 Agent Packet。",
           downloadedJson: "已下载 loop-snapshot.json。",
@@ -1120,7 +1120,7 @@ Return JSON only. Do not add prose outside the JSON.
         const activeUi = ui[currentLang] || ui.en;
 
         document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
-        document.title = currentLang === "zh" ? "造梦师构建器" : "Ariadne Loop Builder";
+        document.title = currentLang === "zh" ? "造梦构建器" : "Ariadne Loop Builder";
         document.querySelectorAll("[data-i18n]").forEach((element) => {
           const key = element.getAttribute("data-i18n");
           if (activeUi[key]) {

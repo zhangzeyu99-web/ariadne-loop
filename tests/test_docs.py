@@ -108,7 +108,9 @@ def test_playground_contains_required_static_controls():
     assert "Agent packet" in playground
     assert "Return JSON only" in playground
     assert "ariadne-loop check" in playground
-    assert "先把护栏写清楚" in playground
+    assert "造梦构建器" in playground
+    assert "造梦师构建器" not in playground
+    assert "先写清循环" in playground
     assert "presetRelease" in playground
 
 
