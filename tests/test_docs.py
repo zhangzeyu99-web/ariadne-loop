@@ -177,7 +177,13 @@ def test_generated_examples_do_not_contain_known_mojibake():
     generated_files = list((ROOT / "examples" / "generated").glob("*"))
     assert generated_files
 
-    bad_tokens = ["\ufffd", "\u951b", "\u9286"]
+    bad_tokens = [
+        "\ufffd",
+        "\u951b",
+        "\u9286",
+        "\u95ab\u72b3",
+        "\u6d93\u20ac",
+    ]
     for path in generated_files:
         if not path.is_file():
             continue
@@ -201,6 +207,10 @@ def test_public_chinese_content_has_no_mojibake():
         "\u00e6",
         "\u00e8",
         "\u00e7",
+        "\u95ab\u72b3",
+        "\u6d93\u20ac",
+        "\u951b",
+        "\u9286",
     ]
 
     for source in cjk_sources:
