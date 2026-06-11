@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Ariadne Loop writes verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
+      content="Ariadne Loop, also known as 造梦师, writes verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta
       name="keywords"
@@ -16,34 +16,40 @@
     <link rel="canonical" href="https://zhangzeyu99-web.github.io/ariadne-loop/" />
     <link rel="alternate" type="text/plain" href="https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" />
     <meta property="og:site_name" content="Ariadne Loop" />
-    <meta property="og:title" content="Ariadne Loop - Loop Engineering for AI Coding Agents" />
+    <link
+      rel="alternate"
+      hreflang="zh-CN"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/?lang=zh"
+    />
+    <meta property="og:title" content="Ariadne Loop | 造梦师 - Loop Engineering for AI Coding Agents" />
     <meta
       property="og:description"
-      content="Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
+      content="Write guarded Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zhangzeyu99-web.github.io/ariadne-loop/" />
     <meta
       property="og:image"
-      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ariadne Loop - Loop Engineering for AI Coding Agents" />
+    <meta name="twitter:title" content="Ariadne Loop | 造梦师 - Loop Engineering for AI Coding Agents" />
     <meta
       name="twitter:description"
-      content="Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
+      content="Write guarded Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents."
     />
     <meta
       name="twitter:image"
-      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
     />
-    <title>Ariadne Loop - Loop Engineering for AI Coding Agents</title>
+    <title>Ariadne Loop | 造梦师 - Loop Engineering for AI Coding Agents</title>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "Ariadne Loop",
-        "description": "Write verifiable Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents.",
+        "alternateName": "造梦师",
+        "description": "Write guarded Loop Engineering specs, agent loop templates, and execution packets for Codex, Claude Code, OpenClaw, and AI coding agents.",
         "url": "https://zhangzeyu99-web.github.io/ariadne-loop/",
         "codeRepository": "https://github.com/zhangzeyu99-web/ariadne-loop",
         "programmingLanguage": "Python",
@@ -104,28 +110,37 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0d1117;
-        --panel: #151b23;
-        --panel-2: #1b2430;
-        --text: #f0f6fc;
-        --muted: #9da7b3;
-        --line: #2c3642;
+        --bg: #0b0f14;
+        --bg-2: #101821;
+        --panel: #151d27;
+        --panel-2: #1d2835;
+        --text: #f5f7fb;
+        --muted: #a9b5c2;
+        --line: #2a3644;
         --teal: #2dd4bf;
-        --gold: #eab308;
-        --green: #4ade80;
+        --teal-dark: #0f766e;
+        --gold: #f4c95d;
+        --blue: #7dd3fc;
+        --green: #6ee7b7;
       }
 
       * {
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
-        background: var(--bg);
+        background:
+          linear-gradient(180deg, rgba(16, 24, 33, 0.74), transparent 520px),
+          var(--bg);
         color: var(--text);
         font-family:
           Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+          "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
         line-height: 1.5;
       }
 
@@ -134,13 +149,23 @@
         text-decoration: none;
       }
 
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
       .shell {
         width: min(1120px, calc(100% - 40px));
         margin: 0 auto;
       }
 
       header {
-        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(42, 54, 68, 0.86);
+        background: rgba(11, 15, 20, 0.86);
+        backdrop-filter: blur(18px);
       }
 
       nav {
@@ -152,8 +177,22 @@
       }
 
       .brand {
-        font-weight: 750;
+        display: grid;
+        gap: 2px;
+        font-weight: 780;
         letter-spacing: 0;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .nav-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
       }
 
       .nav-links {
@@ -162,21 +201,73 @@
         font-size: 14px;
       }
 
+      .lang-toggle {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .lang-toggle button {
+        min-width: 44px;
+        min-height: 32px;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 720;
+        cursor: pointer;
+      }
+
+      .lang-toggle button:last-child {
+        border-right: 0;
+      }
+
+      .lang-toggle button[aria-pressed="true"] {
+        background: var(--teal);
+        color: #061311;
+      }
+
       .hero {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
-        gap: 44px;
+        grid-template-columns: minmax(0, 0.94fr) minmax(380px, 0.86fr);
+        gap: 48px;
         align-items: center;
-        min-height: 620px;
-        padding: 56px 0 72px;
+        min-height: 680px;
+        padding: 64px 0 78px;
+      }
+
+      .hero > * {
+        min-width: 0;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        margin-bottom: 18px;
+        border: 1px solid rgba(45, 212, 191, 0.36);
+        border-radius: 8px;
+        padding: 0 10px;
+        color: var(--green);
+        background: rgba(45, 212, 191, 0.08);
+        font-size: 13px;
+        font-weight: 760;
       }
 
       h1 {
-        margin: 0 0 18px;
-        max-width: 760px;
-        font-size: clamp(40px, 7vw, 76px);
-        line-height: 0.96;
+        margin: 0 0 20px;
+        max-width: 780px;
+        font-size: 76px;
+        line-height: 0.98;
         letter-spacing: 0;
+        overflow-wrap: anywhere;
+      }
+
+      html[lang="zh-CN"] h1 {
+        line-height: 1.1;
       }
 
       .lead {
@@ -197,22 +288,23 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 42px;
+        min-height: 44px;
         padding: 0 16px;
         border: 1px solid var(--line);
         border-radius: 8px;
         color: var(--text);
-        background: var(--panel);
-        font-weight: 650;
+        background: rgba(21, 29, 39, 0.94);
+        font-weight: 700;
       }
 
       .button.primary {
         border-color: transparent;
         background: var(--teal);
-        color: #051311;
+        color: #041210;
       }
 
       pre {
+        max-width: 100%;
         margin: 0;
         overflow: auto;
         border: 1px solid var(--line);
@@ -220,74 +312,64 @@
         background: #070a0f;
         padding: 18px;
         color: #d6e2ef;
-        font-size: 14px;
-      }
-
-      .map {
-        position: relative;
-        min-height: 420px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background:
-          linear-gradient(135deg, rgba(45, 212, 191, 0.08), transparent 38%),
-          radial-gradient(circle at 85% 20%, rgba(234, 179, 8, 0.18), transparent 26%),
-          var(--panel);
-        padding: 26px;
-        overflow: hidden;
-      }
-
-      .thread {
-        position: absolute;
-        inset: 74px 50px 80px 48px;
-        border: 2px solid rgba(45, 212, 191, 0.62);
-        border-left-color: transparent;
-        border-bottom-color: transparent;
-        border-radius: 50%;
-        transform: rotate(-12deg);
-      }
-
-      .node {
-        position: absolute;
-        width: 150px;
-        min-height: 64px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(21, 27, 35, 0.92);
-        padding: 12px;
         font-size: 13px;
       }
 
-      .node strong {
-        display: block;
-        margin-bottom: 4px;
-        color: var(--text);
+      .visual {
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--panel);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
       }
 
-      .node span {
+      .visual img {
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+
+      .visual-caption {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        border-top: 1px solid var(--line);
+        background: var(--line);
+      }
+
+      .visual-caption span {
+        display: grid;
+        place-items: center;
+        min-height: 48px;
+        background: var(--panel);
         color: var(--muted);
+        font-size: 13px;
+        font-weight: 740;
+        text-align: center;
       }
 
-      .n1 { left: 24px; top: 42px; }
-      .n2 { right: 38px; top: 72px; }
-      .n3 { right: 74px; bottom: 96px; }
-      .n4 { left: 58px; bottom: 64px; }
-      .check {
-        position: absolute;
-        right: 28px;
-        bottom: 26px;
+      .visual-caption strong {
         color: var(--green);
-        font-weight: 800;
       }
 
       section {
-        padding: 56px 0;
+        padding: 60px 0;
         border-top: 1px solid var(--line);
       }
 
       h2 {
-        margin: 0 0 22px;
+        margin: 0 0 12px;
         font-size: 30px;
         letter-spacing: 0;
+      }
+
+      .section-lead {
+        max-width: 760px;
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 17px;
       }
 
       .grid {
@@ -313,6 +395,64 @@
         color: var(--muted);
       }
 
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .step {
+        min-height: 150px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(125, 211, 252, 0.08), rgba(21, 29, 39, 0.96));
+        padding: 18px;
+      }
+
+      .step-number {
+        display: inline-grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        background: rgba(244, 201, 93, 0.16);
+        color: var(--gold);
+        font-weight: 840;
+      }
+
+      .step h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .callout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 20px;
+        align-items: center;
+        border: 1px solid rgba(45, 212, 191, 0.38);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(45, 212, 191, 0.12), transparent 34%),
+          var(--panel-2);
+        padding: 22px;
+      }
+
+      .callout > * {
+        min-width: 0;
+      }
+
+      .callout p {
+        margin: 0;
+        color: var(--muted);
+      }
+
       footer {
         border-top: 1px solid var(--line);
         padding: 28px 0;
@@ -320,18 +460,42 @@
         font-size: 14px;
       }
 
-      @media (max-width: 860px) {
+      @media (max-width: 900px) {
         .hero {
           grid-template-columns: 1fr;
           min-height: auto;
+          padding-top: 40px;
         }
 
-        .grid {
+        .grid,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .callout {
           grid-template-columns: 1fr;
         }
 
         .nav-links {
           display: none;
+        }
+
+        h1 {
+          font-size: 56px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          width: min(100% - 28px, 1120px);
+        }
+
+        h1 {
+          font-size: 42px;
+        }
+
+        .visual-caption {
+          grid-template-columns: repeat(2, 1fr);
         }
       }
     </style>
@@ -339,16 +503,25 @@
   <body>
     <header>
       <nav class="shell">
-        <div class="brand">Ariadne Loop</div>
-        <div class="nav-links">
-          <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
-          <a href="./playground.html">Builder</a>
-          <a href="./agent-loop-template.html">Template</a>
-          <a href="./openclaw.html">OpenClaw</a>
-          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md">Spec</a>
-          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md">Use cases</a>
-          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/agent-recipes.md">Recipes</a>
-          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md">Workflow</a>
+        <a class="brand" href="./" aria-label="Ariadne Loop home">
+          Ariadne Loop
+          <span data-i18n="brandSub">造梦师</span>
+        </a>
+        <div class="nav-row">
+          <div class="nav-links">
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+            <a href="./playground.html" data-i18n="navBuilder">Builder</a>
+            <a href="./agent-loop-template.html" data-i18n="navTemplate">Template</a>
+            <a href="./openclaw.html">OpenClaw</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md" data-i18n="navSpec">Spec</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md" data-i18n="navUseCases">Use cases</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/agent-recipes.md" data-i18n="navRecipes">Recipes</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md" data-i18n="navWorkflow">Workflow</a>
+          </div>
+          <div class="lang-toggle" aria-label="Language">
+            <button type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-lang="zh" aria-pressed="false">中</button>
+          </div>
         </div>
       </nav>
     </header>
@@ -356,77 +529,309 @@
     <main>
       <section class="hero shell">
         <div>
-          <h1>Write the thread your AI agent can follow.</h1>
-          <p class="lead">
-            Ariadne Loop turns rough context into verifiable Loop Engineering specs:
-            cycle, state, verifiers, stop rules, rollback, budget, and JSON agent reports
-            for Codex, Claude Code, OpenClaw, and other coding agents.
+          <div class="eyebrow" data-i18n="eyebrow">Loop Engineering for coding agents</div>
+          <h1 data-i18n="heroTitle">Give AI agents a loop they can finish.</h1>
+          <p class="lead" data-i18n="heroLead">
+            Ariadne Loop turns scattered context into a guarded work contract:
+            read real state, act in small steps, verify evidence, then stop,
+            continue, or roll back.
           </p>
           <div class="actions">
-            <a class="button primary" href="./playground.html">Open Builder</a>
-            <a class="button" href="./agent-loop-template.html">Agent loop template</a>
-            <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop">View on GitHub</a>
-            <a class="button" href="./openclaw.html">OpenClaw guide</a>
+            <a class="button primary" href="./playground.html" data-i18n="openBuilder">Open Builder</a>
+            <a class="button" href="./agent-loop-template.html" data-i18n="openTemplate">Agent loop template</a>
+            <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop" data-i18n="viewGithub">View on GitHub</a>
+            <a class="button" href="./openclaw.html" data-i18n="openClawGuide">OpenClaw guide</a>
+            <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start" data-i18n="quickStart">Quick start</a>
           </div>
           <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output .ariadne/quickstart
 # then give .ariadne/quickstart/agent-packet.md to your coding agent</code></pre>
         </div>
-        <div class="map" aria-label="Loop Engineering map">
-          <div class="thread"></div>
-          <div class="node n1"><strong>Inspect</strong><span>read real state</span></div>
-          <div class="node n2"><strong>Act</strong><span>small scoped change</span></div>
-          <div class="node n3"><strong>Verify</strong><span>observable gates</span></div>
-          <div class="node n4"><strong>Decide</strong><span>stop, continue, rollback</span></div>
-          <div class="check">verifiable</div>
+        <figure class="visual" aria-label="Ariadne Loop dream architect hero image">
+          <picture>
+            <source srcset="./assets/ariadne-hero-v2.webp" type="image/webp" />
+            <img
+              src="./assets/ariadne-hero-v2.png"
+              width="1792"
+              height="1024"
+              alt="A glowing teal loop running through an abstract architectural workspace"
+            />
+          </picture>
+          <figcaption class="visual-caption">
+            <span data-i18n="captionInspect">Inspect</span>
+            <span data-i18n="captionAct">Act</span>
+            <span data-i18n="captionVerify">Verify</span>
+            <span><strong data-i18n="captionDecide">Decide</strong></span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <div class="shell">
+          <h2 data-i18n="whyTitle">Built for agent work that needs evidence</h2>
+          <p class="section-lead" data-i18n="whyLead">
+            A loop is not a prompt. It is a repeatable operating boundary for
+            long-running coding work: what the agent may change, how progress is
+            reported, and when a human must step in.
+          </p>
+          <div class="grid">
+            <div class="card">
+              <h3 data-i18n="cardSpecsTitle">Loop specs</h3>
+              <p data-i18n="cardSpecsBody">Convert rough notes into a stateful inspect, act, verify, decide contract.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardBuilderTitle">Browser builder</h3>
+              <p data-i18n="cardBuilderBody">Generate editable snapshot JSON without installing anything or sending data away.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardPacketsTitle">Agent packets</h3>
+              <p data-i18n="cardPacketsBody">Give AI agents a bounded task with constraints, human gates, and budget.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardReportsTitle">Report validation</h3>
+              <p data-i18n="cardReportsBody">Reject vague natural-language updates and require parseable JSON evidence.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardSuperviseTitle">Loop supervision</h3>
+              <p data-i18n="cardSuperviseBody">Keep long loops from drifting by checking stop rules, rollback signals, and repeated failures.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardRecipesTitle">Agent recipes</h3>
+              <p data-i18n="cardRecipesBody">Paste issue repair, release, handoff, and PR follow-up loops into Codex or Claude Code.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardClaudeTitle">Claude Code command</h3>
+              <p data-i18n="cardClaudeBody">Install /ariadne-loop as a project command for repeatable loop-gated coding sessions.</p>
+            </div>
+            <div class="card">
+              <h3 data-i18n="cardOpenClawTitle">OpenClaw operations</h3>
+              <p data-i18n="cardOpenClawBody">Wrap scheduled OpenClaw tasks in verifiers, stop rules, rollback, and JSON reports.</p>
+            </div>
+          </div>
         </div>
       </section>
 
       <section>
         <div class="shell">
-          <h2>Built for agent work that needs evidence</h2>
-          <div class="grid">
-            <div class="card">
-              <h3>Loop specs</h3>
-              <p>Convert rough notes into a stateful inspect, act, verify, decide contract.</p>
+          <h2 data-i18n="flowTitle">The loop is the guardrail</h2>
+          <p class="section-lead" data-i18n="flowLead">
+            Ariadne, the dream architect, is the metaphor: build the maze first,
+            leave a thread through it, and make every pass observable.
+          </p>
+          <div class="flow">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h3 data-i18n="stepInspectTitle">Inspect real state</h3>
+              <p data-i18n="stepInspectBody">Read files, tests, issues, logs, or remote state before deciding what to change.</p>
             </div>
-            <div class="card">
-              <h3>Browser builder</h3>
-              <p>Generate editable snapshot JSON without installing anything or sending data away.</p>
+            <div class="step">
+              <div class="step-number">2</div>
+              <h3 data-i18n="stepActTitle">Act small</h3>
+              <p data-i18n="stepActBody">Limit each turn to the smallest change that can move the verifier.</p>
             </div>
-            <div class="card">
-              <h3>Agent packets</h3>
-              <p>Give AI agents a bounded task with constraints, human gates, and budget.</p>
+            <div class="step">
+              <div class="step-number">3</div>
+              <h3 data-i18n="stepVerifyTitle">Verify evidence</h3>
+              <p data-i18n="stepVerifyBody">Use concrete gates instead of vague confidence: tests, screenshots, readbacks, diffs.</p>
             </div>
-            <div class="card">
-              <h3>Report validation</h3>
-              <p>Reject vague natural-language updates and require parseable JSON evidence.</p>
+            <div class="step">
+              <div class="step-number">4</div>
+              <h3 data-i18n="stepDecideTitle">Decide the next turn</h3>
+              <p data-i18n="stepDecideBody">Stop when done, continue when bounded, roll back on damage, ask a human before external effects.</p>
             </div>
-            <div class="card">
-              <h3>Verifier recipes</h3>
-              <p>Copy concrete gates for releases, UI fixes, docs refreshes, and issue triage.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <div class="callout">
+            <div>
+              <h2 data-i18n="calloutTitle">Start with a snapshot, not a meeting.</h2>
+              <p data-i18n="calloutBody">
+                Use the Builder to capture goal, current state, progress,
+                constraints, verifiers, and external effects. Ariadne Loop turns
+                that snapshot into a packet your coding agent can follow.
+              </p>
             </div>
-            <div class="card">
-              <h3>Agent recipes</h3>
-              <p>Paste issue repair, release, handoff, and PR follow-up loops into Codex or Claude Code.</p>
-            </div>
-            <div class="card">
-              <h3>Claude Code command</h3>
-              <p>Install <code>/ariadne-loop</code> as a project command for repeatable loop-gated coding sessions.</p>
-            </div>
-            <div class="card">
-              <h3>OpenClaw operations</h3>
-              <p>Wrap scheduled OpenClaw tasks in verifiers, stop rules, rollback, and JSON reports.</p>
-            </div>
+            <a class="button primary" href="./playground.html" data-i18n="calloutButton">Build a loop</a>
           </div>
         </div>
       </section>
     </main>
 
     <footer>
-      <div class="shell">
+      <div class="shell" data-i18n="footer">
         MIT licensed. Built by Aaron Zhang.
       </div>
     </footer>
+
+    <script>
+      const copy = {
+        en: {
+          brandSub: "造梦师",
+          navBuilder: "Builder",
+          navTemplate: "Template",
+          navSpec: "Spec",
+          navUseCases: "Use cases",
+          navRecipes: "Recipes",
+          navWorkflow: "Workflow",
+          eyebrow: "Loop Engineering for coding agents",
+          heroTitle: "Give AI agents a loop they can finish.",
+          heroLead:
+            "Ariadne Loop turns scattered context into a guarded work contract: read real state, act in small steps, verify evidence, then stop, continue, or roll back.",
+          openBuilder: "Open Builder",
+          openTemplate: "Agent loop template",
+          viewGithub: "View on GitHub",
+          openClawGuide: "OpenClaw guide",
+          quickStart: "Quick start",
+          captionInspect: "Inspect",
+          captionAct: "Act",
+          captionVerify: "Verify",
+          captionDecide: "Decide",
+          whyTitle: "Built for agent work that needs evidence",
+          whyLead:
+            "A loop is not a prompt. It is a repeatable operating boundary for long-running coding work: what the agent may change, how progress is reported, and when a human must step in.",
+          cardSpecsTitle: "Loop specs",
+          cardSpecsBody:
+            "Convert rough notes into a stateful inspect, act, verify, decide contract.",
+          cardBuilderTitle: "Browser builder",
+          cardBuilderBody:
+            "Generate editable snapshot JSON without installing anything or sending data away.",
+          cardPacketsTitle: "Agent packets",
+          cardPacketsBody:
+            "Give AI agents a bounded task with constraints, human gates, and budget.",
+          cardReportsTitle: "Report validation",
+          cardReportsBody:
+            "Reject vague natural-language updates and require parseable JSON evidence.",
+          cardSuperviseTitle: "Loop supervision",
+          cardSuperviseBody:
+            "Keep long loops from drifting by checking stop rules, rollback signals, and repeated failures.",
+          cardRecipesTitle: "Agent recipes",
+          cardRecipesBody:
+            "Paste issue repair, release, handoff, and PR follow-up loops into Codex or Claude Code.",
+          cardClaudeTitle: "Claude Code command",
+          cardClaudeBody:
+            "Install /ariadne-loop as a project command for repeatable loop-gated coding sessions.",
+          cardOpenClawTitle: "OpenClaw operations",
+          cardOpenClawBody:
+            "Wrap scheduled OpenClaw tasks in verifiers, stop rules, rollback, and JSON reports.",
+          flowTitle: "The loop is the guardrail",
+          flowLead:
+            "Ariadne, the dream architect, is the metaphor: build the maze first, leave a thread through it, and make every pass observable.",
+          stepInspectTitle: "Inspect real state",
+          stepInspectBody:
+            "Read files, tests, issues, logs, or remote state before deciding what to change.",
+          stepActTitle: "Act small",
+          stepActBody:
+            "Limit each turn to the smallest change that can move the verifier.",
+          stepVerifyTitle: "Verify evidence",
+          stepVerifyBody:
+            "Use concrete gates instead of vague confidence: tests, screenshots, readbacks, diffs.",
+          stepDecideTitle: "Decide the next turn",
+          stepDecideBody:
+            "Stop when done, continue when bounded, roll back on damage, ask a human before external effects.",
+          calloutTitle: "Start with a snapshot, not a meeting.",
+          calloutBody:
+            "Use the Builder to capture goal, current state, progress, constraints, verifiers, and external effects. Ariadne Loop turns that snapshot into a packet your coding agent can follow.",
+          calloutButton: "Build a loop",
+          footer: "MIT licensed. Built by Aaron Zhang."
+        },
+        zh: {
+          brandSub: "造梦师",
+          navBuilder: "构建器",
+          navTemplate: "模板",
+          navSpec: "规格",
+          navUseCases: "场景",
+          navRecipes: "配方",
+          navWorkflow: "工作流",
+          eyebrow: "给 Coding Agent 用的 Loop Engineering",
+          heroTitle: "让 AI Agent 顺着循环跑完。",
+          heroLead:
+            "造梦师把零散上下文变成一份带护栏的工作合约：先读真实状态，小步行动，拿证据验证，再决定停止、继续或回滚。",
+          openBuilder: "打开构建器",
+          openTemplate: "Agent Loop 模板",
+          viewGithub: "查看 GitHub",
+          openClawGuide: "OpenClaw 指南",
+          quickStart: "快速开始",
+          captionInspect: "读状态",
+          captionAct: "小步改",
+          captionVerify: "验结果",
+          captionDecide: "做决策",
+          whyTitle: "为需要证据的 Agent 工作而做",
+          whyLead:
+            "Loop 不是一段提示词，而是长期编码任务的运行边界：Agent 能改什么、怎么汇报进度、什么时候必须停下来找人。",
+          cardSpecsTitle: "Loop 规格",
+          cardSpecsBody: "把粗糙笔记变成有状态的读状态、行动、验证、决策合约。",
+          cardBuilderTitle: "浏览器构建器",
+          cardBuilderBody: "不用安装，也不上传数据，直接在页面里生成可编辑的 snapshot JSON。",
+          cardPacketsTitle: "Agent Packet",
+          cardPacketsBody: "把目标、限制、人类确认点和预算交给 AI Agent，避免无限发散。",
+          cardReportsTitle: "报告校验",
+          cardReportsBody: "拒绝含糊的自然语言进度，要求可解析的 JSON 证据。",
+          cardSuperviseTitle: "持续护航",
+          cardSuperviseBody: "检查停止规则、回滚信号和重复失败，防止长循环跑偏。",
+          cardRecipesTitle: "Agent 配方",
+          cardRecipesBody: "把 issue 修复、发布、交接、PR 跟进 loop 直接贴给 Codex 或 Claude Code。",
+          cardClaudeTitle: "Claude Code 命令",
+          cardClaudeBody: "把 /ariadne-loop 安装成项目命令，让编码会话按 loop 门禁重复执行。",
+          cardOpenClawTitle: "OpenClaw 运维",
+          cardOpenClawBody: "用验证器、停止规则、回滚和 JSON 报告包住定时 OpenClaw 任务。",
+          flowTitle: "循环本身就是护栏",
+          flowLead:
+            "Ariadne 是造梦师这个隐喻：先建迷宫，再留下线索，让每一轮行动都能被观察和验证。",
+          stepInspectTitle: "读取真实状态",
+          stepInspectBody: "先读文件、测试、issue、日志或远端状态，再决定要改什么。",
+          stepActTitle: "小步行动",
+          stepActBody: "每一轮只做能推进验证器的最小改动。",
+          stepVerifyTitle: "验证证据",
+          stepVerifyBody: "用测试、截图、读回、diff 这些具体门禁替代“感觉差不多”。",
+          stepDecideTitle: "决定下一轮",
+          stepDecideBody: "完成就停，边界清楚就继续，造成损坏就回滚，外部影响先找人确认。",
+          calloutTitle: "先写 snapshot，不要先开会。",
+          calloutBody:
+            "用构建器捕获目标、当前状态、进展、限制、验证器和外部影响。造梦师会把它变成 Coding Agent 能照着执行的 packet。",
+          calloutButton: "生成一个 loop",
+          footer: "MIT 许可。Aaron Zhang 制作。"
+        }
+      };
+
+      function getInitialLanguage() {
+        const params = new URLSearchParams(window.location.search);
+        const queryLang = params.get("lang");
+        if (queryLang === "zh" || queryLang === "en") {
+          return queryLang;
+        }
+        const saved = window.localStorage.getItem("ariadne-lang");
+        if (saved === "zh" || saved === "en") {
+          return saved;
+        }
+        return window.navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+      }
+
+      function setLanguage(lang) {
+        const activeCopy = copy[lang] || copy.en;
+        document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (activeCopy[key]) {
+            element.textContent = activeCopy[key];
+          }
+        });
+        document.querySelectorAll("[data-lang]").forEach((button) => {
+          button.setAttribute("aria-pressed", button.dataset.lang === lang ? "true" : "false");
+        });
+        window.localStorage.setItem("ariadne-lang", lang);
+        const params = new URLSearchParams(window.location.search);
+        params.set("lang", lang);
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+      }
+
+      document.querySelectorAll("[data-lang]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+
+      setLanguage(getInitialLanguage());
+    </script>
   </body>
 </html>

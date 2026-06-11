@@ -12,6 +12,9 @@ def test_homepage_links_to_browser_builder():
     assert "Open Builder" in index
     assert "./openclaw.html" in index
     assert "OpenClaw guide" in index
+    assert "造梦师" in index
+    assert "Give AI agents a loop they can finish." in index
+    assert "让 AI Agent 顺着循环跑完。" in index
     assert "agent-recipes.md" in index
     assert "Agent recipes" in index
     assert "Claude Code command" in index
@@ -25,18 +28,19 @@ def test_homepage_has_share_and_search_metadata():
     robots = (ROOT / "docs" / "robots.txt").read_text(encoding="utf-8")
     sitemap = (ROOT / "docs" / "sitemap.xml").read_text(encoding="utf-8")
     llms = (ROOT / "docs" / "llms.txt").read_text(encoding="utf-8")
-    og_image = (ROOT / "docs" / "assets" / "ariadne-loop-og.svg").read_text(
-        encoding="utf-8"
-    )
+    og_image = ROOT / "docs" / "assets" / "ariadne-loop-og.png"
+    hero_image = ROOT / "docs" / "assets" / "ariadne-hero-v2.webp"
 
     assert 'rel="canonical"' in index
+    assert 'hreflang="zh-CN"' in index
     assert 'name="keywords"' in index
     assert 'property="og:site_name"' in index
     assert 'property="og:title"' in index
     assert 'name="twitter:card"' in index
     assert "application/ld+json" in index
     assert '"applicationCategory": "DeveloperApplication"' in index
-    assert "ariadne-loop-og.svg" in index
+    assert "ariadne-loop-og.png" in index
+    assert "ariadne-hero-v2.webp" in index
     assert "Sitemap:" in robots
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in sitemap
@@ -47,7 +51,8 @@ def test_homepage_has_share_and_search_metadata():
     assert "Claude Code Command" in llms
     assert "ariadne-loop quickstart" in llms
     assert "https://github.com/zhangzeyu99-web/ariadne-loop" in llms
-    assert "<svg" in og_image
+    assert og_image.read_bytes().startswith(b"\x89PNG")
+    assert hero_image.read_bytes().startswith(b"RIFF")
 
 
 def test_openclaw_page_has_search_metadata_and_setup():
@@ -75,7 +80,8 @@ def test_playground_has_share_and_search_metadata():
     assert "application/ld+json" in playground
     assert '"@type": "WebApplication"' in playground
     assert "Local AI Agent Packet Generator" in playground
-    assert "ariadne-loop-og.svg" in playground
+    assert "ariadne-loop-og.png" in playground
+    assert 'hreflang="zh-CN"' in playground
 
 
 def test_playground_contains_required_static_controls():
@@ -100,6 +106,8 @@ def test_playground_contains_required_static_controls():
     assert "Agent packet" in playground
     assert "Return JSON only" in playground
     assert "ariadne-loop check" in playground
+    assert "先把护栏写清楚" in playground
+    assert "presetRelease" in playground
 
 
 def test_verifier_recipes_are_linked_and_concrete():
