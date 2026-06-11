@@ -5,9 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Build Ariadne Loop snapshot JSON in the browser without sending data anywhere."
+      content="Generate Ariadne Loop snapshot JSON and ready-to-paste agent packets locally in the browser for Codex, Claude Code, and AI coding agents."
     />
-    <title>Ariadne Loop Builder</title>
+    <meta
+      name="keywords"
+      content="Ariadne Loop, Loop Engineering, AI agent packet, Codex workflow, Claude Code workflow, local-first AI"
+    />
+    <link
+      rel="canonical"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/playground.html"
+    />
+    <meta property="og:site_name" content="Ariadne Loop" />
+    <meta property="og:title" content="Ariadne Loop Builder" />
+    <meta
+      property="og:description"
+      content="Build verifiable Loop Engineering packets locally in your browser, without sending project context anywhere."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/playground.html"
+    />
+    <meta
+      property="og:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ariadne Loop Builder" />
+    <meta
+      name="twitter:description"
+      content="Generate snapshot JSON and agent packets for verifiable AI coding workflows."
+    />
+    <meta
+      name="twitter:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+    />
+    <title>Ariadne Loop Builder - Local AI Agent Packet Generator</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Ariadne Loop Builder",
+        "description": "Generate Ariadne Loop snapshot JSON and ready-to-paste agent packets locally in the browser for Codex, Claude Code, and AI coding agents.",
+        "url": "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "browserRequirements": "Requires JavaScript. Runs locally in the browser."
+      }
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -264,9 +310,9 @@
 
     <main class="shell">
       <section class="intro">
-        <h1>Build a loop snapshot.</h1>
+        <h1>Build a loop packet.</h1>
         <p class="lead">
-          Fill the fields once, then copy JSON into Ariadne Loop. Everything runs locally in this page.
+          Fill the fields once, then copy snapshot JSON or a ready-to-paste agent packet. Everything runs locally in this page.
         </p>
       </section>
 
@@ -336,7 +382,14 @@
         </div>
 
         <div class="panel">
-          <h2>Snapshot JSON</h2>
+          <div class="field">
+            <label for="outputMode">Output</label>
+            <select id="outputMode">
+              <option value="snapshot">Snapshot JSON</option>
+              <option value="packet">Agent packet</option>
+            </select>
+          </div>
+          <h2 id="outputTitle">Snapshot JSON</h2>
           <textarea id="output" class="output" readonly></textarea>
           <div class="actions">
             <button class="primary" id="copyButton" type="button">Copy JSON</button>
@@ -449,7 +502,11 @@
         verifiers: document.getElementById("verifiers"),
         effects: document.getElementById("effects"),
         risk: document.getElementById("risk"),
+        outputMode: document.getElementById("outputMode"),
+        outputTitle: document.getElementById("outputTitle"),
         output: document.getElementById("output"),
+        copyButton: document.getElementById("copyButton"),
+        downloadButton: document.getElementById("downloadButton"),
         commands: document.getElementById("commands"),
         status: document.getElementById("status"),
         verifierCount: document.getElementById("verifierCount"),
@@ -494,9 +551,152 @@
         };
       }
 
+      function buildLoop(value) {
+        const verifiers = value.verifiers.length
+          ? value.verifiers
+          : ["Read back the real artifact and verify the goal, key fields, and constraints"];
+        const risk = value.risk || "medium";
+        const externalEffects = value.external_effects || [];
+        const verifierSummary = verifiers.join("; ");
+        const stopRules = [
+          "Stop when every verifier has current evidence and passes.",
+          "Stop and narrow the problem after the same verifier fails twice.",
+          "Stop and ask for confirmation when the goal, input, or permissions do not match the current context."
+        ];
+        if (externalEffects.length) {
+          stopRules.push(`Ask for confirmation before external-impact actions: ${externalEffects.join(", ")}`);
+        }
+        const humanGates = [
+          "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."
+        ];
+        if (risk !== "low") {
+          humanGates.push(`Risk is ${risk}; do not expand scope after failure.`);
+        }
+        if (externalEffects.length) {
+          humanGates.push("After an external-impact action, read back the real target before reporting success.");
+        }
+        return {
+          version: "1.0",
+          name: `${value.title || "Untitled task"} Loop`,
+          goal: value.goal || `Move ${value.title || "the task"} to a verifiably complete state`,
+          context: {
+            source_title: value.title || "Untitled task",
+            current_state:
+              value.current_state || "No current state was provided. Inspect real context before acting.",
+            evidence: value.recent_progress,
+            constraints: value.constraints,
+            external_effects: externalEffects,
+            risk
+          },
+          cycle: [
+            {
+              id: "inspect",
+              instruction:
+                "Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target.",
+              expected_output: "Turn scope, known evidence, gaps, and explicit non-goals"
+            },
+            {
+              id: "act",
+              instruction: `Take the smallest useful action toward the goal: ${value.goal}`,
+              expected_output: "This turn's artifact or change list"
+            },
+            {
+              id: "verify",
+              instruction: `Run or perform these verifiers: ${verifierSummary}`,
+              expected_output: "Pass, fail, or missing-evidence status for each verifier"
+            },
+            {
+              id: "decide",
+              instruction:
+                "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
+              expected_output: "Next action and stop decision"
+            }
+          ],
+          verifiers: verifiers.map((verifier, index) => ({
+            id: `gate-${index + 1}`,
+            kind: /pytest|ruff|build|test|npm|compile/i.test(verifier) ? "command" : "checklist",
+            instruction: verifier,
+            proves: `This turn satisfies: ${verifier}`
+          })),
+          stop_rules: stopRules,
+          rollback: {
+            action:
+              "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope."
+          },
+          budget: {
+            max_iterations: risk === "high" ? 2 : 3,
+            max_minutes: risk === "high" ? 30 : 60
+          },
+          human_gates: humanGates
+        };
+      }
+
+      function markdownList(values) {
+        return values.length ? values.map((value) => `- ${value}`).join("\n") : "- None";
+      }
+
+      function renderAgentPacket(value) {
+        const loop = buildLoop(value);
+        const actionLines = loop.cycle
+          .map((step) => `- \`${step.id}\`: ${step.instruction} -> ${step.expected_output}`)
+          .join("\n");
+        const verifierLines = loop.verifiers
+          .map((gate) => `- \`${gate.id}\` (${gate.kind}): ${gate.instruction}`)
+          .join("\n");
+        return `# ${loop.name} Agent Packet
+
+## Goal
+${loop.goal}
+
+## Current State
+${loop.context.current_state}
+
+## Constraints
+${markdownList(loop.context.constraints)}
+
+## Cycle
+${actionLines}
+
+## Verifiers
+${verifierLines}
+
+## Stop Rules
+${markdownList(loop.stop_rules)}
+
+## Rollback
+${loop.rollback.action}
+
+## Human Gates
+${markdownList(loop.human_gates)}
+
+## Budget
+- max_iterations: ${loop.budget.max_iterations}
+- max_minutes: ${loop.budget.max_minutes}
+
+## Report Contract
+Return JSON only. Do not add prose outside the JSON.
+
+\`\`\`json
+{
+  "action_id": "inspect|act|verify|decide",
+  "status": "continue|stop|needs_human|rollback",
+  "evidence": ["specific evidence observed in this turn"],
+  "next_step": "the next concrete action",
+  "passed_verifiers": ["gate ids that passed in this turn"],
+  "failed_verifiers": ["gate ids that failed in this turn"]
+}
+\`\`\`
+`;
+      }
+
       function render() {
         const value = snapshot();
-        fields.output.value = JSON.stringify(value, null, 2) + "\n";
+        const mode = fields.outputMode.value;
+        fields.output.value =
+          mode === "packet" ? renderAgentPacket(value) : JSON.stringify(value, null, 2) + "\n";
+        fields.outputTitle.textContent = mode === "packet" ? "Agent packet" : "Snapshot JSON";
+        fields.copyButton.textContent = mode === "packet" ? "Copy packet" : "Copy JSON";
+        fields.downloadButton.textContent = mode === "packet" ? "Download packet" : "Download JSON";
         fields.verifierCount.textContent = String(value.verifiers.length);
         fields.constraintCount.textContent = String(value.constraints.length);
         fields.effectCount.textContent = String(value.external_effects.length);
@@ -509,22 +709,27 @@
 
       async function copyJson() {
         await navigator.clipboard.writeText(fields.output.value);
-        fields.status.textContent = "Copied JSON to clipboard.";
+        fields.status.textContent =
+          fields.outputMode.value === "packet" ? "Copied agent packet to clipboard." : "Copied JSON to clipboard.";
       }
 
       function downloadJson() {
-        const blob = new Blob([fields.output.value], { type: "application/json" });
+        const isPacket = fields.outputMode.value === "packet";
+        const blob = new Blob([fields.output.value], {
+          type: isPacket ? "text/markdown" : "application/json"
+        });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "loop-snapshot.json";
+        link.download = isPacket ? "agent-packet.md" : "loop-snapshot.json";
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(link.href);
-        fields.status.textContent = "Downloaded loop-snapshot.json.";
+        fields.status.textContent = isPacket ? "Downloaded agent-packet.md." : "Downloaded loop-snapshot.json.";
       }
 
       fields.preset.addEventListener("change", () => loadPreset(fields.preset.value));
+      fields.outputMode.addEventListener("change", render);
       document.querySelectorAll("input, textarea, select").forEach((element) => {
         if (element.id !== "preset") {
           element.addEventListener("input", render);

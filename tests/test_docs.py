@@ -23,13 +23,31 @@ def test_homepage_has_share_and_search_metadata():
     )
 
     assert 'rel="canonical"' in index
+    assert 'name="keywords"' in index
+    assert 'property="og:site_name"' in index
     assert 'property="og:title"' in index
     assert 'name="twitter:card"' in index
     assert "application/ld+json" in index
+    assert '"applicationCategory": "DeveloperApplication"' in index
     assert "ariadne-loop-og.svg" in index
     assert "Sitemap:" in robots
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in sitemap
     assert "<svg" in og_image
+
+
+def test_playground_has_share_and_search_metadata():
+    playground = (ROOT / "docs" / "playground.html").read_text(encoding="utf-8")
+
+    assert 'rel="canonical"' in playground
+    assert 'name="keywords"' in playground
+    assert 'property="og:site_name"' in playground
+    assert 'property="og:title"' in playground
+    assert 'name="twitter:card"' in playground
+    assert "application/ld+json" in playground
+    assert '"@type": "WebApplication"' in playground
+    assert "Local AI Agent Packet Generator" in playground
+    assert "ariadne-loop-og.svg" in playground
 
 
 def test_playground_contains_required_static_controls():
@@ -37,6 +55,7 @@ def test_playground_contains_required_static_controls():
 
     for element_id in [
         'id="preset"',
+        'id="outputMode"',
         'id="title"',
         'id="goal"',
         'id="currentState"',
@@ -49,6 +68,9 @@ def test_playground_contains_required_static_controls():
 
     assert "navigator.clipboard.writeText" in playground
     assert "loop-snapshot.json" in playground
+    assert "agent-packet.md" in playground
+    assert "Agent packet" in playground
+    assert "Return JSON only" in playground
     assert "ariadne-loop check" in playground
 
 
