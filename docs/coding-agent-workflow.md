@@ -6,6 +6,11 @@ agent. It writes the loop contract, then checks the evidence that comes back.
 For a zero-install start, use the browser builder:
 <https://zhangzeyu99-web.github.io/ariadne-loop/playground.html>
 
+For Claude Code, install the project slash command by copying
+`.claude/commands/ariadne-loop.md` into your target repository. It exposes
+`/ariadne-loop <task>` as a reusable prompt that generates a snapshot, packet,
+verifier plan, and JSON report contract.
+
 ## 1. Start From a Preset
 
 For a complete demo directory first:

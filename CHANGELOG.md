@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added a Claude Code `/ariadne-loop` custom command for turning a task into a verifiable loop packet inside Claude Code.
+
 ## 0.10.1 - 2026-06-11
 
 - Added an OpenClaw guide page for searchable loop-gated agent operations.

@@ -34,6 +34,20 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
   --name ariadne-loop
 ```
 
+Claude Code slash command:
+
+```bash
+mkdir -p .claude/commands
+curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/.claude/commands/ariadne-loop.md \
+  -o .claude/commands/ariadne-loop.md
+```
+
+Then run:
+
+```text
+/ariadne-loop fix this failing issue without broad refactors
+```
+
 ```bash
 python -m pip install -e .
 ariadne-loop init --preset release --output loop-snapshot.json

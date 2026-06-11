@@ -59,6 +59,17 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
   --name ariadne-loop
 ```
 
+Use the Claude Code slash command:
+
+```bash
+mkdir -p .claude/commands
+curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/.claude/commands/ariadne-loop.md \
+  -o .claude/commands/ariadne-loop.md
+```
+
+Then run `/ariadne-loop fix this failing issue without broad refactors` inside
+Claude Code.
+
 ## Quick Start
 
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).

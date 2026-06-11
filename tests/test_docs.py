@@ -13,6 +13,8 @@ def test_homepage_links_to_browser_builder():
     assert "OpenClaw guide" in index
     assert "agent-recipes.md" in index
     assert "Agent recipes" in index
+    assert "Claude Code command" in index
+    assert "/ariadne-loop" in index
     assert "ariadne-loop quickstart" in index
 
 
@@ -169,3 +171,26 @@ def test_codex_skill_is_installable_from_readme():
     assert "ariadne-loop from-issue" in skill
     assert "ariadne-loop supervise" in skill
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in skill
+
+
+def test_claude_code_command_is_documented_and_bounded():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+    workflow = (ROOT / "docs" / "coding-agent-workflow.md").read_text(
+        encoding="utf-8"
+    )
+    command = (ROOT / ".claude" / "commands" / "ariadne-loop.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert ".claude/commands/ariadne-loop.md" in readme
+    assert "Claude Code slash command" in readme
+    assert "Claude Code slash command" in readme_zh
+    assert "/ariadne-loop" in workflow
+    assert command.startswith("---\n")
+    assert "allowed-tools:" in command
+    assert "$ARGUMENTS" in command
+    assert "inspect -> act -> verify -> decide" in command
+    assert "do not install it automatically" in command
+    assert "dangerously-skip-permissions" not in command
+    assert '"status": "continue|stop|needs_human|rollback"' in command
