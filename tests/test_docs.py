@@ -9,6 +9,8 @@ def test_homepage_links_to_browser_builder():
 
     assert "./playground.html" in index
     assert "Open Builder" in index
+    assert "./openclaw.html" in index
+    assert "OpenClaw guide" in index
     assert "agent-recipes.md" in index
     assert "Agent recipes" in index
     assert "ariadne-loop quickstart" in index
@@ -33,7 +35,22 @@ def test_homepage_has_share_and_search_metadata():
     assert "Sitemap:" in robots
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in sitemap
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html" in sitemap
     assert "<svg" in og_image
+
+
+def test_openclaw_page_has_search_metadata_and_setup():
+    page = (ROOT / "docs" / "openclaw.html").read_text(encoding="utf-8")
+
+    assert 'rel="canonical"' in page
+    assert "OpenClaw" in page
+    assert "Ariadne Loop for OpenClaw" in page
+    assert 'property="og:title"' in page
+    assert 'name="twitter:card"' in page
+    assert "application/ld+json" in page
+    assert '"@type": "TechArticle"' in page
+    assert "ariadne-loop quickstart" in page
+    assert "inspect -> act -> verify -> decide" in page
 
 
 def test_playground_has_share_and_search_metadata():

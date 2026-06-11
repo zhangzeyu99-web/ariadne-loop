@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Use Ariadne Loop with OpenClaw to run recurring AI agent tasks with verifiers, stop rules, rollback, and JSON reports."
+    />
+    <meta
+      name="keywords"
+      content="OpenClaw, Ariadne Loop, Loop Engineering, OpenClaw workflow, AI agent verifier, agent operations"
+    />
+    <link
+      rel="canonical"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html"
+    />
+    <meta property="og:site_name" content="Ariadne Loop" />
+    <meta property="og:title" content="Ariadne Loop for OpenClaw" />
+    <meta
+      property="og:description"
+      content="Wrap OpenClaw tasks in inspect -> act -> verify -> decide loops with evidence-first reports."
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html"
+    />
+    <meta
+      property="og:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ariadne Loop for OpenClaw" />
+    <meta
+      name="twitter:description"
+      content="A practical OpenClaw guide for loop-gated agent operations."
+    />
+    <meta
+      name="twitter:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.svg"
+    />
+    <title>Ariadne Loop for OpenClaw - Verifiable Agent Operations</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Ariadne Loop for OpenClaw",
+        "description": "Use Ariadne Loop with OpenClaw to run recurring AI agent tasks with verifiers, stop rules, rollback, and JSON reports.",
+        "url": "https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html",
+        "author": {
+          "@type": "Person",
+          "name": "Aaron Zhang"
+        },
+        "about": ["OpenClaw", "Loop Engineering", "AI agent operations"]
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --panel: #151b23;
+        --panel-2: #1b2430;
+        --text: #f0f6fc;
+        --muted: #9da7b3;
+        --line: #2c3642;
+        --teal: #2dd4bf;
+        --gold: #eab308;
+        --green: #4ade80;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--teal);
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(1080px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      header,
+      footer {
+        border-color: var(--line);
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 72px;
+        gap: 24px;
+      }
+
+      .brand {
+        font-weight: 750;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+      }
+
+      main {
+        padding: 56px 0 64px;
+      }
+
+      .hero {
+        max-width: 860px;
+        padding-bottom: 36px;
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        font-size: clamp(40px, 7vw, 72px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      .primary {
+        background: var(--teal);
+        border-color: var(--teal);
+        color: #061412;
+      }
+
+      section {
+        padding: 34px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: 28px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+
+      .card p,
+      li {
+        color: var(--muted);
+      }
+
+      pre {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+        padding: 16px;
+      }
+
+      code {
+        color: #d7fbe8;
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell">
+        <a class="brand" href="./">Ariadne Loop</a>
+        <div class="nav-links">
+          <a href="./playground.html">Builder</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+          <a href="https://github.com/openclaw/openclaw">OpenClaw</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <div class="hero">
+        <h1>Ariadne Loop for OpenClaw</h1>
+        <p class="lead">
+          Turn recurring OpenClaw work into loop-gated agent operations with
+          verifiers, stop rules, rollback guidance, and JSON reports.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="./playground.html">Build a packet</a>
+          <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop">Install CLI</a>
+        </div>
+      </div>
+
+      <section>
+        <h2>Why it helps</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Evidence first</h3>
+            <p>OpenClaw reports what it inspected and which verifier passed before it continues.</p>
+          </div>
+          <div class="card">
+            <h3>Bounded autonomy</h3>
+            <p>Stop rules and human gates keep publishing, sending, deleting, and external actions controlled.</p>
+          </div>
+          <div class="card">
+            <h3>Reviewable history</h3>
+            <p>JSON reports make scheduled runs searchable and easier to debug after failures.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Setup</h2>
+        <p>Generate a packet, then paste it into OpenClaw as the task contract.</p>
+        <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
+ariadne-loop quickstart --output openclaw-loop-demo
+# give openclaw-loop-demo/agent-packet.md to OpenClaw</code></pre>
+        <p>The packet follows inspect -> act -> verify -> decide, then returns a JSON-only status report.</p>
+      </section>
+
+      <section>
+        <h2>Good fits</h2>
+        <ul>
+          <li>Daily repo health checks and stale PR follow-up</li>
+          <li>Local service monitoring with readback after fixes</li>
+          <li>Documentation refreshes that must verify links and examples</li>
+          <li>Scheduled bug triage that should stop after repeated verifier failures</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        MIT licensed. Built by Aaron Zhang.
+      </div>
+    </footer>
+  </body>
+</html>

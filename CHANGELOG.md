@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added an OpenClaw guide page for searchable loop-gated agent operations.
 - Added search and social metadata to the browser builder page so shared packet links render with a useful title, description, and preview card.
 - Updated the browser builder so it can generate a ready-to-paste agent packet without installing the CLI.
 - Updated the bundled Codex skill to recommend `ariadne-loop quickstart` for first-run demos.
