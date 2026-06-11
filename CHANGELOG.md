@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Updated the bundled Codex skill to recommend `ariadne-loop quickstart` for first-run demos.
+
 ## 0.10.0 - 2026-06-11
 
 - Added `ariadne-loop quickstart` to generate a complete demo snapshot, loop JSON, agent packet, loop report, sample reports, and supervision decision in one command.

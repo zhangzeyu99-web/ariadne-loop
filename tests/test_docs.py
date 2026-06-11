@@ -125,6 +125,7 @@ def test_codex_skill_is_installable_from_readme():
     assert "description:" in skill
     assert "short-description:" in skill
     assert "inspect -> act -> verify -> decide" in skill
+    assert "ariadne-loop quickstart" in skill
     assert "ariadne-loop init" in skill
     assert "ariadne-loop from-issue" in skill
     assert "ariadne-loop supervise" in skill

@@ -44,7 +44,16 @@ Use this skill when the user asks for any of these:
    - rollback behavior,
    - human gates for external effects,
    - JSON-only report contract.
-4. If the Ariadne Loop CLI is installed, prefer using it:
+4. If the user wants a first-run demo and the Ariadne Loop CLI is installed:
+
+   ```bash
+   ariadne-loop quickstart --output .ariadne/quickstart
+   ```
+
+   This creates a snapshot, loop JSON, agent packet, sample reports, and a
+   supervision decision.
+
+5. For real work, prefer using the CLI:
 
    ```bash
    ariadne-loop init --preset bugfix --output loop-snapshot.json
@@ -53,7 +62,7 @@ Use this skill when the user asks for any of these:
    ariadne-loop check --input loop.json
    ```
 
-5. If the work starts from a GitHub issue body:
+6. If the work starts from a GitHub issue body:
 
    ```bash
    ariadne-loop from-issue \
@@ -62,7 +71,7 @@ Use this skill when the user asks for any of these:
      --output issue-loop.json
    ```
 
-6. For running loops, ask the agent to append JSON reports to JSONL and use:
+7. For running loops, ask the agent to append JSON reports to JSONL and use:
 
    ```bash
    ariadne-loop supervise \
