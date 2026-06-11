@@ -103,6 +103,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     supervise_parser.add_argument("--output", required=True, help="Decision JSON file.")
 
+    quickstart_parser = subparsers.add_parser(
+        "quickstart", help="Create a complete runnable demo loop in one directory."
+    )
+    quickstart_parser.add_argument(
+        "--output",
+        default=".ariadne/quickstart",
+        help="Directory where quickstart files will be created.",
+    )
+    quickstart_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite quickstart files if they already exist.",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "make":
@@ -207,7 +221,97 @@ def main(argv: list[str] | None = None) -> int:
         print(str(output_path))
         return 0
 
+    if args.command == "quickstart":
+        output_dir = Path(args.output)
+        files = _quickstart_files(output_dir)
+        existing = [path for path in files.values() if path.exists()]
+        if existing and not args.force:
+            joined = ", ".join(str(path) for path in existing)
+            print(f"quickstart files already exist: {joined}; pass --force to overwrite", file=sys.stderr)
+            return 1
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+        snapshot = {
+            "title": "Quickstart bug repair",
+            "goal": "Show how Ariadne Loop turns a bug report into a verifiable coding-agent packet",
+            "current_state": "A bug report exists, but the next agent needs bounded instructions and proof gates",
+            "recent_progress": ["Bug report captured", "Likely CLI files identified"],
+            "constraints": [
+                "Start by inspecting current files and tests",
+                "Keep the repair scoped to the failing behavior",
+                "Do not push or open a pull request without human confirmation",
+            ],
+            "verifiers": [
+                "Regression test covers the reported bug",
+                "python -m pytest -q passes",
+            ],
+            "external_effects": ["commit", "push", "pull request"],
+            "risk": "medium",
+        }
+        loop = build_loop(snapshot)
+        package = write_loop(snapshot)
+        reports = [
+            {
+                "action_id": "inspect",
+                "status": "continue",
+                "evidence": ["Read the bug report and identified likely CLI files"],
+                "next_step": "write a focused regression test",
+                "passed_verifiers": [],
+                "failed_verifiers": [],
+            },
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": [
+                    "Regression test covers the reported bug",
+                    "python -m pytest -q passes",
+                ],
+                "next_step": "decide whether the loop can stop",
+                "passed_verifiers": ["gate-1", "gate-2"],
+                "failed_verifiers": [],
+            },
+        ]
+        decision = supervise_loop(loop, reports)
+
+        files["snapshot"].write_text(
+            json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        files["loop"].write_text(
+            json.dumps(loop, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        files["agent_packet"].write_text(render_agent_packet(loop), encoding="utf-8")
+        files["loop_report"].write_text(
+            render_loop_writing_report(package), encoding="utf-8"
+        )
+        files["reports"].write_text(
+            "\n".join(json.dumps(report, ensure_ascii=False) for report in reports)
+            + "\n",
+            encoding="utf-8",
+        )
+        files["decision"].write_text(
+            json.dumps(decision, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+        print(f"created Ariadne Loop quickstart in {output_dir}")
+        print(f"agent packet: {files['agent_packet']}")
+        print(f"decision: {files['decision']}")
+        return 0
+
     return 2
+
+
+def _quickstart_files(output_dir: Path) -> dict[str, Path]:
+    return {
+        "snapshot": output_dir / "snapshot.json",
+        "loop": output_dir / "loop.json",
+        "agent_packet": output_dir / "agent-packet.md",
+        "loop_report": output_dir / "loop-report.md",
+        "reports": output_dir / "reports.jsonl",
+        "decision": output_dir / "decision.json",
+    }
 
 
 def _load_jsonl(path: Path) -> list[dict]:

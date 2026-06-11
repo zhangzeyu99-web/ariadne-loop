@@ -11,6 +11,7 @@ def test_homepage_links_to_browser_builder():
     assert "Open Builder" in index
     assert "agent-recipes.md" in index
     assert "Agent recipes" in index
+    assert "ariadne-loop quickstart" in index
 
 
 def test_homepage_has_share_and_search_metadata():
@@ -73,6 +74,9 @@ def test_verifier_recipes_are_linked_and_concrete():
 def test_agent_recipes_are_linked_and_copyable():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+    workflow = (ROOT / "docs" / "coding-agent-workflow.md").read_text(
+        encoding="utf-8"
+    )
     recipes = (ROOT / "docs" / "agent-recipes.md").read_text(encoding="utf-8")
     snapshot = (
         ROOT / "examples" / "codex-issue-repair-snapshot.json"
@@ -81,7 +85,9 @@ def test_agent_recipes_are_linked_and_copyable():
     for doc in [readme, readme_zh]:
         assert "docs/agent-recipes.md" in doc
         assert "examples/codex-issue-repair-snapshot.json" in doc
+        assert "ariadne-loop quickstart" in doc
 
+    assert "ariadne-loop quickstart" in workflow
     assert "Codex Issue Repair" in recipes
     assert "PR Review Follow-Up" in recipes
     assert "Return the JSON report only" in recipes

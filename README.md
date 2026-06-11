@@ -65,6 +65,12 @@ Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.gi
 If you want a copy-paste starting point for Codex or Claude Code, start with
 [Agent Recipes](docs/agent-recipes.md).
 
+Create a complete demo loop:
+
+```bash
+ariadne-loop quickstart --output .ariadne/quickstart
+```
+
 Create a starter snapshot:
 
 ```bash

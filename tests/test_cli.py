@@ -358,3 +358,44 @@ def test_cli_supervise_accepts_utf8_bom_jsonl(tmp_path):
     assert result.returncode == 0, result.stderr
     decision = json.loads(output_path.read_text(encoding="utf-8"))
     assert decision["decision"] == "stop"
+
+
+def test_cli_quickstart_creates_complete_demo(tmp_path):
+    output_dir = tmp_path / "quickstart"
+
+    result = run_cli("quickstart", "--output", str(output_dir))
+
+    assert result.returncode == 0, result.stderr
+    expected_files = [
+        "snapshot.json",
+        "loop.json",
+        "agent-packet.md",
+        "loop-report.md",
+        "reports.jsonl",
+        "decision.json",
+    ]
+    for name in expected_files:
+        assert (output_dir / name).exists(), name
+
+    loop = json.loads((output_dir / "loop.json").read_text(encoding="utf-8"))
+    decision = json.loads((output_dir / "decision.json").read_text(encoding="utf-8"))
+    packet = (output_dir / "agent-packet.md").read_text(encoding="utf-8")
+
+    assert loop["name"] == "Quickstart bug repair Loop"
+    assert decision["decision"] == "stop"
+    assert "Return JSON only" in packet
+    assert "created Ariadne Loop quickstart" in result.stdout
+
+
+def test_cli_quickstart_does_not_overwrite_without_force(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    output_dir.mkdir()
+    (output_dir / "snapshot.json").write_text('{"title": "keep"}\n', encoding="utf-8")
+
+    result = run_cli("quickstart", "--output", str(output_dir))
+
+    assert result.returncode == 1
+    assert "already exist" in result.stderr
+    assert json.loads((output_dir / "snapshot.json").read_text(encoding="utf-8"))[
+        "title"
+    ] == "keep"

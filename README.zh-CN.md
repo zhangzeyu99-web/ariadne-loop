@@ -19,6 +19,12 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 可以先打开网页生成 snapshot：[Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)。
 如果要直接复制给 Codex 或 Claude Code，用这页开始：[Agent Recipes](docs/agent-recipes.md)。
 
+一条命令生成完整 demo loop：
+
+```bash
+ariadne-loop quickstart --output .ariadne/quickstart
+```
+
 Codex skill 安装：
 
 ```bash

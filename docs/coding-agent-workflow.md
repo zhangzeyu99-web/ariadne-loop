@@ -8,6 +8,18 @@ For a zero-install start, use the browser builder:
 
 ## 1. Start From a Preset
 
+For a complete demo directory first:
+
+```bash
+ariadne-loop quickstart --output .ariadne/quickstart
+```
+
+This creates a snapshot, loop JSON, agent packet, sample reports, and a
+supervision decision. Use it to see the full shape before writing your own
+snapshot.
+
+For real work, start from a preset:
+
 ```bash
 ariadne-loop init --preset bugfix --output .ariadne/bugfix-snapshot.json
 ```

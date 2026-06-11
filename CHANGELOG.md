@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 - 2026-06-11
 
+- Added `ariadne-loop quickstart` to generate a complete demo snapshot, loop JSON, agent packet, loop report, sample reports, and supervision decision in one command.
+- Documented quickstart in the README, Chinese README, homepage, and coding-agent workflow guide.
 - Added GitHub Pages canonical, Open Graph, Twitter card, JSON-LD, robots.txt, sitemap.xml, and a social preview SVG.
 
 ## 0.9.0 - 2026-06-11
