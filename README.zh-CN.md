@@ -19,8 +19,8 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 ```bash
 python -m pip install -e .
 ariadne-loop write \
-  --input examples/current-thread-snapshot.json \
-  --output examples/generated/current-thread-loop-report.md \
+  --input examples/release-readiness-snapshot.json \
+  --output examples/generated/release-readiness-loop-report.md \
   --format markdown
 ```
 
