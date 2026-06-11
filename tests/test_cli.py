@@ -295,6 +295,30 @@ def test_cli_report_validates_agent_json_report(tmp_path):
     assert "valid" in result.stdout
 
 
+def test_agent_report_example_matches_public_schema_contract():
+    schema = json.loads(
+        (ROOT / "schemas" / "agent-report.schema.json").read_text(encoding="utf-8")
+    )
+    report = json.loads(
+        (ROOT / "examples" / "agent-report.valid.json").read_text(encoding="utf-8")
+    )
+
+    assert set(schema["required"]).issubset(report)
+    assert report["action_id"] in schema["properties"]["action_id"]["enum"]
+    assert report["status"] in schema["properties"]["status"]["enum"]
+    assert isinstance(report["evidence"], list) and report["evidence"]
+    assert isinstance(report["passed_verifiers"], list)
+    assert isinstance(report["failed_verifiers"], list)
+
+    result = run_cli(
+        "report",
+        "--input",
+        str(ROOT / "examples" / "agent-report.valid.json"),
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
 def test_cli_write_outputs_human_readable_loop_report(tmp_path):
     input_path = tmp_path / "rough.json"
     output_path = tmp_path / "loop-report.md"

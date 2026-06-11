@@ -5,5 +5,10 @@
     "pytest passed",
     "generated examples validate"
   ],
-  "next_step": "prepare release notes and rerun the quick start"
+  "next_step": "prepare release notes and rerun the quick start",
+  "passed_verifiers": [
+    "gate-1",
+    "gate-2"
+  ],
+  "failed_verifiers": []
 }
