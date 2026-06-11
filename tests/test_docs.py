@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -170,6 +171,38 @@ def test_generated_examples_do_not_contain_known_mojibake():
         text = path.read_text(encoding="utf-8")
         for token in bad_tokens:
             assert token not in text, f"{path.name} contains mojibake token {token!r}"
+
+
+def test_readme_and_docs_local_links_resolve():
+    docs_sources = [
+        ROOT / "README.md",
+        ROOT / "README.zh-CN.md",
+        ROOT / "skills" / "ariadne-loop" / "SKILL.md",
+        ROOT / ".claude" / "commands" / "ariadne-loop.md",
+        *sorted((ROOT / "docs").glob("*.md")),
+        *sorted((ROOT / "docs").glob("*.html")),
+    ]
+    markdown_link = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+    html_link = re.compile(r'\b(?:href|src)="([^"]+)"')
+    missing = []
+
+    for source in docs_sources:
+        text = source.read_text(encoding="utf-8")
+        targets = markdown_link.findall(text) + html_link.findall(text)
+        for raw_target in targets:
+            target = raw_target.strip().split()[0]
+            if not target or target.startswith(
+                ("#", "http://", "https://", "mailto:", "data:", "javascript:")
+            ):
+                continue
+            target = target.split("#", 1)[0].split("?", 1)[0]
+            if not target:
+                continue
+            candidate = source.parent / ("index.html" if target in {"./", "/"} else target)
+            if not candidate.exists():
+                missing.append(f"{source.relative_to(ROOT)} -> {raw_target}")
+
+    assert missing == []
 
 
 def test_codex_skill_is_installable_from_readme():
