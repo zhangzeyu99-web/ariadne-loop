@@ -307,12 +307,18 @@
         max-width: 100%;
         margin: 0;
         overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #070a0f;
         padding: 18px;
         color: #d6e2ef;
         font-size: 13px;
+      }
+
+      pre code {
+        white-space: inherit;
       }
 
       .visual {
@@ -529,21 +535,20 @@
     <main>
       <section class="hero shell">
         <div>
-          <div class="eyebrow" data-i18n="eyebrow">Loop Engineering for coding agents</div>
-          <h1 data-i18n="heroTitle">Give AI agents a loop they can finish.</h1>
+          <div class="eyebrow" data-i18n="eyebrow">Loop Engineering for agents</div>
+          <h1 data-i18n="heroTitle">Give agents a loop that closes.</h1>
           <p class="lead" data-i18n="heroLead">
-            Ariadne Loop turns scattered context into a guarded work contract:
-            read real state, act in small steps, verify evidence, then stop,
-            continue, or roll back.
+            Ariadne Loop turns scattered context into a loop contract:
+            inspect, act, verify, decide.
           </p>
           <div class="actions">
             <a class="button primary" href="./playground.html" data-i18n="openBuilder">Open Builder</a>
             <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop" data-i18n="viewGithub">View on GitHub</a>
             <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start" data-i18n="quickStart">Quick start</a>
           </div>
-          <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
+<pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output .ariadne/quickstart
-# then give .ariadne/quickstart/agent-packet.md to your coding agent</code></pre>
+# hand agent-packet.md to your coding agent</code></pre>
         </div>
         <figure class="visual" aria-label="Ariadne Loop dream architect hero image">
           <picture>
@@ -566,44 +571,43 @@ ariadne-loop quickstart --output .ariadne/quickstart
 
       <section>
         <div class="shell">
-          <h2 data-i18n="whyTitle">Built for agent work that needs evidence</h2>
+          <h2 data-i18n="whyTitle">For evidence-led agent work</h2>
           <p class="section-lead" data-i18n="whyLead">
-            A loop is not a prompt. It is a repeatable operating boundary for
-            long-running coding work: what the agent may change, how progress is
-            reported, and when a human must step in.
+            Prompts are not enough. Keep scope, gates, reports, and human
+            handoffs in one place.
           </p>
           <div class="grid">
             <div class="card">
               <h3 data-i18n="cardSpecsTitle">Loop specs</h3>
-              <p data-i18n="cardSpecsBody">Convert rough notes into a stateful inspect, act, verify, decide contract.</p>
+              <p data-i18n="cardSpecsBody">Turn rough notes into inspect-act-verify-decide loops.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardBuilderTitle">Browser builder</h3>
-              <p data-i18n="cardBuilderBody">Generate editable snapshot JSON without installing anything or sending data away.</p>
+              <p data-i18n="cardBuilderBody">Draft snapshot JSON in the browser.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardPacketsTitle">Agent packets</h3>
-              <p data-i18n="cardPacketsBody">Give AI agents a bounded task with constraints, human gates, and budget.</p>
+              <p data-i18n="cardPacketsBody">Hand off scope, constraints, gates, and budget.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardReportsTitle">Report validation</h3>
-              <p data-i18n="cardReportsBody">Reject vague natural-language updates and require parseable JSON evidence.</p>
+              <p data-i18n="cardReportsBody">Require parseable evidence, not status prose.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardSuperviseTitle">Loop supervision</h3>
-              <p data-i18n="cardSuperviseBody">Keep long loops from drifting by checking stop rules, rollback signals, and repeated failures.</p>
+              <p data-i18n="cardSuperviseBody">Catch drift, repeated failures, and rollback signals.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardRecipesTitle">Agent recipes</h3>
-              <p data-i18n="cardRecipesBody">Paste issue repair, release, handoff, and PR follow-up loops into Codex or Claude Code.</p>
+              <p data-i18n="cardRecipesBody">Ready loops for repairs, releases, handoffs, and PR follow-ups.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardClaudeTitle">Claude Code command</h3>
-              <p data-i18n="cardClaudeBody">Install /ariadne-loop as a project command for repeatable loop-gated coding sessions.</p>
+              <p data-i18n="cardClaudeBody">Run /ariadne-loop inside a project.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardOpenClawTitle">OpenClaw operations</h3>
-              <p data-i18n="cardOpenClawBody">Wrap scheduled OpenClaw tasks in verifiers, stop rules, rollback, and JSON reports.</p>
+              <p data-i18n="cardOpenClawBody">Put scheduled work behind checks and stop rules.</p>
             </div>
           </div>
         </div>
@@ -613,29 +617,29 @@ ariadne-loop quickstart --output .ariadne/quickstart
         <div class="shell">
           <h2 data-i18n="flowTitle">The loop is the guardrail</h2>
           <p class="section-lead" data-i18n="flowLead">
-            Ariadne, the dream architect, is the metaphor: build the maze first,
-            leave a thread through it, and make every pass observable.
+            Ariadne builds the maze and leaves the thread. Every pass stays
+            observable.
           </p>
           <div class="flow">
             <div class="step">
               <div class="step-number">1</div>
               <h3 data-i18n="stepInspectTitle">Inspect real state</h3>
-              <p data-i18n="stepInspectBody">Read files, tests, issues, logs, or remote state before deciding what to change.</p>
+              <p data-i18n="stepInspectBody">Read the real project before changing it.</p>
             </div>
             <div class="step">
               <div class="step-number">2</div>
               <h3 data-i18n="stepActTitle">Act small</h3>
-              <p data-i18n="stepActBody">Limit each turn to the smallest change that can move the verifier.</p>
+              <p data-i18n="stepActBody">Make one bounded change.</p>
             </div>
             <div class="step">
               <div class="step-number">3</div>
               <h3 data-i18n="stepVerifyTitle">Verify evidence</h3>
-              <p data-i18n="stepVerifyBody">Use concrete gates instead of vague confidence: tests, screenshots, readbacks, diffs.</p>
+              <p data-i18n="stepVerifyBody">Run the gate and keep the proof.</p>
             </div>
             <div class="step">
               <div class="step-number">4</div>
               <h3 data-i18n="stepDecideTitle">Decide the next turn</h3>
-              <p data-i18n="stepDecideBody">Stop when done, continue when bounded, roll back on damage, ask a human before external effects.</p>
+              <p data-i18n="stepDecideBody">Stop, continue, roll back, or ask.</p>
             </div>
           </div>
         </div>
@@ -645,11 +649,9 @@ ariadne-loop quickstart --output .ariadne/quickstart
         <div class="shell">
           <div class="callout">
             <div>
-              <h2 data-i18n="calloutTitle">Start with a snapshot, not a meeting.</h2>
+              <h2 data-i18n="calloutTitle">Start with a snapshot.</h2>
               <p data-i18n="calloutBody">
-                Use the Builder to capture goal, current state, progress,
-                constraints, verifiers, and external effects. Ariadne Loop turns
-                that snapshot into a packet your coding agent can follow.
+                Capture state once. Hand the packet to your coding agent.
               </p>
             </div>
             <a class="button primary" href="./playground.html" data-i18n="calloutButton">Build a loop</a>
@@ -674,10 +676,10 @@ ariadne-loop quickstart --output .ariadne/quickstart
           navUseCases: "Use cases",
           navRecipes: "Recipes",
           navWorkflow: "Workflow",
-          eyebrow: "Loop Engineering for coding agents",
-          heroTitle: "Give AI agents a loop they can finish.",
+          eyebrow: "Loop Engineering for agents",
+          heroTitle: "Give agents a loop that closes.",
           heroLead:
-            "Ariadne Loop turns scattered context into a guarded work contract: read real state, act in small steps, verify evidence, then stop, continue, or roll back.",
+            "Ariadne Loop turns scattered context into a loop contract: inspect, act, verify, decide.",
           openBuilder: "Open Builder",
           viewGithub: "View on GitHub",
           quickStart: "Quick start",
@@ -685,51 +687,51 @@ ariadne-loop quickstart --output .ariadne/quickstart
           captionAct: "Act",
           captionVerify: "Verify",
           captionDecide: "Decide",
-          whyTitle: "Built for agent work that needs evidence",
+          whyTitle: "For evidence-led agent work",
           whyLead:
-            "A loop is not a prompt. It is a repeatable operating boundary for long-running coding work: what the agent may change, how progress is reported, and when a human must step in.",
+            "Prompts are not enough. Keep scope, gates, reports, and human handoffs in one place.",
           cardSpecsTitle: "Loop specs",
           cardSpecsBody:
-            "Convert rough notes into a stateful inspect, act, verify, decide contract.",
+            "Turn rough notes into inspect-act-verify-decide loops.",
           cardBuilderTitle: "Browser builder",
           cardBuilderBody:
-            "Generate editable snapshot JSON without installing anything or sending data away.",
+            "Draft snapshot JSON in the browser.",
           cardPacketsTitle: "Agent packets",
           cardPacketsBody:
-            "Give AI agents a bounded task with constraints, human gates, and budget.",
+            "Hand off scope, constraints, gates, and budget.",
           cardReportsTitle: "Report validation",
           cardReportsBody:
-            "Reject vague natural-language updates and require parseable JSON evidence.",
+            "Require parseable evidence, not status prose.",
           cardSuperviseTitle: "Loop supervision",
           cardSuperviseBody:
-            "Keep long loops from drifting by checking stop rules, rollback signals, and repeated failures.",
+            "Catch drift, repeated failures, and rollback signals.",
           cardRecipesTitle: "Agent recipes",
           cardRecipesBody:
-            "Paste issue repair, release, handoff, and PR follow-up loops into Codex or Claude Code.",
+            "Ready loops for repairs, releases, handoffs, and PR follow-ups.",
           cardClaudeTitle: "Claude Code command",
           cardClaudeBody:
-            "Install /ariadne-loop as a project command for repeatable loop-gated coding sessions.",
+            "Run /ariadne-loop inside a project.",
           cardOpenClawTitle: "OpenClaw operations",
           cardOpenClawBody:
-            "Wrap scheduled OpenClaw tasks in verifiers, stop rules, rollback, and JSON reports.",
+            "Put scheduled work behind checks and stop rules.",
           flowTitle: "The loop is the guardrail",
           flowLead:
-            "Ariadne, the dream architect, is the metaphor: build the maze first, leave a thread through it, and make every pass observable.",
+            "Ariadne builds the maze and leaves the thread. Every pass stays observable.",
           stepInspectTitle: "Inspect real state",
           stepInspectBody:
-            "Read files, tests, issues, logs, or remote state before deciding what to change.",
+            "Read the real project before changing it.",
           stepActTitle: "Act small",
           stepActBody:
-            "Limit each turn to the smallest change that can move the verifier.",
+            "Make one bounded change.",
           stepVerifyTitle: "Verify evidence",
           stepVerifyBody:
-            "Use concrete gates instead of vague confidence: tests, screenshots, readbacks, diffs.",
+            "Run the gate and keep the proof.",
           stepDecideTitle: "Decide the next turn",
           stepDecideBody:
-            "Stop when done, continue when bounded, roll back on damage, ask a human before external effects.",
-          calloutTitle: "Start with a snapshot, not a meeting.",
+            "Stop, continue, roll back, or ask.",
+          calloutTitle: "Start with a snapshot.",
           calloutBody:
-            "Use the Builder to capture goal, current state, progress, constraints, verifiers, and external effects. Ariadne Loop turns that snapshot into a packet your coding agent can follow.",
+            "Capture state once. Hand the packet to your coding agent.",
           calloutButton: "Build a loop",
           footer: "MIT licensed. Built by Aaron Zhang."
         },
@@ -741,10 +743,10 @@ ariadne-loop quickstart --output .ariadne/quickstart
           navUseCases: "场景",
           navRecipes: "配方",
           navWorkflow: "工作流",
-          eyebrow: "给 Coding Agent 用的 Loop Engineering",
-          heroTitle: "让 AI Agent 顺着循环跑完。",
+          eyebrow: "给 Agent 用的 Loop Engineering",
+          heroTitle: "给 Agent 一个能收口的循环。",
           heroLead:
-            "造梦师把零散上下文变成一份带护栏的工作合约：先读真实状态，小步行动，拿证据验证，再决定停止、继续或回滚。",
+            "造梦师把零散上下文变成 Loop 合约：读状态、小步改、验证、决策。",
           openBuilder: "打开构建器",
           viewGithub: "查看 GitHub",
           quickStart: "快速开始",
@@ -752,40 +754,40 @@ ariadne-loop quickstart --output .ariadne/quickstart
           captionAct: "小步改",
           captionVerify: "验结果",
           captionDecide: "做决策",
-          whyTitle: "为需要证据的 Agent 工作而做",
+          whyTitle: "为有证据的 Agent 工作而做",
           whyLead:
-            "Loop 不是一段提示词，而是长期编码任务的运行边界：Agent 能改什么、怎么汇报进度、什么时候必须停下来找人。",
+            "提示词不够。造梦师把范围、门禁、报告和人工确认放在一处。",
           cardSpecsTitle: "Loop 规格",
-          cardSpecsBody: "把粗糙笔记变成有状态的读状态、行动、验证、决策合约。",
+          cardSpecsBody: "把粗略笔记变成 inspect-act-verify-decide 循环。",
           cardBuilderTitle: "浏览器构建器",
-          cardBuilderBody: "不用安装，也不上传数据，直接在页面里生成可编辑的 snapshot JSON。",
+          cardBuilderBody: "在浏览器里生成 snapshot JSON。",
           cardPacketsTitle: "Agent Packet",
-          cardPacketsBody: "把目标、限制、人类确认点和预算交给 AI Agent，避免无限发散。",
+          cardPacketsBody: "交接范围、限制、门禁和预算。",
           cardReportsTitle: "报告校验",
-          cardReportsBody: "拒绝含糊的自然语言进度，要求可解析的 JSON 证据。",
+          cardReportsBody: "要可解析证据，不要口头进度。",
           cardSuperviseTitle: "持续护航",
-          cardSuperviseBody: "检查停止规则、回滚信号和重复失败，防止长循环跑偏。",
+          cardSuperviseBody: "抓住跑偏、重复失败和回滚信号。",
           cardRecipesTitle: "Agent 配方",
-          cardRecipesBody: "把 issue 修复、发布、交接、PR 跟进 loop 直接贴给 Codex 或 Claude Code。",
+          cardRecipesBody: "修复、发布、交接、PR 跟进直接可用。",
           cardClaudeTitle: "Claude Code 命令",
-          cardClaudeBody: "把 /ariadne-loop 安装成项目命令，让编码会话按 loop 门禁重复执行。",
+          cardClaudeBody: "在项目里运行 /ariadne-loop。",
           cardOpenClawTitle: "OpenClaw 运维",
-          cardOpenClawBody: "用验证器、停止规则、回滚和 JSON 报告包住定时 OpenClaw 任务。",
+          cardOpenClawBody: "给定时任务加检查和停止规则。",
           flowTitle: "循环本身就是护栏",
           flowLead:
-            "Ariadne 是造梦师这个隐喻：先建迷宫，再留下线索，让每一轮行动都能被观察和验证。",
+            "Ariadne 先建迷宫，再留下线索。每一轮都必须可观察。",
           stepInspectTitle: "读取真实状态",
-          stepInspectBody: "先读文件、测试、issue、日志或远端状态，再决定要改什么。",
+          stepInspectBody: "先读真实项目，再动手。",
           stepActTitle: "小步行动",
-          stepActBody: "每一轮只做能推进验证器的最小改动。",
+          stepActBody: "只做一个有边界的改动。",
           stepVerifyTitle: "验证证据",
-          stepVerifyBody: "用测试、截图、读回、diff 这些具体门禁替代“感觉差不多”。",
+          stepVerifyBody: "跑门禁，留下证据。",
           stepDecideTitle: "决定下一轮",
-          stepDecideBody: "完成就停，边界清楚就继续，造成损坏就回滚，外部影响先找人确认。",
-          calloutTitle: "先写 snapshot，不要先开会。",
+          stepDecideBody: "停止、继续、回滚，或找人确认。",
+          calloutTitle: "先写 snapshot。",
           calloutBody:
-            "用构建器捕获目标、当前状态、进展、限制、验证器和外部影响。造梦师会把它变成 Coding Agent 能照着执行的 packet。",
-          calloutButton: "生成一个 loop",
+            "记录一次状态，把 packet 交给 Agent。",
+          calloutButton: "打开构建器",
           footer: "MIT 许可。Aaron Zhang 制作。"
         }
       };
