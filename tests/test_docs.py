@@ -15,6 +15,8 @@ def test_homepage_links_to_browser_builder():
     assert "造梦师" in index
     assert "Give AI agents a loop they can finish." in index
     assert "让 AI Agent 顺着循环跑完。" in index
+    assert 'data-i18n="openTemplate"' not in index
+    assert 'data-i18n="openClawGuide"' not in index
     assert "agent-recipes.md" in index
     assert "Agent recipes" in index
     assert "Claude Code command" in index
