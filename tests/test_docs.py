@@ -1,8 +1,21 @@
 import re
+import tomllib
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_public_version_metadata_stays_in_sync():
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    version = project["project"]["version"]
+    index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    skill = (ROOT / "skills" / "ariadne-loop" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert f'"softwareVersion": "{version}"' in index
+    assert f"version: {version}" in skill
 
 
 def test_homepage_links_to_browser_builder():
