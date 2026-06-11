@@ -113,3 +113,5 @@ Good verifiers:
 - acceptance criteria linked to tests or screenshots,
 - docs updated when behavior changes,
 - no hidden manual steps.
+
+More copyable verifier sets are in [Verifier Recipes](verifier-recipes.md).

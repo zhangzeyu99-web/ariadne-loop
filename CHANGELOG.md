@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0 - 2026-06-11
+
+- Added verifier recipes for Python releases, frontend bugfixes, documentation refreshes, and GitHub issue triage.
+- Linked recipes from README, Chinese README, use-case docs, and the home page.
+
 ## 0.6.0 - 2026-06-11
 
 - Added a static browser Loop Builder at `docs/playground.html`.

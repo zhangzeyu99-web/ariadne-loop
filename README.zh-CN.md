@@ -89,3 +89,4 @@ python -m compileall loops_assistant
 贡献说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 接入 Codex/Claude Code 的完整流程见 [Coding Agent Workflow](docs/coding-agent-workflow.md)。
+常见验证器模板见 [Verifier Recipes](docs/verifier-recipes.md)。

@@ -210,6 +210,7 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 - [Browser loop builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)
 - [OpenClaw agent packet](examples/generated/openclaw-agent-packet.md)
 - [Coding agent workflow](docs/coding-agent-workflow.md)
+- [Verifier recipes](docs/verifier-recipes.md)
 - [Reference patterns](docs/reference-patterns.md)
 - [Use-case gallery](docs/use-cases.md)
 - [Loop spec anatomy](docs/loop-spec.md)
