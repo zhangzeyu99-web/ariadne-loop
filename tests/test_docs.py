@@ -1,4 +1,7 @@
+import json
 from pathlib import Path
+
+from loops_assistant import validate_loop
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -169,6 +172,26 @@ def test_generated_examples_do_not_contain_known_mojibake():
         text = path.read_text(encoding="utf-8")
         for token in bad_tokens:
             assert token not in text, f"{path.name} contains mojibake token {token!r}"
+
+
+def test_project_quality_loop_is_generated_and_agent_ready():
+    snapshot = (ROOT / "examples" / "project-quality-snapshot.json").read_text(
+        encoding="utf-8"
+    )
+    loop = json.loads(
+        (ROOT / "examples" / "generated" / "project-quality-loop.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    packet = (
+        ROOT / "examples" / "generated" / "project-quality-agent-packet.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Ariadne Loop project quality" in snapshot
+    assert validate_loop(loop) == []
+    assert "Improve Ariadne Loop into a high-quality public project" in packet
+    assert "Return JSON only" in packet
+    assert "python -m pytest -q" in packet
 
 
 def test_codex_skill_is_installable_from_readme():
