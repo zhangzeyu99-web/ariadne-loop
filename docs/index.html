@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ariadne Loop turns rough project context into verifiable Loop Engineering specs and AI-ready execution packets."
+    />
+    <title>Ariadne Loop</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --panel: #151b23;
+        --panel-2: #1b2430;
+        --text: #f0f6fc;
+        --muted: #9da7b3;
+        --line: #2c3642;
+        --teal: #2dd4bf;
+        --gold: #eab308;
+        --green: #4ade80;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--teal);
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 72px;
+        gap: 24px;
+      }
+
+      .brand {
+        font-weight: 750;
+        letter-spacing: 0;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+        gap: 44px;
+        align-items: center;
+        min-height: 620px;
+        padding: 56px 0 72px;
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        max-width: 760px;
+        font-size: clamp(40px, 7vw, 76px);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 680px;
+        margin: 0 0 28px;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--text);
+        background: var(--panel);
+        font-weight: 650;
+      }
+
+      .button.primary {
+        border-color: transparent;
+        background: var(--teal);
+        color: #051311;
+      }
+
+      pre {
+        margin: 0;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #070a0f;
+        padding: 18px;
+        color: #d6e2ef;
+        font-size: 14px;
+      }
+
+      .map {
+        position: relative;
+        min-height: 420px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(45, 212, 191, 0.08), transparent 38%),
+          radial-gradient(circle at 85% 20%, rgba(234, 179, 8, 0.18), transparent 26%),
+          var(--panel);
+        padding: 26px;
+        overflow: hidden;
+      }
+
+      .thread {
+        position: absolute;
+        inset: 74px 50px 80px 48px;
+        border: 2px solid rgba(45, 212, 191, 0.62);
+        border-left-color: transparent;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        transform: rotate(-12deg);
+      }
+
+      .node {
+        position: absolute;
+        width: 150px;
+        min-height: 64px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(21, 27, 35, 0.92);
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      .node strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--text);
+      }
+
+      .node span {
+        color: var(--muted);
+      }
+
+      .n1 { left: 24px; top: 42px; }
+      .n2 { right: 38px; top: 72px; }
+      .n3 { right: 74px; bottom: 96px; }
+      .n4 { left: 58px; bottom: 64px; }
+      .check {
+        position: absolute;
+        right: 28px;
+        bottom: 26px;
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      section {
+        padding: 56px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0 0 22px;
+        font-size: 30px;
+        letter-spacing: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell">
+        <div class="brand">Ariadne Loop</div>
+        <div class="nav-links">
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md">Spec</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md">Use cases</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero shell">
+        <div>
+          <h1>Write the thread your AI agent can follow.</h1>
+          <p class="lead">
+            Ariadne Loop turns rough context into verifiable Loop Engineering specs:
+            cycle, state, verifiers, stop rules, rollback, budget, and JSON agent reports.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/zhangzeyu99-web/ariadne-loop">View on GitHub</a>
+            <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start">Quick start</a>
+          </div>
+          <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
+ariadne-loop write --input examples/release-readiness-snapshot.json --output loop.md</code></pre>
+        </div>
+        <div class="map" aria-label="Loop Engineering map">
+          <div class="thread"></div>
+          <div class="node n1"><strong>Inspect</strong><span>read real state</span></div>
+          <div class="node n2"><strong>Act</strong><span>small scoped change</span></div>
+          <div class="node n3"><strong>Verify</strong><span>observable gates</span></div>
+          <div class="node n4"><strong>Decide</strong><span>stop, continue, rollback</span></div>
+          <div class="check">verifiable</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="shell">
+          <h2>Built for agent work that needs evidence</h2>
+          <div class="grid">
+            <div class="card">
+              <h3>Loop specs</h3>
+              <p>Convert rough notes into a stateful inspect, act, verify, decide contract.</p>
+            </div>
+            <div class="card">
+              <h3>Agent packets</h3>
+              <p>Give AI agents a bounded task with constraints, human gates, and budget.</p>
+            </div>
+            <div class="card">
+              <h3>Report validation</h3>
+              <p>Reject vague natural-language updates and require parseable JSON evidence.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell">
+        MIT licensed. Built by Aaron Zhang.
+      </div>
+    </footer>
+  </body>
+</html>

@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 
+from ._version import __version__
 from .core import (
     build_loop,
     load_snapshot,
@@ -19,8 +20,16 @@ from .core import (
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="loops-assistant",
-        description="Generate and validate Loop Engineering specs.",
+        prog="ariadne-loop",
+        description=(
+            "Ariadne Loop turns rough project context into verifiable "
+            "Loop Engineering specs and AI execution packets."
+        ),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"Ariadne Loop {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

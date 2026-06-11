@@ -37,8 +37,8 @@ def load_snapshot(path: str | Path) -> dict[str, Any]:
 
 
 def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
-    title = _clean_text(snapshot.get("title")) or "未命名任务"
-    goal = _clean_text(snapshot.get("goal")) or f"把 {title} 推进到可验证完成状态"
+    title = _clean_text(snapshot.get("title")) or "Untitled task"
+    goal = _clean_text(snapshot.get("goal")) or f"Move {title} to a verifiably complete state"
     current_state = _clean_text(snapshot.get("current_state") or snapshot.get("status"))
     recent_progress = _string_list(snapshot.get("recent_progress") or snapshot.get("evidence"))
     constraints = _string_list(snapshot.get("constraints"))
@@ -54,7 +54,7 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
         "goal": goal,
         "context": {
             "source_title": title,
-            "current_state": current_state or "未提供当前状态，先读取真实上下文再行动",
+            "current_state": current_state or "No current state was provided. Inspect real context before acting.",
             "evidence": recent_progress,
             "constraints": constraints,
             "external_effects": external_effects,
@@ -71,18 +71,18 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
                 "id": f"gate-{index}",
                 "kind": _verifier_kind(verifier),
                 "instruction": verifier,
-                "proves": f"本轮结果满足：{verifier}",
+                "proves": f"This turn satisfies: {verifier}",
             }
             for index, verifier in enumerate(verifier_inputs, start=1)
         ],
         "stop_rules": _build_stop_rules(external_effects),
         "rollback": {
-            "trigger": "任一 verifier 失败、输出缺证据、或动作越过约束",
-            "action": "撤销本轮产物或保持原状态，记录失败证据，回到 inspect 步骤重新收窄范围",
+            "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",
+            "action": "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.",
         },
         "memory": {
-            "read": "每轮开始读取上一轮状态、失败原因、通过的 verifier 和用户确认项",
-            "write": "每轮结束写入 action_id、证据、验证结果、停止判断和下一步",
+            "read": "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
+            "write": "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step.",
         },
         "budget": _build_budget(risk),
         "human_gates": _build_human_gates(risk, external_effects),
@@ -234,7 +234,7 @@ def render_loop_writing_report(package: dict[str, Any]) -> str:
     )
     assertions = "\n".join(f"- {item}" for item in eval_pattern["assertions"])
 
-    return f"""# Loop Writing Assistant
+    return f"""# Ariadne Loop Report
 
 ## Clear Loop
 - Name: {loop['name']}
@@ -392,42 +392,42 @@ def _score_loop_clarity(
     external_effects = _string_list(original_snapshot.get("external_effects"))
 
     goal_specificity = "strong"
-    if not goal or goal in {"让 AI 帮我做完", "做好", "继续推进"} or len(goal) < 12:
+    if not goal or goal.lower() in {"let ai finish it", "do it well", "continue"} or goal in {"让 AI 帮我做完", "做好", "继续推进"} or len(goal) < 12:
         goal_specificity = "weak"
         score -= 20
-        missing.append("goal: 写清楚最终状态、对象和完成标准")
+        missing.append("goal: specify the final state, target object, and completion standard")
 
     state_grounding = "strong"
     if not current_state:
         state_grounding = "weak"
         score -= 15
-        missing.append("current_state: 补充当前进度、已有产物和未解决缺口")
+        missing.append("current_state: add current progress, existing artifacts, and unresolved gaps")
 
     verifier_strength = "strong"
     if not verifiers:
         verifier_strength = "weak"
         score -= 25
-        missing.append("verifier: 至少写一个能产生外部证据的验证器")
+        missing.append("verifier: add at least one verifier that produces observable evidence")
 
     constraint_quality = "strong"
     if not constraints:
         constraint_quality = "weak"
         score -= 10
-        missing.append("constraints: 写出不做事项、权限边界和风险动作")
+        missing.append("constraints: state non-goals, permission boundaries, and risky actions")
 
     stop_safety = "strong" if loop.get("stop_rules") and loop.get("rollback") else "weak"
     if stop_safety == "weak":
         score -= 20
-        missing.append("stop_rules: 写清楚何时停止、回滚或请求确认")
+        missing.append("stop_rules: define when to stop, rollback, or ask for confirmation")
 
     ai_contract = "strong" if loop.get("agent_contract") else "weak"
     if ai_contract == "weak":
         score -= 10
-        missing.append("agent_contract: 约束 AI 返回结构化报告")
+        missing.append("agent_contract: require structured agent reports")
 
     if external_effects and not loop.get("human_gates"):
         score -= 10
-        missing.append("human_gate: 外部影响动作前必须有人工确认")
+        missing.append("human_gate: require confirmation before external-impact actions")
 
     return {
         "score": max(0, score),
@@ -510,12 +510,12 @@ def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:
                 "constraints",
                 "output_contract",
             ],
-            "instruction": "把 Loop 写成 AI 能执行的任务说明，而不是只写愿望。",
+            "instruction": "Write the loop as an executable task contract, not a wish.",
         },
         "harness": {
             "source": "agent harness projects",
             "requires": ["state", "tools", "memory", "checkpoints", "budget"],
-            "instruction": "把上下文、工具、状态、预算和检查点放进执行环境。",
+            "instruction": "Put context, tools, state, budget, and checkpoints into the execution environment.",
         },
         "eval": {
             "source": "LLM eval harnesses",
@@ -531,9 +531,9 @@ def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:
 
 def _tightened_brief(loop: dict[str, Any]) -> str:
     return (
-        f"围绕“{loop['goal']}”运行一个有状态闭环：先读取真实上下文，"
-        "再执行最小必要动作，用 verifier 逐项验证；验证失败就回滚或收窄，"
-        "触碰外部状态前请求人工确认。"
+        f"Run a stateful loop around \"{loop['goal']}\": inspect real context, "
+        "take the smallest useful action, verify each gate, then stop, continue, "
+        "rollback, or ask for human confirmation before changing external state."
     )
 
 
@@ -542,45 +542,45 @@ def _build_cycle(goal: str, verifier_inputs: list[str]) -> list[dict[str, str]]:
     return [
         {
             "id": "inspect",
-            "instruction": "读取真实上下文、现有产物和上一轮状态，确认本轮只处理一个可验证目标",
-            "expected_output": "本轮范围、已知证据、缺口和不做事项",
+            "instruction": "Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target.",
+            "expected_output": "Turn scope, known evidence, gaps, and explicit non-goals",
         },
         {
             "id": "act",
-            "instruction": f"围绕目标执行最小必要动作：{goal}",
-            "expected_output": "本轮产物或改动清单",
+            "instruction": f"Take the smallest useful action toward the goal: {goal}",
+            "expected_output": "This turn's artifact or change list",
         },
         {
             "id": "verify",
-            "instruction": f"运行或执行这些验证：{verifier_summary}",
-            "expected_output": "逐项 verifier 的通过、失败或缺证据状态",
+            "instruction": f"Run or perform these verifiers: {verifier_summary}",
+            "expected_output": "Pass, fail, or missing-evidence status for each verifier",
         },
         {
             "id": "decide",
-            "instruction": "根据验证结果决定继续、停止、回滚或请求人工确认",
-            "expected_output": "下一步动作和停止判断",
+            "instruction": "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
+            "expected_output": "Next action and stop decision",
         },
     ]
 
 
 def _build_stop_rules(external_effects: list[str]) -> list[str]:
     rules = [
-        "所有 verifier 都有当前证据且通过时停止",
-        "同一 verifier 连续失败 2 次时停止并收窄问题",
-        "发现目标、输入或权限与当前上下文不一致时停止并请求确认",
+        "Stop when every verifier has current evidence and passes.",
+        "Stop and narrow the problem after the same verifier fails twice.",
+        "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
     ]
     if external_effects:
         joined = "、".join(external_effects)
-        rules.append(f"执行外部影响动作前停止并确认：{joined}")
+        rules.append(f"Ask for confirmation before external-impact actions: {joined}")
     return rules
 
 
 def _build_human_gates(risk: str, external_effects: list[str]) -> list[str]:
-    gates = ["需要改变外部状态、发布、发送、删除或付款前必须人工确认"]
+    gates = ["Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."]
     if risk in {"medium", "high", "critical"}:
-        gates.append(f"风险等级为 {risk}，失败后不可直接扩大范围")
+        gates.append(f"Risk is {risk}; do not expand scope after failure.")
     if external_effects:
-        gates.append("外部影响动作完成后必须读回真实载体再报告")
+        gates.append("After an external-impact action, read back the real target before reporting success.")
     return gates
 
 
@@ -595,9 +595,9 @@ def _build_budget(risk: str) -> dict[str, int]:
 def _infer_verifiers(recent_progress: list[str], external_effects: list[str]) -> list[str]:
     inferred = [item for item in recent_progress if _looks_like_verifier(item)]
     if external_effects:
-        inferred.append("外部载体读回验证")
+        inferred.append("Read back the external target and verify the effect")
     if not inferred:
-        inferred.append("读回真实产物并核对目标、关键字段和约束")
+        inferred.append("Read back the real artifact and verify the goal, key fields, and constraints")
     return list(dict.fromkeys(inferred))
 
 

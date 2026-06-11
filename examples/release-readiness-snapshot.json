@@ -1,0 +1,25 @@
+{
+  "title": "Release readiness",
+  "goal": "Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag",
+  "current_state": "Core tests pass, but the README quick start and generated examples need to be checked before release",
+  "recent_progress": [
+    "pytest passed",
+    "CLI version command passed"
+  ],
+  "constraints": [
+    "Do not publish until generated examples are committed",
+    "Do not create a release tag until the README quick start works from a clean checkout"
+  ],
+  "verifiers": [
+    "pytest",
+    "python -m compileall loops_assistant",
+    "README quick start generates expected files",
+    "ariadne-loop check validates generated loop JSON",
+    "GitHub release target commit matches local HEAD"
+  ],
+  "external_effects": [
+    "git tag",
+    "GitHub release"
+  ],
+  "risk": "medium"
+}

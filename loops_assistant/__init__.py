@@ -1,3 +1,4 @@
+from ._version import __version__
 from .core import (
     build_loop,
     load_snapshot,
@@ -10,6 +11,7 @@ from .core import (
 )
 
 __all__ = [
+    "__version__",
     "build_loop",
     "load_snapshot",
     "parse_agent_report",

@@ -3,6 +3,18 @@ import subprocess
 import sys
 
 
+def test_cli_version_uses_public_project_name():
+    result = subprocess.run(
+        [sys.executable, "-m", "loops_assistant", "--version"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "Ariadne Loop" in result.stdout
+
+
 def test_cli_generates_json_and_markdown_packets(tmp_path):
     input_path = tmp_path / "thread.json"
     json_output = tmp_path / "loop.json"
@@ -164,7 +176,7 @@ def test_cli_write_outputs_human_readable_loop_report(tmp_path):
 
     assert result.returncode == 0, result.stderr
     report = output_path.read_text(encoding="utf-8")
-    assert "# Loop Writing Assistant" in report
+    assert "# Ariadne Loop Report" in report
     assert "当前线程 Loop" in report
     assert "Clarity Score" in report
     assert "Agent Packet" in report

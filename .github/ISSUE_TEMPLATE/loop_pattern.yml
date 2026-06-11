@@ -1,0 +1,34 @@
+name: Loop pattern request
+description: Suggest a new loop pattern, verifier, or example.
+title: "[pattern] "
+labels: ["enhancement", "loop-pattern"]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Scenario
+      description: What kind of agent workflow should this help with?
+    validations:
+      required: true
+  - type: textarea
+    id: rough-snapshot
+    attributes:
+      label: Rough snapshot
+      description: Paste a sanitized input snapshot if you have one.
+      render: json
+    validations:
+      required: false
+  - type: textarea
+    id: verifiers
+    attributes:
+      label: Useful verifiers
+      description: What evidence would prove the loop worked?
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundaries
+      description: What should the agent not do without human confirmation?
+    validations:
+      required: false

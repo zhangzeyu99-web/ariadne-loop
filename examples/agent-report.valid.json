@@ -1,0 +1,9 @@
+{
+  "action_id": "verify",
+  "status": "continue",
+  "evidence": [
+    "pytest passed",
+    "generated examples validate"
+  ],
+  "next_step": "prepare release notes and rerun the quick start"
+}

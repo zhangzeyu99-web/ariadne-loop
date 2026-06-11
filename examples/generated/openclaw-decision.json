@@ -1,0 +1,15 @@
+{
+  "decision": "stop",
+  "next_action_id": "decide",
+  "reasons": [
+    "all verifiers passed"
+  ],
+  "iteration": 2,
+  "covered_verifiers": [
+    "gate-1",
+    "gate-2",
+    "gate-3",
+    "gate-4"
+  ],
+  "failed_verifiers": []
+}

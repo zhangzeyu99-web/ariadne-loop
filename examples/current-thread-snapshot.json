@@ -1,31 +1,34 @@
 {
-  "title": "当前线程：增强 Loops Assistant",
-  "goal": "基于高星 prompt、eval 和 harness 项目的结构，把 Loops Assistant 升级成能帮用户写清楚并持续护航 Loop 的助手，并测试、AI smoke、supervise 决策和 GitHub 发布验证",
-  "current_state": "已有 make/check/report/write 命令和 GitHub 发布；本轮新增 supervise 命令、持续护航规则、JSONL 报告读取、BOM 兼容、schema 字段和发布验证",
+  "title": "Ariadne Loop public launch",
+  "goal": "Turn the first working loop CLI into a public open-source project that a developer can understand, run, supervise, and contribute to in under ten minutes",
+  "current_state": "The core generator, writer, report validator, and supervise command exist; the repository needs stronger naming, public documentation, generated examples, metadata, and distribution hooks",
   "recent_progress": [
-    "已调研 f/prompts.chat、promptfoo、langgraph、openai/evals、lm-evaluation-harness",
-    "已建立 TDD 红灯测试",
-    "已有 Codex smoke 脚本验证 AI 可读取 Agent Packet",
-    "已新增 supervise 测试覆盖外部影响、连续失败、全部通过和 Windows BOM JSONL"
+    "CLI can generate loop JSON",
+    "CLI can render agent packets",
+    "agent report validation works",
+    "supervise can read JSONL agent reports",
+    "supervise can decide continue, stop, rollback, or needs_human",
+    "tests pass locally"
   ],
   "constraints": [
-    "先写失败测试再实现",
-    "不把建议停在文档，要落到 CLI 和样例",
-    "不复制第三方项目内容，只借鉴结构",
-    "发布前必须跑完整测试、AI smoke、supervise 决策和远端读回"
+    "Keep the compatibility command for existing users",
+    "Do not add heavy runtime dependencies",
+    "Do not publish before generated examples and metadata updates are committed",
+    "Do not hide external-impact actions behind automation"
   ],
   "verifiers": [
     "pytest",
-    "compileall",
-    "output_quality_gate README.md",
-    "write 命令生成 current-thread-loop-report.md",
-    "Codex AI smoke 返回 valid report",
-    "supervise 根据 AI report 输出护航决策",
-    "GitHub 远端 main SHA 与本地一致"
+    "python -m compileall loops_assistant",
+    "README quick start works",
+    "generated examples validate",
+    "supervise produces a decision from JSONL reports",
+    "GitHub repo metadata is updated"
   ],
   "external_effects": [
     "commit",
-    "push"
+    "push",
+    "GitHub repository rename",
+    "GitHub release"
   ],
   "risk": "medium"
 }

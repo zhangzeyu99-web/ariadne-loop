@@ -3,22 +3,41 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "loops-assistant"
+name = "ariadne-loop"
 version = "0.3.0"
-description = "Generate verifiable Loop Engineering specs and AI-ready execution packets from project or thread snapshots."
+description = "Turn rough project context into verifiable Loop Engineering specs and AI-ready execution packets."
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Codex" }]
+authors = [{ name = "Aaron Zhang" }]
 license = { text = "MIT" }
-keywords = ["ai-agents", "loop-engineering", "workflow", "verification"]
+keywords = [
+    "ai-agents",
+    "agent-workflows",
+    "loop-engineering",
+    "prompt-engineering",
+    "verification",
+]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
+[project.urls]
+Homepage = "https://github.com/zhangzeyu99-web/ariadne-loop"
+Repository = "https://github.com/zhangzeyu99-web/ariadne-loop"
+Issues = "https://github.com/zhangzeyu99-web/ariadne-loop/issues"
+Documentation = "https://zhangzeyu99-web.github.io/ariadne-loop/"
+
 [project.scripts]
+ariadne-loop = "loops_assistant.cli:main"
 loops-assistant = "loops_assistant.cli:main"
 
 [tool.setuptools.packages.find]

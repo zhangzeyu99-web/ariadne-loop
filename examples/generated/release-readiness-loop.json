@@ -1,0 +1,122 @@
+{
+  "version": "1.0",
+  "name": "Release readiness Loop",
+  "goal": "Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag",
+  "context": {
+    "source_title": "Release readiness",
+    "current_state": "Core tests pass, but the README quick start and generated examples need to be checked before release",
+    "evidence": [
+      "pytest passed",
+      "CLI version command passed"
+    ],
+    "constraints": [
+      "Do not publish until generated examples are committed",
+      "Do not create a release tag until the README quick start works from a clean checkout"
+    ],
+    "external_effects": [
+      "git tag",
+      "GitHub release"
+    ],
+    "risk": "medium"
+  },
+  "state": {
+    "status": "ready",
+    "progress": [
+      "pytest passed",
+      "CLI version command passed"
+    ],
+    "open_questions": []
+  },
+  "cycle": [
+    {
+      "id": "inspect",
+      "instruction": "Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target.",
+      "expected_output": "Turn scope, known evidence, gaps, and explicit non-goals"
+    },
+    {
+      "id": "act",
+      "instruction": "Take the smallest useful action toward the goal: Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag",
+      "expected_output": "This turn's artifact or change list"
+    },
+    {
+      "id": "verify",
+      "instruction": "Run or perform these verifiers: pytest；python -m compileall loops_assistant；README quick start generates expected files；ariadne-loop check validates generated loop JSON；GitHub release target commit matches local HEAD",
+      "expected_output": "Pass, fail, or missing-evidence status for each verifier"
+    },
+    {
+      "id": "decide",
+      "instruction": "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
+      "expected_output": "Next action and stop decision"
+    }
+  ],
+  "verifiers": [
+    {
+      "id": "gate-1",
+      "kind": "command",
+      "instruction": "pytest",
+      "proves": "This turn satisfies: pytest"
+    },
+    {
+      "id": "gate-2",
+      "kind": "checklist",
+      "instruction": "python -m compileall loops_assistant",
+      "proves": "This turn satisfies: python -m compileall loops_assistant"
+    },
+    {
+      "id": "gate-3",
+      "kind": "checklist",
+      "instruction": "README quick start generates expected files",
+      "proves": "This turn satisfies: README quick start generates expected files"
+    },
+    {
+      "id": "gate-4",
+      "kind": "checklist",
+      "instruction": "ariadne-loop check validates generated loop JSON",
+      "proves": "This turn satisfies: ariadne-loop check validates generated loop JSON"
+    },
+    {
+      "id": "gate-5",
+      "kind": "checklist",
+      "instruction": "GitHub release target commit matches local HEAD",
+      "proves": "This turn satisfies: GitHub release target commit matches local HEAD"
+    }
+  ],
+  "stop_rules": [
+    "Stop when every verifier has current evidence and passes.",
+    "Stop and narrow the problem after the same verifier fails twice.",
+    "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
+    "Ask for confirmation before external-impact actions: git tag、GitHub release"
+  ],
+  "rollback": {
+    "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",
+    "action": "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope."
+  },
+  "memory": {
+    "read": "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
+    "write": "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step."
+  },
+  "budget": {
+    "max_iterations": 3,
+    "max_minutes": 60
+  },
+  "human_gates": [
+    "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying.",
+    "Risk is medium; do not expand scope after failure.",
+    "After an external-impact action, read back the real target before reporting success."
+  ],
+  "agent_contract": {
+    "output_format": "json",
+    "required_fields": [
+      "action_id",
+      "status",
+      "evidence",
+      "next_step"
+    ],
+    "allowed_statuses": [
+      "continue",
+      "needs_human",
+      "rollback",
+      "stop"
+    ]
+  }
+}

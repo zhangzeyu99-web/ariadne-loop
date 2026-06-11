@@ -1,0 +1,113 @@
+{
+  "version": "1.0",
+  "name": "OpenClaw 每日健康监控 Loop",
+  "goal": "每天检查 Gateway、cron、备份和 doctor，只报告可操作异常",
+  "context": {
+    "source_title": "OpenClaw 每日健康监控",
+    "current_state": "Gateway 自启动已修复，备份由 OpenClaw 自己执行",
+    "evidence": [
+      "日备份试跑 OK",
+      "周备份试跑 OK",
+      "doctor 无 error"
+    ],
+    "constraints": [
+      "SecretRefs 迁移单独开任务",
+      "不直接改安全体系",
+      "只修确定的执行问题"
+    ],
+    "external_effects": [],
+    "risk": "low"
+  },
+  "state": {
+    "status": "ready",
+    "progress": [
+      "日备份试跑 OK",
+      "周备份试跑 OK",
+      "doctor 无 error"
+    ],
+    "open_questions": []
+  },
+  "cycle": [
+    {
+      "id": "inspect",
+      "instruction": "Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target.",
+      "expected_output": "Turn scope, known evidence, gaps, and explicit non-goals"
+    },
+    {
+      "id": "act",
+      "instruction": "Take the smallest useful action toward the goal: 每天检查 Gateway、cron、备份和 doctor，只报告可操作异常",
+      "expected_output": "This turn's artifact or change list"
+    },
+    {
+      "id": "verify",
+      "instruction": "Run or perform these verifiers: Gateway 端口；cron ok；backup verify；doctor 无 error",
+      "expected_output": "Pass, fail, or missing-evidence status for each verifier"
+    },
+    {
+      "id": "decide",
+      "instruction": "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
+      "expected_output": "Next action and stop decision"
+    }
+  ],
+  "verifiers": [
+    {
+      "id": "gate-1",
+      "kind": "readback",
+      "instruction": "Gateway 端口",
+      "proves": "This turn satisfies: Gateway 端口"
+    },
+    {
+      "id": "gate-2",
+      "kind": "checklist",
+      "instruction": "cron ok",
+      "proves": "This turn satisfies: cron ok"
+    },
+    {
+      "id": "gate-3",
+      "kind": "readback",
+      "instruction": "backup verify",
+      "proves": "This turn satisfies: backup verify"
+    },
+    {
+      "id": "gate-4",
+      "kind": "readback",
+      "instruction": "doctor 无 error",
+      "proves": "This turn satisfies: doctor 无 error"
+    }
+  ],
+  "stop_rules": [
+    "Stop when every verifier has current evidence and passes.",
+    "Stop and narrow the problem after the same verifier fails twice.",
+    "Stop and ask for confirmation when the goal, input, or permissions do not match the current context."
+  ],
+  "rollback": {
+    "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",
+    "action": "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope."
+  },
+  "memory": {
+    "read": "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
+    "write": "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step."
+  },
+  "budget": {
+    "max_iterations": 4,
+    "max_minutes": 90
+  },
+  "human_gates": [
+    "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."
+  ],
+  "agent_contract": {
+    "output_format": "json",
+    "required_fields": [
+      "action_id",
+      "status",
+      "evidence",
+      "next_step"
+    ],
+    "allowed_statuses": [
+      "continue",
+      "needs_human",
+      "rollback",
+      "stop"
+    ]
+  }
+}

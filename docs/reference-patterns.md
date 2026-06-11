@@ -1,20 +1,44 @@
 # Reference Patterns
 
-检索时间：2026-06-10。
+Ariadne Loop borrows structure from three mature open-source patterns. These projects are references, not dependencies.
 
-这些项目不是依赖项，只作为结构参考：
+## Prompt Libraries
 
-| Project | Stars observed | Useful pattern for Loops Assistant |
-| --- | ---: | --- |
-| [f/prompts.chat](https://github.com/f/prompts.chat) | 163,511 | Prompt 条目强调 role、task、context、constraints、output format，适合转成 Loop 的说明层。 |
-| [promptfoo/promptfoo](https://github.com/promptfoo/promptfoo) | 22,080 | 把 prompt/agent/RAG 放进本地 eval、断言和 CI，适合转成 Loop 的 verifier 和 report check。 |
-| [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | 34,350 | 低层 agent 编排强调长期、有状态、可恢复，适合转成 Loop 的 state、checkpoint、budget。 |
-| [openai/evals](https://github.com/openai/evals) | 18,648 | 把 LLM 系统行为写成 benchmark/eval registry，适合转成 Loop 的测试用例和断言。 |
-| [EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) | 12,906 | 统一评测 harness，适合提醒 Loop 不只看输出，还要看任务集、指标和可重复运行方式。 |
+High-quality prompt collections usually separate role, task, context, constraints, and output format. Ariadne keeps those sections but adds state, verification, rollback, and budget.
 
-落到本项目里的规则：
+Useful pattern:
 
-- Prompt pattern：role、task、context、constraints、output_contract。
-- Harness pattern：state、tools、memory、checkpoints、budget。
-- Eval pattern：cycle 存在、verifier 有外部证据、stop/rollback 明确、AI report 可机器校验。
+- name the task,
+- include enough context,
+- state constraints,
+- require a structured output.
 
+## Agent Harnesses
+
+Agent runtimes such as graph-based or checkpointed systems show why a loop needs state. A loop should not depend on the agent remembering everything implicitly.
+
+Useful pattern:
+
+- current state,
+- memory read/write rules,
+- checkpoint or rollback point,
+- explicit budget.
+
+## Eval Harnesses
+
+Eval systems are useful because they make success observable. Ariadne treats verifiers as the smallest useful eval layer for agent work.
+
+Useful pattern:
+
+- observable assertions,
+- repeatable checks,
+- failure messages that narrow the next action,
+- reports that can be parsed by another tool.
+
+## Loop Engineering Notes
+
+The current public discussion around Loop Engineering frames the move as designing systems that prompt agents, rather than manually prompting agents one turn at a time. See Addy Osmani's June 2026 essay: <https://addyosmani.com/blog/loop-engineering/>.
+
+Ariadne's practical rule is stricter:
+
+> If a loop has no verifier, stop rule, rollback path, and report contract, it is still just a prompt.

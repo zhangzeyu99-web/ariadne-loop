@@ -152,7 +152,7 @@ def test_render_loop_writing_report_surfaces_missing_inputs():
 
     report = render_loop_writing_report(package)
 
-    assert "# Loop Writing Assistant" in report
+    assert "# Ariadne Loop Report" in report
     assert "Clarity Score" in report
     assert "Missing Inputs" in report
     assert "verifier" in report.lower()
