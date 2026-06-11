@@ -12,6 +12,8 @@ from .core import (
     parse_agent_report,
     render_loop_writing_report,
     render_agent_packet,
+    starter_preset_names,
+    starter_snapshot,
     supervise_loop,
     validate_loop,
     write_loop,
@@ -62,6 +64,22 @@ def main(argv: list[str] | None = None) -> int:
         "report", help="Validate an AI agent JSON report."
     )
     report_parser.add_argument("--input", required=True, help="Agent report file.")
+
+    init_parser = subparsers.add_parser(
+        "init", help="Create an editable starter snapshot JSON file."
+    )
+    init_parser.add_argument(
+        "--preset",
+        choices=starter_preset_names(),
+        default="bugfix",
+        help="Starter snapshot preset.",
+    )
+    init_parser.add_argument("--output", required=True, help="Snapshot JSON output file.")
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite the output file if it already exists.",
+    )
 
     supervise_parser = subparsers.add_parser(
         "supervise", help="Guard an ongoing loop using JSONL agent reports."
@@ -128,6 +146,20 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc), file=sys.stderr)
             return 1
         print("valid")
+        return 0
+
+    if args.command == "init":
+        output_path = Path(args.output)
+        if output_path.exists() and not args.force:
+            print(f"{output_path} already exists; pass --force to overwrite", file=sys.stderr)
+            return 1
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(
+            json.dumps(starter_snapshot(args.preset), ensure_ascii=False, indent=2)
+            + "\n",
+            encoding="utf-8",
+        )
+        print(str(output_path))
         return 0
 
     if args.command == "supervise":

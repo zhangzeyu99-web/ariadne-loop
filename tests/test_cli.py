@@ -81,6 +81,79 @@ def test_cli_generates_json_and_markdown_packets(tmp_path):
     assert "无证据项不写入主表" in packet
 
 
+def test_cli_init_creates_snapshot_that_write_can_use(tmp_path):
+    snapshot_path = tmp_path / "snapshot.json"
+    report_path = tmp_path / "report.md"
+
+    init_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "init",
+            "--preset",
+            "agent-handoff",
+            "--output",
+            str(snapshot_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    write_result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "write",
+            "--input",
+            str(snapshot_path),
+            "--output",
+            str(report_path),
+            "--format",
+            "markdown",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    report = report_path.read_text(encoding="utf-8")
+
+    assert init_result.returncode == 0, init_result.stderr
+    assert write_result.returncode == 0, write_result.stderr
+    assert snapshot["title"] == "Agent handoff loop"
+    assert snapshot["verifiers"]
+    assert "Agent handoff loop Loop" in report
+    assert "Return JSON only" in report
+
+
+def test_cli_init_does_not_overwrite_without_force(tmp_path):
+    snapshot_path = tmp_path / "snapshot.json"
+    snapshot_path.write_text('{"title": "keep me"}\n', encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "init",
+            "--preset",
+            "bugfix",
+            "--output",
+            str(snapshot_path),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "already exists" in result.stderr
+    assert json.loads(snapshot_path.read_text(encoding="utf-8"))["title"] == "keep me"
+
+
 def test_cli_check_rejects_invalid_loop(tmp_path):
     invalid_path = tmp_path / "invalid.json"
     invalid_path.write_text(

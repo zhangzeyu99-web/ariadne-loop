@@ -251,6 +251,7 @@
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/loop-spec.md">Spec</a>
           <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md">Use cases</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md">Workflow</a>
         </div>
       </nav>
     </header>
@@ -268,7 +269,8 @@
             <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start">Quick start</a>
           </div>
           <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
-ariadne-loop write --input examples/release-readiness-snapshot.json --output loop.md</code></pre>
+ariadne-loop init --preset release --output loop-snapshot.json
+ariadne-loop write --input loop-snapshot.json --output loop.md</code></pre>
         </div>
         <div class="map" aria-label="Loop Engineering map">
           <div class="thread"></div>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,102 @@ EXTERNAL_EFFECT_WORDS = {
     "发布",
     "推送",
 }
+STARTER_SNAPSHOTS: dict[str, dict[str, Any]] = {
+    "bugfix": {
+        "title": "Bug repair loop",
+        "goal": "Fix a reproducible bug without changing unrelated behavior",
+        "current_state": "A failure has been observed, but the exact root cause still needs inspection",
+        "recent_progress": [
+            "Reproduction steps are known",
+            "Likely files or modules have been identified",
+        ],
+        "constraints": [
+            "Do not refactor unrelated code",
+            "Keep the fix to the smallest behavior change that passes the verifier",
+        ],
+        "verifiers": [
+            "The original failing case now passes",
+            "Related tests still pass",
+            "No unrelated file churn is present",
+        ],
+        "external_effects": [],
+        "risk": "medium",
+    },
+    "release": {
+        "title": "Release readiness loop",
+        "goal": "Prepare a release without shipping broken docs, stale examples, or unverified artifacts",
+        "current_state": "Core work is implemented, but release evidence still needs to be collected",
+        "recent_progress": [
+            "Main feature work is complete",
+            "Release notes have a draft",
+        ],
+        "constraints": [
+            "Do not publish until quick start and generated examples are verified",
+            "Do not create tags or releases before human confirmation",
+        ],
+        "verifiers": [
+            "Tests pass",
+            "Quick start works from a fresh checkout",
+            "Generated examples validate",
+            "Release notes match the version",
+        ],
+        "external_effects": ["git tag", "GitHub release", "package publish"],
+        "risk": "medium",
+    },
+    "refactor": {
+        "title": "Incremental refactor loop",
+        "goal": "Refactor one bounded module while preserving public behavior",
+        "current_state": "The target area is known, but the next safe boundary needs inspection",
+        "recent_progress": [
+            "Existing behavior has been identified",
+            "Tests or smoke checks are available",
+        ],
+        "constraints": [
+            "Do not change public APIs unless explicitly approved",
+            "Keep each loop turn small enough to review",
+        ],
+        "verifiers": [
+            "Focused tests pass",
+            "Integration smoke passes",
+            "Public imports still work",
+            "Diff contains no unrelated formatting churn",
+        ],
+        "external_effects": [],
+        "risk": "medium",
+    },
+    "agent-handoff": {
+        "title": "Agent handoff loop",
+        "goal": "Turn a long coding-agent thread into a resumable work contract",
+        "current_state": "Prior work exists across messages, files, or logs, but the next agent needs a compact state packet",
+        "recent_progress": [
+            "Completed work and current blockers have been summarized",
+            "Relevant files or artifacts have been listed",
+        ],
+        "constraints": [
+            "Do not rely on memory without reading current files or remote state",
+            "Mark stale assumptions instead of presenting them as facts",
+        ],
+        "verifiers": [
+            "Current branch and remote state are read back",
+            "Required artifacts exist at the referenced paths",
+            "Next action has one concrete verifier",
+        ],
+        "external_effects": ["commit", "push"],
+        "risk": "medium",
+    },
+}
+
+
+def starter_preset_names() -> list[str]:
+    return sorted(STARTER_SNAPSHOTS)
+
+
+def starter_snapshot(preset: str = "bugfix") -> dict[str, Any]:
+    key = preset.strip().lower()
+    if key not in STARTER_SNAPSHOTS:
+        allowed = ", ".join(starter_preset_names())
+        raise ValueError(f"unknown preset: {preset}. Choose one of: {allowed}")
+    return deepcopy(STARTER_SNAPSHOTS[key])
 
 
 def load_snapshot(path: str | Path) -> dict[str, Any]:

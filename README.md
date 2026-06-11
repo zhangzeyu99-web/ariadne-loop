@@ -51,7 +51,22 @@ The old `loops-assistant` command is kept as a compatibility alias.
 
 ## Quick Start
 
-Generate a human-readable loop-writing report:
+Create a starter snapshot:
+
+```bash
+ariadne-loop init --preset release --output loop-snapshot.json
+```
+
+Edit `loop-snapshot.json`, then generate a human-readable loop-writing report:
+
+```bash
+ariadne-loop write \
+  --input loop-snapshot.json \
+  --output loop-report.md \
+  --format markdown
+```
+
+Try an included example:
 
 ```bash
 ariadne-loop write \
@@ -118,6 +133,15 @@ Use JSON for serious work because it makes verifiers and constraints explicit.
 
 Markdown input also works for quick notes, but JSON is easier to validate and repeat.
 
+Starter presets are available for common cases:
+
+```bash
+ariadne-loop init --preset bugfix --output bugfix-loop.json
+ariadne-loop init --preset release --output release-loop.json
+ariadne-loop init --preset refactor --output refactor-loop.json
+ariadne-loop init --preset agent-handoff --output handoff-loop.json
+```
+
 ## What Ariadne Writes
 
 A valid loop includes:
@@ -173,6 +197,7 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 
 - [Release readiness loop report](examples/generated/release-readiness-loop-report.md)
 - [OpenClaw agent packet](examples/generated/openclaw-agent-packet.md)
+- [Coding agent workflow](docs/coding-agent-workflow.md)
 - [Reference patterns](docs/reference-patterns.md)
 - [Use-case gallery](docs/use-cases.md)
 - [Loop spec anatomy](docs/loop-spec.md)

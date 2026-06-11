@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 - 2026-06-11
+
+- Added `ariadne-loop init` to create editable starter snapshots.
+- Added starter presets for bugfix, release, refactor, and agent handoff loops.
+- Added overwrite protection for generated snapshot files.
+- Added a coding-agent workflow guide for Codex, Claude Code, and similar tools.
+- Updated the README and homepage quick start to begin from a generated snapshot.
+
 ## 0.3.0 - 2026-06-11
 
 - Rebranded the project as Ariadne Loop.

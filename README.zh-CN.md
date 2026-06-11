@@ -18,10 +18,20 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 
 ```bash
 python -m pip install -e .
+ariadne-loop init --preset release --output loop-snapshot.json
 ariadne-loop write \
-  --input examples/release-readiness-snapshot.json \
-  --output examples/generated/release-readiness-loop-report.md \
+  --input loop-snapshot.json \
+  --output loop-report.md \
   --format markdown
+```
+
+可用预设：
+
+```bash
+ariadne-loop init --preset bugfix --output bugfix-loop.json
+ariadne-loop init --preset release --output release-loop.json
+ariadne-loop init --preset refactor --output refactor-loop.json
+ariadne-loop init --preset agent-handoff --output handoff-loop.json
 ```
 
 生成 JSON loop：
@@ -66,3 +76,5 @@ python -m compileall loops_assistant
 ```
 
 贡献说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+接入 Codex/Claude Code 的完整流程见 [Coding Agent Workflow](docs/coding-agent-workflow.md)。
