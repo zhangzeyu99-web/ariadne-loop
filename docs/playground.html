@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Build Ariadne Loop snapshot JSON in the browser without sending data anywhere."
+    />
+    <title>Ariadne Loop Builder</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f4ef;
+        --surface: #ffffff;
+        --ink: #18211f;
+        --muted: #5e6965;
+        --line: #d8ddd8;
+        --teal: #0f766e;
+        --teal-dark: #115e59;
+        --amber: #b45309;
+        --green: #15803d;
+        --code: #111827;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--teal-dark);
+        text-decoration: none;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 68px;
+        gap: 24px;
+      }
+
+      .brand {
+        font-weight: 760;
+        letter-spacing: 0;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+      }
+
+      main {
+        padding: 42px 0 54px;
+      }
+
+      .intro {
+        max-width: 860px;
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(34px, 6vw, 64px);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .builder {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      .panel h2 {
+        margin: 0 0 14px;
+        font-size: 19px;
+        letter-spacing: 0;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 13px;
+      }
+
+      label {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fbfcfb;
+        color: var(--ink);
+        font: inherit;
+        padding: 10px 11px;
+      }
+
+      textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+
+      .small {
+        min-height: 64px;
+      }
+
+      .output {
+        min-height: 520px;
+        background: var(--code);
+        color: #d1fae5;
+        border-color: #273244;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      button,
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 14px;
+        font-weight: 720;
+        cursor: pointer;
+      }
+
+      button.primary,
+      .button.primary {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #ffffff;
+      }
+
+      .hint {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .commands {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 8px;
+        background: #17211f;
+        color: #f7f5ef;
+        overflow: auto;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .status {
+        min-height: 20px;
+        color: var(--green);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fbfcfb;
+      }
+
+      .metric strong {
+        display: block;
+        color: var(--amber);
+        font-size: 20px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 900px) {
+        .builder {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell">
+        <div class="brand">Ariadne Loop Builder</div>
+        <div class="nav-links">
+          <a href="./">Home</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md">Workflow</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="intro">
+        <h1>Build a loop snapshot.</h1>
+        <p class="lead">
+          Fill the fields once, then copy JSON into Ariadne Loop. Everything runs locally in this page.
+        </p>
+      </section>
+
+      <section class="builder" aria-label="Loop snapshot builder">
+        <div class="panel">
+          <h2>Inputs</h2>
+          <div class="metrics">
+            <div class="metric"><strong id="verifierCount">0</strong><span>verifiers</span></div>
+            <div class="metric"><strong id="constraintCount">0</strong><span>constraints</span></div>
+            <div class="metric"><strong id="effectCount">0</strong><span>external effects</span></div>
+          </div>
+
+          <div class="field">
+            <label for="preset">Preset</label>
+            <select id="preset">
+              <option value="release">Release readiness</option>
+              <option value="bugfix">Bug repair</option>
+              <option value="refactor">Incremental refactor</option>
+              <option value="agent-handoff">Agent handoff</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="title">Title</label>
+            <input id="title" />
+          </div>
+
+          <div class="field">
+            <label for="goal">Goal</label>
+            <textarea id="goal"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="currentState">Current state</label>
+            <textarea id="currentState"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="progress">Recent progress, one per line</label>
+            <textarea id="progress" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="constraints">Constraints, one per line</label>
+            <textarea id="constraints" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="verifiers">Verifiers, one per line</label>
+            <textarea id="verifiers" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="effects">External effects, one per line</label>
+            <textarea id="effects" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="risk">Risk</label>
+            <select id="risk">
+              <option value="low">low</option>
+              <option value="medium">medium</option>
+              <option value="high">high</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Snapshot JSON</h2>
+          <textarea id="output" class="output" readonly></textarea>
+          <div class="actions">
+            <button class="primary" id="copyButton" type="button">Copy JSON</button>
+            <button id="downloadButton" type="button">Download</button>
+            <button id="resetButton" type="button">Reset preset</button>
+          </div>
+          <p class="status" id="status" aria-live="polite"></p>
+          <pre class="commands"><code id="commands"></code></pre>
+          <p class="hint">
+            Save the JSON as <code>loop-snapshot.json</code>, edit it if needed, then run the commands above.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const presets = {
+        release: {
+          title: "Release readiness loop",
+          goal: "Prepare a release without shipping broken docs, stale examples, or unverified artifacts",
+          current_state: "Core work is implemented, but release evidence still needs to be collected",
+          recent_progress: ["Main feature work is complete", "Release notes have a draft"],
+          constraints: [
+            "Do not publish until quick start and generated examples are verified",
+            "Do not create tags or releases before human confirmation"
+          ],
+          verifiers: [
+            "Tests pass",
+            "Quick start works from a fresh checkout",
+            "Generated examples validate",
+            "Release notes match the version"
+          ],
+          external_effects: ["git tag", "GitHub release", "package publish"],
+          risk: "medium"
+        },
+        bugfix: {
+          title: "Bug repair loop",
+          goal: "Fix a reproducible bug without changing unrelated behavior",
+          current_state: "A failure has been observed, but the exact root cause still needs inspection",
+          recent_progress: ["Reproduction steps are known", "Likely files or modules have been identified"],
+          constraints: [
+            "Do not refactor unrelated code",
+            "Keep the fix to the smallest behavior change that passes the verifier"
+          ],
+          verifiers: [
+            "The original failing case now passes",
+            "Related tests still pass",
+            "No unrelated file churn is present"
+          ],
+          external_effects: [],
+          risk: "medium"
+        },
+        refactor: {
+          title: "Incremental refactor loop",
+          goal: "Refactor one bounded module while preserving public behavior",
+          current_state: "The target area is known, but the next safe boundary needs inspection",
+          recent_progress: ["Existing behavior has been identified", "Tests or smoke checks are available"],
+          constraints: [
+            "Do not change public APIs unless explicitly approved",
+            "Keep each loop turn small enough to review"
+          ],
+          verifiers: [
+            "Focused tests pass",
+            "Integration smoke passes",
+            "Public imports still work",
+            "Diff contains no unrelated formatting churn"
+          ],
+          external_effects: [],
+          risk: "medium"
+        },
+        "agent-handoff": {
+          title: "Agent handoff loop",
+          goal: "Turn a long coding-agent thread into a resumable work contract",
+          current_state: "Prior work exists across messages, files, or logs, but the next agent needs a compact state packet",
+          recent_progress: [
+            "Completed work and current blockers have been summarized",
+            "Relevant files or artifacts have been listed"
+          ],
+          constraints: [
+            "Do not rely on memory without reading current files or remote state",
+            "Mark stale assumptions instead of presenting them as facts"
+          ],
+          verifiers: [
+            "Current branch and remote state are read back",
+            "Required artifacts exist at the referenced paths",
+            "Next action has one concrete verifier"
+          ],
+          external_effects: ["commit", "push"],
+          risk: "medium"
+        },
+        custom: {
+          title: "Custom loop",
+          goal: "Move the task to a verifiably complete state",
+          current_state: "Describe the current evidence, gaps, and known risks",
+          recent_progress: [],
+          constraints: [],
+          verifiers: ["Read back the real artifact and verify the goal, key fields, and constraints"],
+          external_effects: [],
+          risk: "medium"
+        }
+      };
+
+      const fields = {
+        preset: document.getElementById("preset"),
+        title: document.getElementById("title"),
+        goal: document.getElementById("goal"),
+        currentState: document.getElementById("currentState"),
+        progress: document.getElementById("progress"),
+        constraints: document.getElementById("constraints"),
+        verifiers: document.getElementById("verifiers"),
+        effects: document.getElementById("effects"),
+        risk: document.getElementById("risk"),
+        output: document.getElementById("output"),
+        commands: document.getElementById("commands"),
+        status: document.getElementById("status"),
+        verifierCount: document.getElementById("verifierCount"),
+        constraintCount: document.getElementById("constraintCount"),
+        effectCount: document.getElementById("effectCount")
+      };
+
+      function toLines(value) {
+        return value
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+      }
+
+      function fromLines(values) {
+        return values.join("\n");
+      }
+
+      function loadPreset(name) {
+        const preset = presets[name] || presets.release;
+        fields.title.value = preset.title;
+        fields.goal.value = preset.goal;
+        fields.currentState.value = preset.current_state;
+        fields.progress.value = fromLines(preset.recent_progress);
+        fields.constraints.value = fromLines(preset.constraints);
+        fields.verifiers.value = fromLines(preset.verifiers);
+        fields.effects.value = fromLines(preset.external_effects);
+        fields.risk.value = preset.risk;
+        render();
+      }
+
+      function snapshot() {
+        return {
+          title: fields.title.value.trim(),
+          goal: fields.goal.value.trim(),
+          current_state: fields.currentState.value.trim(),
+          recent_progress: toLines(fields.progress.value),
+          constraints: toLines(fields.constraints.value),
+          verifiers: toLines(fields.verifiers.value),
+          external_effects: toLines(fields.effects.value),
+          risk: fields.risk.value
+        };
+      }
+
+      function render() {
+        const value = snapshot();
+        fields.output.value = JSON.stringify(value, null, 2) + "\n";
+        fields.verifierCount.textContent = String(value.verifiers.length);
+        fields.constraintCount.textContent = String(value.constraints.length);
+        fields.effectCount.textContent = String(value.external_effects.length);
+        fields.commands.textContent = [
+          "ariadne-loop write --input loop-snapshot.json --output loop-report.md --format markdown",
+          "ariadne-loop make --input loop-snapshot.json --output loop.json --format json",
+          "ariadne-loop check --input loop.json"
+        ].join("\n");
+      }
+
+      async function copyJson() {
+        await navigator.clipboard.writeText(fields.output.value);
+        fields.status.textContent = "Copied JSON to clipboard.";
+      }
+
+      function downloadJson() {
+        const blob = new Blob([fields.output.value], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "loop-snapshot.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(link.href);
+        fields.status.textContent = "Downloaded loop-snapshot.json.";
+      }
+
+      fields.preset.addEventListener("change", () => loadPreset(fields.preset.value));
+      document.querySelectorAll("input, textarea, select").forEach((element) => {
+        if (element.id !== "preset") {
+          element.addEventListener("input", render);
+        }
+      });
+      document.getElementById("copyButton").addEventListener("click", copyJson);
+      document.getElementById("downloadButton").addEventListener("click", downloadJson);
+      document.getElementById("resetButton").addEventListener("click", () => loadPreset(fields.preset.value));
+
+      loadPreset("release");
+    </script>
+  </body>
+</html>

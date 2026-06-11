@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 - 2026-06-11
+
+- Added a static browser Loop Builder at `docs/playground.html`.
+- Linked the builder from the GitHub Pages home page, README, Chinese README, and coding-agent workflow guide.
+- Added docs checks for the hosted builder entry point.
+
 ## 0.5.0 - 2026-06-11
 
 - Added `ariadne-loop from-issue` to convert a GitHub issue title and Markdown body into a loop snapshot.

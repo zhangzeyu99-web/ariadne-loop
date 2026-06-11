@@ -3,6 +3,9 @@
 Ariadne Loop is designed to sit just outside a coding agent. It does not run the
 agent. It writes the loop contract, then checks the evidence that comes back.
 
+For a zero-install start, use the browser builder:
+<https://zhangzeyu99-web.github.io/ariadne-loop/playground.html>
+
 ## 1. Start From a Preset
 
 ```bash

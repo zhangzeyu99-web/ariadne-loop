@@ -51,6 +51,8 @@ The old `loops-assistant` command is kept as a compatibility alias.
 
 ## Quick Start
 
+Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
+
 Create a starter snapshot:
 
 ```bash
@@ -205,6 +207,7 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 ## Example Outputs
 
 - [Release readiness loop report](examples/generated/release-readiness-loop-report.md)
+- [Browser loop builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)
 - [OpenClaw agent packet](examples/generated/openclaw-agent-packet.md)
 - [Coding agent workflow](docs/coding-agent-workflow.md)
 - [Reference patterns](docs/reference-patterns.md)

@@ -16,6 +16,8 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 
 ## 快速开始
 
+可以先打开网页生成 snapshot：[Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)。
+
 ```bash
 python -m pip install -e .
 ariadne-loop init --preset release --output loop-snapshot.json
