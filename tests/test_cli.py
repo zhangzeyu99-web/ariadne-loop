@@ -3,13 +3,17 @@ import subprocess
 import sys
 
 
-def test_cli_version_uses_public_project_name():
-    result = subprocess.run(
-        [sys.executable, "-m", "loops_assistant", "--version"],
+def run_cli(*args: str):
+    return subprocess.run(
+        [sys.executable, "-m", "loops_assistant", *args],
         text=True,
         capture_output=True,
         check=False,
     )
+
+
+def test_cli_version_uses_public_project_name():
+    result = run_cli("--version")
 
     assert result.returncode == 0
     assert "Ariadne Loop" in result.stdout
@@ -22,51 +26,34 @@ def test_cli_generates_json_and_markdown_packets(tmp_path):
     input_path.write_text(
         json.dumps(
             {
-                "title": "术语提取",
-                "goal": "从语言包和公告里提取有证据的术语",
-                "current_state": "脚本本地提取后由 Codex 补充检查",
-                "recent_progress": ["候选 packet 已生成"],
-                "constraints": ["无证据项不写入主表"],
-                "verifiers": ["每个新增术语可回溯到来源"],
-            },
-            ensure_ascii=False,
+                "title": "Terminology extraction",
+                "goal": "Extract evidence-backed terms from a language pack and announcement copy",
+                "current_state": "A local script extracted candidates; Codex still needs to verify them",
+                "recent_progress": ["Candidate packet generated"],
+                "constraints": ["Do not add terms without source evidence"],
+                "verifiers": ["Each new term traces back to a source row"],
+            }
         ),
         encoding="utf-8",
     )
 
-    json_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "make",
-            "--input",
-            str(input_path),
-            "--output",
-            str(json_output),
-            "--format",
-            "json",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    json_result = run_cli(
+        "make",
+        "--input",
+        str(input_path),
+        "--output",
+        str(json_output),
+        "--format",
+        "json",
     )
-    markdown_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "make",
-            "--input",
-            str(input_path),
-            "--output",
-            str(markdown_output),
-            "--format",
-            "markdown",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    markdown_result = run_cli(
+        "make",
+        "--input",
+        str(input_path),
+        "--output",
+        str(markdown_output),
+        "--format",
+        "markdown",
     )
 
     assert json_result.returncode == 0, json_result.stderr
@@ -75,47 +62,31 @@ def test_cli_generates_json_and_markdown_packets(tmp_path):
     loop = json.loads(json_output.read_text(encoding="utf-8"))
     packet = markdown_output.read_text(encoding="utf-8")
 
-    assert loop["name"] == "术语提取 Loop"
+    assert loop["name"] == "Terminology extraction Loop"
     assert loop["verifiers"]
     assert "Return JSON only" in packet
-    assert "无证据项不写入主表" in packet
+    assert "Do not add terms without source evidence" in packet
 
 
 def test_cli_init_creates_snapshot_that_write_can_use(tmp_path):
     snapshot_path = tmp_path / "snapshot.json"
     report_path = tmp_path / "report.md"
 
-    init_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "init",
-            "--preset",
-            "agent-handoff",
-            "--output",
-            str(snapshot_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    init_result = run_cli(
+        "init",
+        "--preset",
+        "agent-handoff",
+        "--output",
+        str(snapshot_path),
     )
-    write_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "write",
-            "--input",
-            str(snapshot_path),
-            "--output",
-            str(report_path),
-            "--format",
-            "markdown",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    write_result = run_cli(
+        "write",
+        "--input",
+        str(snapshot_path),
+        "--output",
+        str(report_path),
+        "--format",
+        "markdown",
     )
 
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
@@ -133,20 +104,12 @@ def test_cli_init_does_not_overwrite_without_force(tmp_path):
     snapshot_path = tmp_path / "snapshot.json"
     snapshot_path.write_text('{"title": "keep me"}\n', encoding="utf-8")
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "init",
-            "--preset",
-            "bugfix",
-            "--output",
-            str(snapshot_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    result = run_cli(
+        "init",
+        "--preset",
+        "bugfix",
+        "--output",
+        str(snapshot_path),
     )
 
     assert result.returncode == 1
@@ -174,53 +137,25 @@ The quick start still requires users to write JSON by hand.
         encoding="utf-8",
     )
 
-    from_issue_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "from-issue",
-            "--title",
-            "Add starter snapshots",
-            "--body-file",
-            str(issue_body),
-            "--output",
-            str(snapshot_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    from_issue_result = run_cli(
+        "from-issue",
+        "--title",
+        "Add starter snapshots",
+        "--body-file",
+        str(issue_body),
+        "--output",
+        str(snapshot_path),
     )
-    make_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "make",
-            "--input",
-            str(snapshot_path),
-            "--output",
-            str(loop_path),
-            "--format",
-            "json",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    make_result = run_cli(
+        "make",
+        "--input",
+        str(snapshot_path),
+        "--output",
+        str(loop_path),
+        "--format",
+        "json",
     )
-    check_result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "check",
-            "--input",
-            str(loop_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    check_result = run_cli("check", "--input", str(loop_path))
 
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
 
@@ -235,23 +170,11 @@ The quick start still requires users to write JSON by hand.
 def test_cli_check_rejects_invalid_loop(tmp_path):
     invalid_path = tmp_path / "invalid.json"
     invalid_path.write_text(
-        json.dumps({"version": "1.0", "goal": "缺少闭环"}, ensure_ascii=False),
+        json.dumps({"version": "1.0", "goal": "Missing loop gates"}),
         encoding="utf-8",
     )
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "check",
-            "--input",
-            str(invalid_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    result = run_cli("check", "--input", str(invalid_path))
 
     assert result.returncode == 1
     assert "verifier" in result.stderr
@@ -271,19 +194,7 @@ def test_cli_report_validates_agent_json_report(tmp_path):
         encoding="utf-8",
     )
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "report",
-            "--input",
-            str(report_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    result = run_cli("report", "--input", str(report_path))
 
     assert result.returncode == 0
     assert "valid" in result.stdout
@@ -295,40 +206,31 @@ def test_cli_write_outputs_human_readable_loop_report(tmp_path):
     input_path.write_text(
         json.dumps(
             {
-                "title": "当前线程",
-                "goal": "继续增强 loops assistant，参考高星项目并发布",
-                "current_state": "已有 make/check/report",
-                "constraints": ["先写测试", "不只输出建议"],
-                "verifiers": ["pytest", "AI smoke", "GitHub 远端读回"],
+                "title": "Current thread",
+                "goal": "Keep improving Ariadne Loop using public project evidence",
+                "current_state": "make, check, report, and supervise commands already exist",
+                "constraints": ["Write tests first", "Do not stop at advice"],
+                "verifiers": ["pytest", "AI smoke", "GitHub remote readback"],
                 "external_effects": ["commit", "push"],
-            },
-            ensure_ascii=False,
+            }
         ),
         encoding="utf-8",
     )
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "write",
-            "--input",
-            str(input_path),
-            "--output",
-            str(output_path),
-            "--format",
-            "markdown",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    result = run_cli(
+        "write",
+        "--input",
+        str(input_path),
+        "--output",
+        str(output_path),
+        "--format",
+        "markdown",
     )
 
     assert result.returncode == 0, result.stderr
     report = output_path.read_text(encoding="utf-8")
     assert "# Ariadne Loop Report" in report
-    assert "当前线程 Loop" in report
+    assert "Current thread Loop" in report
     assert "Clarity Score" in report
     assert "Agent Packet" in report
 
@@ -341,13 +243,12 @@ def test_cli_supervise_outputs_guardrail_decision(tmp_path):
     snapshot_path.write_text(
         json.dumps(
             {
-                "title": "发布护航",
-                "goal": "持续运行并发布结果",
-                "current_state": "等待验证",
-                "verifiers": ["pytest", "GitHub 远端读回"],
+                "title": "Release guardrail",
+                "goal": "Keep running and publish only after verification",
+                "current_state": "Waiting for verification",
+                "verifiers": ["pytest", "GitHub remote readback"],
                 "external_effects": ["push"],
-            },
-            ensure_ascii=False,
+            }
         ),
         encoding="utf-8",
     )
@@ -374,29 +275,20 @@ def test_cli_supervise_outputs_guardrail_decision(tmp_path):
                 "evidence": ["pytest passed"],
                 "next_step": "push to GitHub",
                 "passed_verifiers": ["gate-1"],
-            },
-            ensure_ascii=False,
+            }
         )
         + "\n",
         encoding="utf-8",
     )
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "supervise",
-            "--loop",
-            str(loop_path),
-            "--reports",
-            str(reports_path),
-            "--output",
-            str(output_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    result = run_cli(
+        "supervise",
+        "--loop",
+        str(loop_path),
+        "--reports",
+        str(reports_path),
+        "--output",
+        str(output_path),
     )
 
     assert result.returncode == 0, result.stderr
@@ -434,8 +326,7 @@ def test_cli_supervise_accepts_utf8_bom_jsonl(tmp_path):
                         "next_step",
                     ]
                 },
-            },
-            ensure_ascii=False,
+            }
         ),
         encoding="utf-8",
     )
@@ -449,28 +340,19 @@ def test_cli_supervise_accepts_utf8_bom_jsonl(tmp_path):
                 "next_step": "decide",
                 "passed_verifiers": ["gate-1"],
                 "failed_verifiers": [],
-            },
-            ensure_ascii=False,
+            }
         ).encode("utf-8")
         + b"\n"
     )
 
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "loops_assistant",
-            "supervise",
-            "--loop",
-            str(loop_path),
-            "--reports",
-            str(reports_path),
-            "--output",
-            str(output_path),
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+    result = run_cli(
+        "supervise",
+        "--loop",
+        str(loop_path),
+        "--reports",
+        str(reports_path),
+        "--output",
+        str(output_path),
     )
 
     assert result.returncode == 0, result.stderr

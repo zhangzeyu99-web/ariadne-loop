@@ -1,0 +1,27 @@
+{
+  "title": "Codex issue repair",
+  "goal": "Turn a GitHub bug report into a bounded Codex repair loop that ends only after the failing case and related checks pass",
+  "current_state": "A public issue describes a reproducible CLI failure. The repository builds locally, but no focused regression test exists yet.",
+  "recent_progress": [
+    "Issue body was saved to issue.md",
+    "Likely files are loops_assistant/cli.py and tests/test_cli.py"
+  ],
+  "constraints": [
+    "Start by reproducing or writing a regression test",
+    "Keep the fix scoped to the failing CLI behavior",
+    "Do not push, tag, or publish without human confirmation"
+  ],
+  "verifiers": [
+    "Regression test fails before the fix and passes after the fix",
+    "python -m pytest -q",
+    "python -m compileall loops_assistant",
+    "ariadne-loop check validates the generated loop JSON",
+    "git diff shows no unrelated file churn"
+  ],
+  "external_effects": [
+    "commit",
+    "push",
+    "pull request"
+  ],
+  "risk": "medium"
+}

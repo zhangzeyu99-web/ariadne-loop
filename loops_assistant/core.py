@@ -674,7 +674,7 @@ def _tightened_brief(loop: dict[str, Any]) -> str:
 
 
 def _build_cycle(goal: str, verifier_inputs: list[str]) -> list[dict[str, str]]:
-    verifier_summary = "；".join(verifier_inputs)
+    verifier_summary = "; ".join(verifier_inputs)
     return [
         {
             "id": "inspect",
@@ -706,7 +706,7 @@ def _build_stop_rules(external_effects: list[str]) -> list[str]:
         "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
     ]
     if external_effects:
-        joined = "、".join(external_effects)
+        joined = ", ".join(external_effects)
         rules.append(f"Ask for confirmation before external-impact actions: {joined}")
     return rules
 

@@ -17,6 +17,7 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 ## 快速开始
 
 可以先打开网页生成 snapshot：[Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)。
+如果要直接复制给 Codex 或 Claude Code，用这页开始：[Agent Recipes](docs/agent-recipes.md)。
 
 Codex skill 安装：
 
@@ -63,6 +64,15 @@ ariadne-loop make \
   --format json
 ```
 
+Codex issue repair 示例：
+
+```bash
+ariadne-loop make \
+  --input examples/codex-issue-repair-snapshot.json \
+  --output examples/generated/codex-issue-repair-agent-packet.md \
+  --format markdown
+```
+
 校验 loop：
 
 ```bash
@@ -98,4 +108,5 @@ python -m compileall loops_assistant
 贡献说明见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 接入 Codex/Claude Code 的完整流程见 [Coding Agent Workflow](docs/coding-agent-workflow.md)。
+可复制的 agent recipes 见 [Agent Recipes](docs/agent-recipes.md)。
 常见验证器模板见 [Verifier Recipes](docs/verifier-recipes.md)。

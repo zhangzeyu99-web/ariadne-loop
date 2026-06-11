@@ -40,7 +40,7 @@
     },
     {
       "id": "verify",
-      "instruction": "Run or perform these verifiers: Gateway 端口；cron ok；backup verify；doctor 无 error",
+      "instruction": "Run or perform these verifiers: Gateway 端口; cron ok; backup verify; doctor 无 error",
       "expected_output": "Pass, fail, or missing-evidence status for each verifier"
     },
     {

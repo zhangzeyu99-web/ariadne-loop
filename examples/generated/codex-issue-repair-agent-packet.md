@@ -1,33 +1,34 @@
-# Release readiness Loop Agent Packet
+# Codex issue repair Loop Agent Packet
 
 ## Goal
-Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag
+Turn a GitHub bug report into a bounded Codex repair loop that ends only after the failing case and related checks pass
 
 ## Current State
-Core tests pass, but the README quick start and generated examples need to be checked before release
+A public issue describes a reproducible CLI failure. The repository builds locally, but no focused regression test exists yet.
 
 ## Constraints
-- Do not publish until generated examples are committed
-- Do not create a release tag until the README quick start works from a clean checkout
+- Start by reproducing or writing a regression test
+- Keep the fix scoped to the failing CLI behavior
+- Do not push, tag, or publish without human confirmation
 
 ## Cycle
 - `inspect`: Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target. -> Turn scope, known evidence, gaps, and explicit non-goals
-- `act`: Take the smallest useful action toward the goal: Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag -> This turn's artifact or change list
-- `verify`: Run or perform these verifiers: pytest; python -m compileall loops_assistant; README quick start generates expected files; ariadne-loop check validates generated loop JSON; GitHub release target commit matches local HEAD -> Pass, fail, or missing-evidence status for each verifier
+- `act`: Take the smallest useful action toward the goal: Turn a GitHub bug report into a bounded Codex repair loop that ends only after the failing case and related checks pass -> This turn's artifact or change list
+- `verify`: Run or perform these verifiers: Regression test fails before the fix and passes after the fix; python -m pytest -q; python -m compileall loops_assistant; ariadne-loop check validates the generated loop JSON; git diff shows no unrelated file churn -> Pass, fail, or missing-evidence status for each verifier
 - `decide`: Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results. -> Next action and stop decision
 
 ## Verifiers
-- `gate-1` (command): pytest
-- `gate-2` (checklist): python -m compileall loops_assistant
-- `gate-3` (checklist): README quick start generates expected files
-- `gate-4` (checklist): ariadne-loop check validates generated loop JSON
-- `gate-5` (checklist): GitHub release target commit matches local HEAD
+- `gate-1` (command): Regression test fails before the fix and passes after the fix
+- `gate-2` (command): python -m pytest -q
+- `gate-3` (checklist): python -m compileall loops_assistant
+- `gate-4` (checklist): ariadne-loop check validates the generated loop JSON
+- `gate-5` (checklist): git diff shows no unrelated file churn
 
 ## Stop Rules
 - Stop when every verifier has current evidence and passes.
 - Stop and narrow the problem after the same verifier fails twice.
 - Stop and ask for confirmation when the goal, input, or permissions do not match the current context.
-- Ask for confirmation before external-impact actions: git tag, GitHub release
+- Ask for confirmation before external-impact actions: commit, push, pull request
 
 ## Rollback
 Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.

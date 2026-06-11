@@ -14,7 +14,7 @@ Gateway 自启动已修复，备份由 OpenClaw 自己执行
 ## Cycle
 - `inspect`: Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target. -> Turn scope, known evidence, gaps, and explicit non-goals
 - `act`: Take the smallest useful action toward the goal: 每天检查 Gateway、cron、备份和 doctor，只报告可操作异常 -> This turn's artifact or change list
-- `verify`: Run or perform these verifiers: Gateway 端口；cron ok；backup verify；doctor 无 error -> Pass, fail, or missing-evidence status for each verifier
+- `verify`: Run or perform these verifiers: Gateway 端口; cron ok; backup verify; doctor 无 error -> Pass, fail, or missing-evidence status for each verifier
 - `decide`: Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results. -> Next action and stop decision
 
 ## Verifiers

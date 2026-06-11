@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0 - 2026-06-11
+
+- Added copy-paste agent recipes for Codex issue repair, release readiness, long-thread handoff, and PR review follow-up.
+- Added a Codex issue repair example snapshot plus generated loop JSON and agent packet.
+- Regenerated example outputs with ASCII-safe separators to avoid mojibake in public artifacts.
+- Cleaned CLI tests and added documentation regression coverage for agent recipes and generated examples.
+
 ## 0.8.0 - 2026-06-11
 
 - Added a Codex skill at `skills/ariadne-loop/SKILL.md`.

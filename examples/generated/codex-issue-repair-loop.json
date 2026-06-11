@@ -1,29 +1,31 @@
 {
   "version": "1.0",
-  "name": "Release readiness Loop",
-  "goal": "Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag",
+  "name": "Codex issue repair Loop",
+  "goal": "Turn a GitHub bug report into a bounded Codex repair loop that ends only after the failing case and related checks pass",
   "context": {
-    "source_title": "Release readiness",
-    "current_state": "Core tests pass, but the README quick start and generated examples need to be checked before release",
+    "source_title": "Codex issue repair",
+    "current_state": "A public issue describes a reproducible CLI failure. The repository builds locally, but no focused regression test exists yet.",
     "evidence": [
-      "pytest passed",
-      "CLI version command passed"
+      "Issue body was saved to issue.md",
+      "Likely files are loops_assistant/cli.py and tests/test_cli.py"
     ],
     "constraints": [
-      "Do not publish until generated examples are committed",
-      "Do not create a release tag until the README quick start works from a clean checkout"
+      "Start by reproducing or writing a regression test",
+      "Keep the fix scoped to the failing CLI behavior",
+      "Do not push, tag, or publish without human confirmation"
     ],
     "external_effects": [
-      "git tag",
-      "GitHub release"
+      "commit",
+      "push",
+      "pull request"
     ],
     "risk": "medium"
   },
   "state": {
     "status": "ready",
     "progress": [
-      "pytest passed",
-      "CLI version command passed"
+      "Issue body was saved to issue.md",
+      "Likely files are loops_assistant/cli.py and tests/test_cli.py"
     ],
     "open_questions": []
   },
@@ -35,12 +37,12 @@
     },
     {
       "id": "act",
-      "instruction": "Take the smallest useful action toward the goal: Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag",
+      "instruction": "Take the smallest useful action toward the goal: Turn a GitHub bug report into a bounded Codex repair loop that ends only after the failing case and related checks pass",
       "expected_output": "This turn's artifact or change list"
     },
     {
       "id": "verify",
-      "instruction": "Run or perform these verifiers: pytest; python -m compileall loops_assistant; README quick start generates expected files; ariadne-loop check validates generated loop JSON; GitHub release target commit matches local HEAD",
+      "instruction": "Run or perform these verifiers: Regression test fails before the fix and passes after the fix; python -m pytest -q; python -m compileall loops_assistant; ariadne-loop check validates the generated loop JSON; git diff shows no unrelated file churn",
       "expected_output": "Pass, fail, or missing-evidence status for each verifier"
     },
     {
@@ -53,39 +55,39 @@
     {
       "id": "gate-1",
       "kind": "command",
-      "instruction": "pytest",
-      "proves": "This turn satisfies: pytest"
+      "instruction": "Regression test fails before the fix and passes after the fix",
+      "proves": "This turn satisfies: Regression test fails before the fix and passes after the fix"
     },
     {
       "id": "gate-2",
+      "kind": "command",
+      "instruction": "python -m pytest -q",
+      "proves": "This turn satisfies: python -m pytest -q"
+    },
+    {
+      "id": "gate-3",
       "kind": "checklist",
       "instruction": "python -m compileall loops_assistant",
       "proves": "This turn satisfies: python -m compileall loops_assistant"
     },
     {
-      "id": "gate-3",
-      "kind": "checklist",
-      "instruction": "README quick start generates expected files",
-      "proves": "This turn satisfies: README quick start generates expected files"
-    },
-    {
       "id": "gate-4",
       "kind": "checklist",
-      "instruction": "ariadne-loop check validates generated loop JSON",
-      "proves": "This turn satisfies: ariadne-loop check validates generated loop JSON"
+      "instruction": "ariadne-loop check validates the generated loop JSON",
+      "proves": "This turn satisfies: ariadne-loop check validates the generated loop JSON"
     },
     {
       "id": "gate-5",
       "kind": "checklist",
-      "instruction": "GitHub release target commit matches local HEAD",
-      "proves": "This turn satisfies: GitHub release target commit matches local HEAD"
+      "instruction": "git diff shows no unrelated file churn",
+      "proves": "This turn satisfies: git diff shows no unrelated file churn"
     }
   ],
   "stop_rules": [
     "Stop when every verifier has current evidence and passes.",
     "Stop and narrow the problem after the same verifier fails twice.",
     "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
-    "Ask for confirmation before external-impact actions: git tag, GitHub release"
+    "Ask for confirmation before external-impact actions: commit, push, pull request"
   ],
   "rollback": {
     "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",

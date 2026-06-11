@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+[![Release](https://img.shields.io/github/v/release/zhangzeyu99-web/ariadne-loop?sort=semver)](https://github.com/zhangzeyu99-web/ariadne-loop/releases)
 
 Write the thread your AI agent can follow.
 
@@ -61,6 +62,8 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 ## Quick Start
 
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
+If you want a copy-paste starting point for Codex or Claude Code, start with
+[Agent Recipes](docs/agent-recipes.md).
 
 Create a starter snapshot:
 
@@ -83,6 +86,15 @@ Try an included example:
 ariadne-loop write \
   --input examples/release-readiness-snapshot.json \
   --output examples/generated/release-readiness-loop-report.md \
+  --format markdown
+```
+
+Try a Codex issue repair loop:
+
+```bash
+ariadne-loop make \
+  --input examples/codex-issue-repair-snapshot.json \
+  --output examples/generated/codex-issue-repair-agent-packet.md \
   --format markdown
 ```
 
@@ -216,9 +228,11 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 ## Example Outputs
 
 - [Release readiness loop report](examples/generated/release-readiness-loop-report.md)
+- [Codex issue repair agent packet](examples/generated/codex-issue-repair-agent-packet.md)
 - [Browser loop builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)
 - [OpenClaw agent packet](examples/generated/openclaw-agent-packet.md)
 - [Coding agent workflow](docs/coding-agent-workflow.md)
+- [Agent recipes](docs/agent-recipes.md)
 - [Verifier recipes](docs/verifier-recipes.md)
 - [Reference patterns](docs/reference-patterns.md)
 - [Use-case gallery](docs/use-cases.md)

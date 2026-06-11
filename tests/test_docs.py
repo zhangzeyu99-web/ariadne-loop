@@ -9,7 +9,8 @@ def test_homepage_links_to_browser_builder():
 
     assert "./playground.html" in index
     assert "Open Builder" in index
-    assert "verifier-recipes.md" in index
+    assert "agent-recipes.md" in index
+    assert "Agent recipes" in index
 
 
 def test_playground_contains_required_static_controls():
@@ -49,6 +50,37 @@ def test_verifier_recipes_are_linked_and_concrete():
 
     assert '"action_id": "verify"' in recipes
     assert "python -m pytest -q" in recipes
+
+
+def test_agent_recipes_are_linked_and_copyable():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+    recipes = (ROOT / "docs" / "agent-recipes.md").read_text(encoding="utf-8")
+    snapshot = (
+        ROOT / "examples" / "codex-issue-repair-snapshot.json"
+    ).read_text(encoding="utf-8")
+
+    for doc in [readme, readme_zh]:
+        assert "docs/agent-recipes.md" in doc
+        assert "examples/codex-issue-repair-snapshot.json" in doc
+
+    assert "Codex Issue Repair" in recipes
+    assert "PR Review Follow-Up" in recipes
+    assert "Return the JSON report only" in recipes
+    assert "Regression test fails before the fix" in snapshot
+
+
+def test_generated_examples_do_not_contain_known_mojibake():
+    generated_files = list((ROOT / "examples" / "generated").glob("*"))
+    assert generated_files
+
+    bad_tokens = ["\ufffd", "\u951b", "\u9286"]
+    for path in generated_files:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for token in bad_tokens:
+            assert token not in text, f"{path.name} contains mojibake token {token!r}"
 
 
 def test_codex_skill_is_installable_from_readme():

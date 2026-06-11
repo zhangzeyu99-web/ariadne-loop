@@ -43,7 +43,7 @@ Core tests pass, but the README quick start and generated examples need to be ch
 ## Cycle
 - `inspect`: Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target. -> Turn scope, known evidence, gaps, and explicit non-goals
 - `act`: Take the smallest useful action toward the goal: Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag -> This turn's artifact or change list
-- `verify`: Run or perform these verifiers: pytest；python -m compileall loops_assistant；README quick start generates expected files；ariadne-loop check validates generated loop JSON；GitHub release target commit matches local HEAD -> Pass, fail, or missing-evidence status for each verifier
+- `verify`: Run or perform these verifiers: pytest; python -m compileall loops_assistant; README quick start generates expected files; ariadne-loop check validates generated loop JSON; GitHub release target commit matches local HEAD -> Pass, fail, or missing-evidence status for each verifier
 - `decide`: Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results. -> Next action and stop decision
 
 ## Verifiers
@@ -57,7 +57,7 @@ Core tests pass, but the README quick start and generated examples need to be ch
 - Stop when every verifier has current evidence and passes.
 - Stop and narrow the problem after the same verifier fails twice.
 - Stop and ask for confirmation when the goal, input, or permissions do not match the current context.
-- Ask for confirmation before external-impact actions: git tag、GitHub release
+- Ask for confirmation before external-impact actions: git tag, GitHub release
 
 ## Rollback
 Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.
