@@ -1,7 +1,10 @@
 import json
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
+
+from loops_assistant import __version__
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +24,14 @@ def test_cli_version_uses_public_project_name():
 
     assert result.returncode == 0
     assert "Ariadne Loop" in result.stdout
+
+
+def test_project_version_metadata_stays_in_sync():
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    result = run_cli("--version")
+
+    assert pyproject["project"]["version"] == __version__
+    assert result.stdout.strip() == f"Ariadne Loop {__version__}"
 
 
 def test_cli_generates_json_and_markdown_packets(tmp_path):
