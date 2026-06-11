@@ -173,6 +173,30 @@ def test_generated_examples_do_not_contain_known_mojibake():
             assert token not in text, f"{path.name} contains mojibake token {token!r}"
 
 
+def test_public_chinese_content_has_no_mojibake():
+    cjk_sources = [
+        ROOT / "README.zh-CN.md",
+        ROOT / "docs" / "index.html",
+        ROOT / "docs" / "playground.html",
+    ]
+    bad_tokens = [
+        "\ufffd",
+        "????",
+        "\u00c3",
+        "\u00c2",
+        "\u00e2\u20ac",
+        "\u00e6",
+        "\u00e8",
+        "\u00e7",
+    ]
+
+    for source in cjk_sources:
+        text = source.read_text(encoding="utf-8")
+        assert any("\u4e00" <= char <= "\u9fff" for char in text)
+        for token in bad_tokens:
+            assert token not in text, f"{source.relative_to(ROOT)} contains {token!r}"
+
+
 def test_readme_and_docs_local_links_resolve():
     docs_sources = [
         ROOT / "README.md",
