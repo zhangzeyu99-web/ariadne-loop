@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ariadne-loop"
-version = "0.10.2"
+version = "0.10.3"
 description = "Turn rough project context into verifiable Loop Engineering specs and AI-ready execution packets."
 readme = "README.md"
 requires-python = ">=3.11"

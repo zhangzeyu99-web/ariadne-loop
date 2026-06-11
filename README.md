@@ -75,6 +75,8 @@ Claude Code.
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
 If you want a copy-paste starting point for Codex or Claude Code, start with
 [Agent Recipes](docs/agent-recipes.md).
+AI agents and search crawlers can start from
+[llms.txt](https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt).
 
 Create a complete demo loop:
 

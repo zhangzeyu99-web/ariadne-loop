@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.10.3 - 2026-06-11
+
+- Added `llms.txt` so AI agents and search crawlers can discover the project, docs, browser builder, and Claude Code command quickly.
+
 ## 0.10.2 - 2026-06-11
 
 - Added a Claude Code `/ariadne-loop` custom command for turning a task into a verifiable loop packet inside Claude Code.

@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_homepage_links_to_browser_builder():
     index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "./playground.html" in index
     assert "Open Builder" in index
@@ -16,12 +17,14 @@ def test_homepage_links_to_browser_builder():
     assert "Claude Code command" in index
     assert "/ariadne-loop" in index
     assert "ariadne-loop quickstart" in index
+    assert "llms.txt" in readme
 
 
 def test_homepage_has_share_and_search_metadata():
     index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
     robots = (ROOT / "docs" / "robots.txt").read_text(encoding="utf-8")
     sitemap = (ROOT / "docs" / "sitemap.xml").read_text(encoding="utf-8")
+    llms = (ROOT / "docs" / "llms.txt").read_text(encoding="utf-8")
     og_image = (ROOT / "docs" / "assets" / "ariadne-loop-og.svg").read_text(
         encoding="utf-8"
     )
@@ -38,6 +41,12 @@ def test_homepage_has_share_and_search_metadata():
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html" in sitemap
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" in sitemap
+    assert "LLMs:" in robots
+    assert "Ariadne Loop" in llms
+    assert "Claude Code Command" in llms
+    assert "ariadne-loop quickstart" in llms
+    assert "https://github.com/zhangzeyu99-web/ariadne-loop" in llms
     assert "<svg" in og_image
 
 
