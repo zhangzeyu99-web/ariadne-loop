@@ -1,6 +1,10 @@
 import json
 import subprocess
 import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def run_cli(*args: str):
@@ -66,6 +70,86 @@ def test_cli_generates_json_and_markdown_packets(tmp_path):
     assert loop["verifiers"]
     assert "Return JSON only" in packet
     assert "Do not add terms without source evidence" in packet
+
+
+def test_generated_examples_match_current_cli(tmp_path):
+    generated_cases = [
+        (
+            "make",
+            ROOT / "examples" / "release-readiness-snapshot.json",
+            "release-readiness-loop.json",
+            "json",
+        ),
+        (
+            "write",
+            ROOT / "examples" / "release-readiness-snapshot.json",
+            "release-readiness-loop-report.md",
+            "markdown",
+        ),
+        (
+            "make",
+            ROOT / "examples" / "release-readiness-snapshot.json",
+            "release-readiness-agent-packet.md",
+            "markdown",
+        ),
+        (
+            "make",
+            ROOT / "examples" / "openclaw-snapshot.json",
+            "openclaw-loop.json",
+            "json",
+        ),
+        (
+            "make",
+            ROOT / "examples" / "openclaw-snapshot.json",
+            "openclaw-agent-packet.md",
+            "markdown",
+        ),
+        (
+            "make",
+            ROOT / "examples" / "codex-issue-repair-snapshot.json",
+            "codex-issue-repair-loop.json",
+            "json",
+        ),
+        (
+            "make",
+            ROOT / "examples" / "codex-issue-repair-snapshot.json",
+            "codex-issue-repair-agent-packet.md",
+            "markdown",
+        ),
+    ]
+
+    for command, source, generated_name, output_format in generated_cases:
+        output_path = tmp_path / generated_name
+        result = run_cli(
+            command,
+            "--input",
+            str(source),
+            "--output",
+            str(output_path),
+            "--format",
+            output_format,
+        )
+
+        assert result.returncode == 0, result.stderr
+        assert output_path.read_text(encoding="utf-8") == (
+            ROOT / "examples" / "generated" / generated_name
+        ).read_text(encoding="utf-8")
+
+    decision_output = tmp_path / "openclaw-decision.json"
+    decision_result = run_cli(
+        "supervise",
+        "--loop",
+        str(ROOT / "examples" / "generated" / "openclaw-loop.json"),
+        "--reports",
+        str(ROOT / "examples" / "openclaw-reports.jsonl"),
+        "--output",
+        str(decision_output),
+    )
+
+    assert decision_result.returncode == 0, decision_result.stderr
+    assert decision_output.read_text(encoding="utf-8") == (
+        ROOT / "examples" / "generated" / "openclaw-decision.json"
+    ).read_text(encoding="utf-8")
 
 
 def test_cli_init_creates_snapshot_that_write_can_use(tmp_path):
