@@ -13,6 +13,24 @@ def test_homepage_links_to_browser_builder():
     assert "Agent recipes" in index
 
 
+def test_homepage_has_share_and_search_metadata():
+    index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    robots = (ROOT / "docs" / "robots.txt").read_text(encoding="utf-8")
+    sitemap = (ROOT / "docs" / "sitemap.xml").read_text(encoding="utf-8")
+    og_image = (ROOT / "docs" / "assets" / "ariadne-loop-og.svg").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'rel="canonical"' in index
+    assert 'property="og:title"' in index
+    assert 'name="twitter:card"' in index
+    assert "application/ld+json" in index
+    assert "ariadne-loop-og.svg" in index
+    assert "Sitemap:" in robots
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
+    assert "<svg" in og_image
+
+
 def test_playground_contains_required_static_controls():
     playground = (ROOT / "docs" / "playground.html").read_text(encoding="utf-8")
 

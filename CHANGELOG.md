@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added GitHub Pages canonical, Open Graph, Twitter card, JSON-LD, robots.txt, sitemap.xml, and a social preview SVG.
+
 ## 0.9.0 - 2026-06-11
 
 - Added copy-paste agent recipes for Codex issue repair, release readiness, long-thread handoff, and PR review follow-up.
