@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.0 - 2026-06-11
+
+- Added a Codex skill at `skills/ariadne-loop/SKILL.md`.
+- Documented one-command Codex skill installation in English and Chinese READMEs.
+
 ## 0.7.0 - 2026-06-11
 
 - Added verifier recipes for Python releases, frontend bugfixes, documentation refreshes, and GitHub issue triage.

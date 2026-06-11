@@ -49,6 +49,15 @@ ariadne-loop --version
 
 The old `loops-assistant` command is kept as a compatibility alias.
 
+Install the Codex skill:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo zhangzeyu99-web/ariadne-loop \
+  --path skills/ariadne-loop \
+  --name ariadne-loop
+```
+
 ## Quick Start
 
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).

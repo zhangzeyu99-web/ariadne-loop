@@ -49,3 +49,27 @@ def test_verifier_recipes_are_linked_and_concrete():
 
     assert '"action_id": "verify"' in recipes
     assert "python -m pytest -q" in recipes
+
+
+def test_codex_skill_is_installable_from_readme():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+    skill = (ROOT / "skills" / "ariadne-loop" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
+
+    for doc in [readme, readme_zh]:
+        assert "install-skill-from-github.py" in doc
+        assert "--repo zhangzeyu99-web/ariadne-loop" in doc
+        assert "--path skills/ariadne-loop" in doc
+        assert "--name ariadne-loop" in doc
+
+    assert skill.startswith("---\n")
+    assert "name: ariadne-loop" in skill
+    assert "description:" in skill
+    assert "short-description:" in skill
+    assert "inspect -> act -> verify -> decide" in skill
+    assert "ariadne-loop init" in skill
+    assert "ariadne-loop from-issue" in skill
+    assert "ariadne-loop supervise" in skill
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in skill
