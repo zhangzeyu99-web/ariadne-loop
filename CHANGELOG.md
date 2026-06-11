@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.1 - 2026-06-11
+
 - Added an OpenClaw guide page for searchable loop-gated agent operations.
 - Added search and social metadata to the browser builder page so shared packet links render with a useful title, description, and preview card.
 - Updated the browser builder so it can generate a ready-to-paste agent packet without installing the CLI.
