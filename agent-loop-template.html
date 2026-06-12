@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Copy a practical AI agent loop template for Codex, Claude Code, OpenClaw, and other coding agents with inspect, act, verify, decide, rollback, and JSON reports."
+    />
+    <meta
+      name="keywords"
+      content="AI agent loop template, Loop Engineering template, Codex prompt template, Claude Code workflow, OpenClaw verifier loop, JSON agent report"
+    />
+    <meta name="author" content="Aaron Zhang" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link
+      rel="canonical"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html"
+    />
+    <link rel="alternate" type="text/plain" href="https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" />
+    <meta property="og:site_name" content="Ariadne Loop" />
+    <meta property="og:title" content="AI Agent Loop Template - Ariadne Loop" />
+    <meta
+      property="og:description"
+      content="A copy-ready Loop Engineering template for verifier-driven coding-agent work."
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html"
+    />
+    <meta
+      property="og:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Agent Loop Template - Ariadne Loop" />
+    <meta
+      name="twitter:description"
+      content="Copy a practical inspect -> act -> verify -> decide loop for Codex, Claude Code, and OpenClaw."
+    />
+    <meta
+      name="twitter:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
+    />
+    <title>AI Agent Loop Template - Ariadne Loop</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "AI Agent Loop Template",
+        "description": "Copy a practical AI agent loop template for Codex, Claude Code, OpenClaw, and other coding agents.",
+        "url": "https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html",
+        "author": {
+          "@type": "Person",
+          "name": "Aaron Zhang"
+        },
+        "about": ["Loop Engineering", "AI coding agents", "OpenClaw", "Codex", "Claude Code"]
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --panel: #151b23;
+        --text: #f0f6fc;
+        --muted: #9da7b3;
+        --line: #2c3642;
+        --teal: #2dd4bf;
+        --gold: #eab308;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: var(--teal);
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(960px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      header,
+      footer {
+        border-color: var(--line);
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 72px;
+        gap: 24px;
+      }
+
+      .brand {
+        font-weight: 750;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+      }
+
+      main {
+        padding: 56px 0 72px;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0 0 18px;
+        font-size: 68px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 44px 0 14px;
+        font-size: 26px;
+      }
+
+      p {
+        max-width: 760px;
+        color: var(--muted);
+      }
+
+      .lead {
+        font-size: 19px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 28px 0 34px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .primary {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #041013;
+      }
+
+      .panel {
+        padding: 20px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      pre {
+        overflow: auto;
+        margin: 0;
+        padding: 18px;
+        border: 1px solid var(--line);
+        background: #05080c;
+        color: #d8f3ff;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      ul {
+        color: var(--muted);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0;
+        color: var(--muted);
+      }
+
+      @media (max-width: 720px) {
+        nav {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 18px 0;
+        }
+
+        .nav-links {
+          flex-wrap: wrap;
+        }
+
+        h1 {
+          font-size: 46px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        h1 {
+          font-size: 38px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell">
+        <a class="brand" href="./">Ariadne Loop</a>
+        <div class="nav-links">
+          <a href="./playground.html">Builder</a>
+          <a href="./openclaw.html">OpenClaw</a>
+          <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <h1>AI agent loop template</h1>
+      <p class="lead">
+        Use this Loop Engineering template when Codex, Claude Code, OpenClaw, or
+        another coding agent needs to keep working across turns without losing
+        state, evidence, stop rules, or rollback criteria.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="./playground.html">Generate in builder</a>
+        <a class="button" href="https://github.com/zhangzeyu99-web/ariadne-loop#quick-start">CLI quick start</a>
+      </div>
+
+      <section class="panel">
+        <h2>Copy-Ready Template</h2>
+        <pre><code>You are running a bounded agent loop.
+
+Goal:
+{one concrete outcome}
+
+Current state:
+{what is known now, with file paths, issue links, logs, or screenshots}
+
+Constraints:
+- Keep edits scoped to {files/modules}.
+- Do not perform external effects without human approval.
+- Preserve unrelated user changes.
+
+Loop:
+1. Inspect the real current state before acting.
+2. Act with the smallest change that moves the goal forward.
+3. Verify with observable evidence.
+4. Decide: continue, stop, rollback, or ask for human input.
+
+Verifiers:
+- {command or readback gate}
+- {UI/page/API/file existence gate}
+- {remote state readback gate if the task touches GitHub, release, deploy, or publish}
+
+Rollback rules:
+- Roll back your own latest change if {failure condition}.
+- Ask for human input if rollback would touch unrelated work.
+
+Report after every turn as JSON only:
+{
+  "action_id": "inspect|act|verify|decide",
+  "status": "continue|stop|needs_human|rollback",
+  "evidence": ["specific evidence observed in this turn"],
+  "next_step": "the next concrete action",
+  "passed_verifiers": ["gate ids that passed"],
+  "failed_verifiers": ["gate ids that failed"]
+}</code></pre>
+      </section>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Bugfixes where the agent must reproduce and verify the fix.</li>
+        <li>Release or SEO work where GitHub Pages, releases, or package metadata must be read back.</li>
+        <li>OpenClaw recurring tasks that need stop rules and JSON reports.</li>
+        <li>Long Codex or Claude Code sessions that need resumable handoff state.</li>
+      </ul>
+
+      <h2>Generate a stricter packet</h2>
+      <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
+ariadne-loop quickstart --output .ariadne/quickstart
+ariadne-loop make --input .ariadne/quickstart/snapshot.json --output agent-packet.md --format markdown</code></pre>
+    </main>
+
+    <footer>
+      <div class="shell">MIT licensed. Built by Aaron Zhang.</div>
+    </footer>
+  </body>
+</html>

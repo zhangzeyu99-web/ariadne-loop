@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Generate Ariadne Loop snapshot JSON and ready-to-paste agent packets locally in the browser for Codex, Claude Code, OpenClaw, and AI coding agents."
+    />
+    <meta
+      name="keywords"
+      content="Ariadne Loop, Loop Engineering, AI agent packet, Codex workflow, Claude Code workflow, OpenClaw workflow, local-first AI"
+    />
+    <meta name="author" content="Aaron Zhang" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link
+      rel="canonical"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/playground.html"
+    />
+    <link rel="alternate" type="text/plain" href="https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" />
+    <link
+      rel="alternate"
+      hreflang="zh-CN"
+      href="https://zhangzeyu99-web.github.io/ariadne-loop/playground.html?lang=zh"
+    />
+    <meta property="og:site_name" content="Ariadne Loop" />
+    <meta property="og:title" content="Ariadne Loop Builder" />
+    <meta
+      property="og:description"
+      content="Build verifiable Loop Engineering packets locally in your browser, without sending project context anywhere."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/playground.html"
+    />
+    <meta
+      property="og:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ariadne Loop Builder" />
+    <meta
+      name="twitter:description"
+      content="Generate snapshot JSON and agent packets for verifiable AI coding workflows."
+    />
+    <meta
+      name="twitter:image"
+      content="https://zhangzeyu99-web.github.io/ariadne-loop/assets/ariadne-loop-og.png"
+    />
+    <title>Ariadne Loop Builder - Local AI Agent Packet Generator</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Ariadne Loop Builder",
+        "description": "Generate Ariadne Loop snapshot JSON and ready-to-paste agent packets locally in the browser for Codex, Claude Code, OpenClaw, and AI coding agents.",
+        "url": "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "browserRequirements": "Requires JavaScript. Runs locally in the browser."
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7f4;
+        --surface: #ffffff;
+        --surface-2: #f1f5f2;
+        --surface-3: #edf3f0;
+        --ink: #141c19;
+        --muted: #607069;
+        --line: #d7ded8;
+        --line-strong: #c4d0c8;
+        --teal: #0f766e;
+        --teal-dark: #115e59;
+        --blue: #1d4ed8;
+        --amber: #b45309;
+        --green: #15803d;
+        --code: #101827;
+        --shadow: 0 18px 48px rgba(20, 28, 25, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, #fbfcfa 0, var(--bg) 340px),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--teal-dark);
+        text-decoration: none;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(16px);
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 68px;
+        gap: 24px;
+      }
+
+      .brand {
+        display: grid;
+        gap: 2px;
+        color: var(--ink);
+        font-weight: 780;
+        letter-spacing: 0;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .nav-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+      }
+
+      .lang-toggle {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .lang-toggle button {
+        min-width: 44px;
+        min-height: 32px;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 720;
+        cursor: pointer;
+      }
+
+      .lang-toggle button:last-child {
+        border-right: 0;
+      }
+
+      .lang-toggle button[aria-pressed="true"] {
+        background: var(--teal);
+        color: #ffffff;
+      }
+
+      main {
+        padding: 28px 0 48px;
+      }
+
+      .intro {
+        max-width: 960px;
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        margin-bottom: 14px;
+        border: 1px solid rgba(15, 118, 110, 0.28);
+        border-radius: 8px;
+        padding: 0 10px;
+        color: var(--teal-dark);
+        background: rgba(15, 118, 110, 0.08);
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        max-width: 860px;
+        font-size: 52px;
+        line-height: 1;
+        letter-spacing: 0;
+        overflow-wrap: anywhere;
+      }
+
+      html[lang="zh-CN"] h1 {
+        line-height: 1.1;
+      }
+
+      .lead {
+        max-width: 820px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 18px 0;
+      }
+
+      .summary-item {
+        min-height: 68px;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px 14px;
+      }
+
+      .summary-item strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--teal-dark);
+      }
+
+      .summary-item span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .builder {
+        display: grid;
+        grid-template-columns: minmax(0, 0.96fr) minmax(430px, 1fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .builder > * {
+        min-width: 0;
+      }
+
+      .panel {
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        padding: 16px;
+      }
+
+      .panel.output-panel {
+        position: sticky;
+        top: 88px;
+      }
+
+      .panel h2 {
+        margin: 0 0 8px;
+        font-size: 19px;
+        letter-spacing: 0;
+      }
+
+      .panel-note {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 13px;
+        font-weight: 740;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fbfcfb;
+        color: var(--ink);
+        font: inherit;
+        line-height: 1.55;
+        padding: 10px 12px;
+      }
+
+      textarea {
+        min-height: 72px;
+        overflow: hidden;
+        resize: none;
+      }
+
+      .small {
+        min-height: 52px;
+      }
+
+      .output {
+        min-height: 360px;
+        background: var(--code);
+        color: #d1fae5;
+        border-color: #273244;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.45;
+        overflow: hidden;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      button,
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 14px;
+        font-weight: 720;
+        cursor: pointer;
+      }
+
+      button.primary,
+      .button.primary {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #ffffff;
+      }
+
+      .hint {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .commands {
+        max-width: 100%;
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 8px;
+        background: #17211f;
+        color: #f7f5ef;
+        overflow: visible;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+      }
+
+      .status {
+        min-height: 20px;
+        color: var(--green);
+        font-size: 13px;
+        font-weight: 740;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--surface-3);
+      }
+
+      .metric strong {
+        display: block;
+        color: var(--amber);
+        font-size: 20px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 960px) {
+        .intro {
+          grid-template-columns: 1fr;
+        }
+
+        .builder,
+        .summary-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .panel.output-panel {
+          position: static;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .metrics {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 40px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .shell {
+          width: min(100% - 28px, 1180px);
+        }
+
+        h1 {
+          font-size: 34px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav class="shell">
+        <a class="brand" href="./playground.html" aria-label="Ariadne Loop Builder">
+          Ariadne Loop Builder
+          <span data-i18n="brandSub">造梦构建器</span>
+        </a>
+        <div class="nav-row">
+          <div class="nav-links">
+            <a href="./" data-i18n="navHome">Home</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+            <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md" data-i18n="navWorkflow">Workflow</a>
+          </div>
+          <div class="lang-toggle" aria-label="Language">
+            <button type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-lang="zh" aria-pressed="false">中</button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="intro">
+        <div class="eyebrow" data-i18n="eyebrow">Local loop snapshot builder</div>
+        <h1 data-i18n="title">Shape the loop before the agent runs.</h1>
+        <p class="lead" data-i18n="lead">
+          Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.
+        </p>
+      </section>
+
+      <section class="summary-strip" aria-label="Builder benefits">
+        <div class="summary-item">
+          <strong data-i18n="summaryLocalTitle">Local</strong>
+          <span data-i18n="summaryLocalBody">No account. No upload.</span>
+        </div>
+        <div class="summary-item">
+          <strong data-i18n="summaryLoopTitle">Loop first</strong>
+          <span data-i18n="summaryLoopBody">Goal, state, limits, checks, effects.</span>
+        </div>
+        <div class="summary-item">
+          <strong data-i18n="summaryAgentTitle">Ready to hand off</strong>
+          <span data-i18n="summaryAgentBody">Copy JSON or a packet.</span>
+        </div>
+      </section>
+
+      <section class="builder" aria-label="Loop snapshot builder">
+        <div class="panel">
+          <h2 data-i18n="inputsTitle">Inputs</h2>
+          <p class="panel-note" data-i18n="inputsNote">
+            Pick a preset, then replace the defaults with the real thread state.
+          </p>
+          <div class="metrics">
+            <div class="metric"><strong id="verifierCount">0</strong><span data-i18n="metricVerifiers">verifiers</span></div>
+            <div class="metric"><strong id="constraintCount">0</strong><span data-i18n="metricConstraints">constraints</span></div>
+            <div class="metric"><strong id="effectCount">0</strong><span data-i18n="metricEffects">external effects</span></div>
+          </div>
+
+          <div class="field">
+            <label for="preset" data-i18n="labelPreset">Preset</label>
+            <select id="preset">
+              <option value="release" data-label-key="presetRelease">Release readiness</option>
+              <option value="bugfix" data-label-key="presetBugfix">Bug repair</option>
+              <option value="refactor" data-label-key="presetRefactor">Incremental refactor</option>
+              <option value="agent-handoff" data-label-key="presetHandoff">Agent handoff</option>
+              <option value="custom" data-label-key="presetCustom">Custom</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="title" data-i18n="labelTitle">Title</label>
+            <input id="title" />
+          </div>
+
+          <div class="field">
+            <label for="goal" data-i18n="labelGoal">Goal</label>
+            <textarea id="goal"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="currentState" data-i18n="labelState">Current state</label>
+            <textarea id="currentState"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="progress" data-i18n="labelProgress">Recent progress, one per line</label>
+            <textarea id="progress" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="constraints" data-i18n="labelConstraints">Constraints, one per line</label>
+            <textarea id="constraints" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="verifiers" data-i18n="labelVerifiers">Verifiers, one per line</label>
+            <textarea id="verifiers" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="effects" data-i18n="labelEffects">External effects, one per line</label>
+            <textarea id="effects" class="small"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="risk" data-i18n="labelRisk">Risk</label>
+            <select id="risk">
+              <option value="low" data-label-key="riskLow">low</option>
+              <option value="medium" data-label-key="riskMedium">medium</option>
+              <option value="high" data-label-key="riskHigh">high</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel output-panel">
+          <div class="field">
+            <label for="outputMode" data-i18n="labelOutputMode">Output</label>
+            <select id="outputMode">
+              <option value="snapshot" data-label-key="outputSnapshot">Snapshot JSON</option>
+              <option value="packet" data-label-key="outputPacket">Agent packet</option>
+            </select>
+          </div>
+          <h2 id="outputTitle" data-i18n="outputTitle">Snapshot JSON</h2>
+          <p class="panel-note" data-i18n="outputNote">
+            Copy this into Ariadne Loop or your coding agent.
+          </p>
+          <textarea id="output" class="output" readonly></textarea>
+          <div class="actions">
+            <button class="primary" id="copyButton" type="button" data-i18n="copyButton">Copy JSON</button>
+            <button id="downloadButton" type="button" data-i18n="downloadButton">Download</button>
+            <button id="resetButton" type="button" data-i18n="resetButton">Reset preset</button>
+          </div>
+          <p class="status" id="status" aria-live="polite"></p>
+          <pre class="commands"><code id="commands"></code></pre>
+          <p class="hint" data-i18n="hint">
+            Save as loop-snapshot.json, then run the commands above.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const ui = {
+        en: {
+          brandSub: "造梦构建器",
+          navHome: "Home",
+          navWorkflow: "Workflow",
+          eyebrow: "Local loop snapshot builder",
+          title: "Shape the loop before the agent runs.",
+          lead:
+            "Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.",
+          summaryLocalTitle: "Local",
+          summaryLocalBody: "No account. No upload.",
+          summaryLoopTitle: "Loop first",
+          summaryLoopBody: "Goal, state, limits, checks, effects.",
+          summaryAgentTitle: "Ready to hand off",
+          summaryAgentBody: "Copy JSON or a packet.",
+          inputsTitle: "Inputs",
+          inputsNote:
+            "Pick a preset, then replace the defaults with the real thread state.",
+          metricVerifiers: "verifiers",
+          metricConstraints: "constraints",
+          metricEffects: "external effects",
+          labelPreset: "Preset",
+          labelTitle: "Title",
+          labelGoal: "Goal",
+          labelState: "Current state",
+          labelProgress: "Recent progress, one per line",
+          labelConstraints: "Constraints, one per line",
+          labelVerifiers: "Verifiers, one per line",
+          labelEffects: "External effects, one per line",
+          labelRisk: "Risk",
+          labelOutputMode: "Output",
+          outputTitle: "Snapshot JSON",
+          outputNote: "Copy this into Ariadne Loop or your coding agent.",
+          outputSnapshot: "Snapshot JSON",
+          outputPacket: "Agent packet",
+          copyButton: "Copy JSON",
+          copyJson: "Copy JSON",
+          copyPacket: "Copy packet",
+          downloadButton: "Download JSON",
+          downloadJson: "Download JSON",
+          downloadPacket: "Download packet",
+          resetButton: "Reset preset",
+          hint: "Save as loop-snapshot.json, then run the commands above.",
+          copiedJson: "Copied JSON to clipboard.",
+          copiedPacket: "Copied agent packet to clipboard.",
+          downloadedJson: "Downloaded loop-snapshot.json.",
+          downloadedPacket: "Downloaded agent-packet.md.",
+          presetRelease: "Release readiness",
+          presetBugfix: "Bug repair",
+          presetRefactor: "Incremental refactor",
+          presetHandoff: "Agent handoff",
+          presetCustom: "Custom",
+          riskLow: "low",
+          riskMedium: "medium",
+          riskHigh: "high"
+        },
+        zh: {
+          brandSub: "造梦构建器",
+          navHome: "首页",
+          navWorkflow: "工作流",
+          eyebrow: "本地 Loop Snapshot 构建器",
+          title: "先写清循环，再让 Agent 开跑。",
+          lead:
+            "填一次。复制 snapshot JSON 或 Agent Packet。内容只留在浏览器里。",
+          summaryLocalTitle: "本地",
+          summaryLocalBody: "不用账号，不上传。",
+          summaryLoopTitle: "先写循环",
+          summaryLoopBody: "目标、状态、限制、验证和外部影响放一起。",
+          summaryAgentTitle: "可交接",
+          summaryAgentBody: "复制 JSON 或 Agent Packet。",
+          inputsTitle: "输入",
+          inputsNote: "选模板，再换成当前线程的真实状态。",
+          metricVerifiers: "验证器",
+          metricConstraints: "限制",
+          metricEffects: "外部影响",
+          labelPreset: "模板",
+          labelTitle: "标题",
+          labelGoal: "目标",
+          labelState: "当前状态",
+          labelProgress: "最近进展，每行一条",
+          labelConstraints: "限制，每行一条",
+          labelVerifiers: "验证器，每行一条",
+          labelEffects: "外部影响，每行一条",
+          labelRisk: "风险",
+          labelOutputMode: "输出",
+          outputTitle: "Snapshot JSON",
+          outputNote: "复制给 Ariadne Loop 或 Coding Agent。",
+          outputSnapshot: "Snapshot JSON",
+          outputPacket: "Agent Packet",
+          copyButton: "复制 JSON",
+          copyJson: "复制 JSON",
+          copyPacket: "复制 Agent Packet",
+          downloadButton: "下载 JSON",
+          downloadJson: "下载 JSON",
+          downloadPacket: "下载 Agent Packet",
+          resetButton: "重置模板",
+          hint: "保存为 loop-snapshot.json，再运行上面的命令。",
+          copiedJson: "已复制 JSON。",
+          copiedPacket: "已复制 Agent Packet。",
+          downloadedJson: "已下载 loop-snapshot.json。",
+          downloadedPacket: "已下载 agent-packet.md。",
+          presetRelease: "发布准备",
+          presetBugfix: "Bug 修复",
+          presetRefactor: "渐进重构",
+          presetHandoff: "Agent 交接",
+          presetCustom: "自定义",
+          riskLow: "低",
+          riskMedium: "中",
+          riskHigh: "高"
+        }
+      };
+
+      const presets = {
+        en: {
+          release: {
+            title: "Release readiness loop",
+            goal: "Prepare a release without shipping broken docs, stale examples, or unverified artifacts",
+            current_state: "Core work is implemented, but release evidence still needs to be collected",
+            recent_progress: ["Main feature work is complete", "Release notes have a draft"],
+            constraints: [
+              "Do not publish until quick start and generated examples are verified",
+              "Do not create tags or releases before human confirmation"
+            ],
+            verifiers: [
+              "Tests pass",
+              "Quick start works from a fresh checkout",
+              "Generated examples validate",
+              "Release notes match the version"
+            ],
+            external_effects: ["git tag", "GitHub release", "package publish"],
+            risk: "medium"
+          },
+          bugfix: {
+            title: "Bug repair loop",
+            goal: "Fix a reproducible bug without changing unrelated behavior",
+            current_state: "A failure has been observed, but the exact root cause still needs inspection",
+            recent_progress: ["Reproduction steps are known", "Likely files or modules have been identified"],
+            constraints: [
+              "Do not refactor unrelated code",
+              "Keep the fix to the smallest behavior change that passes the verifier"
+            ],
+            verifiers: [
+              "The original failing case now passes",
+              "Related tests still pass",
+              "No unrelated file churn is present"
+            ],
+            external_effects: [],
+            risk: "medium"
+          },
+          refactor: {
+            title: "Incremental refactor loop",
+            goal: "Refactor one bounded module while preserving public behavior",
+            current_state: "The target area is known, but the next safe boundary needs inspection",
+            recent_progress: ["Existing behavior has been identified", "Tests or smoke checks are available"],
+            constraints: [
+              "Do not change public APIs unless explicitly approved",
+              "Keep each loop turn small enough to review"
+            ],
+            verifiers: [
+              "Focused tests pass",
+              "Integration smoke passes",
+              "Public imports still work",
+              "Diff contains no unrelated formatting churn"
+            ],
+            external_effects: [],
+            risk: "medium"
+          },
+          "agent-handoff": {
+            title: "Agent handoff loop",
+            goal: "Turn a long coding-agent thread into a resumable work contract",
+            current_state:
+              "Prior work exists across messages, files, or logs, but the next agent needs a compact state packet",
+            recent_progress: [
+              "Completed work and current blockers have been summarized",
+              "Relevant files or artifacts have been listed"
+            ],
+            constraints: [
+              "Do not rely on memory without reading current files or remote state",
+              "Mark stale assumptions instead of presenting them as facts"
+            ],
+            verifiers: [
+              "Current branch and remote state are read back",
+              "Required artifacts exist at the referenced paths",
+              "Next action has one concrete verifier"
+            ],
+            external_effects: ["commit", "push"],
+            risk: "medium"
+          },
+          custom: {
+            title: "Custom loop",
+            goal: "Move the task to a verifiably complete state",
+            current_state: "Describe the current evidence, gaps, and known risks",
+            recent_progress: [],
+            constraints: [],
+            verifiers: ["Read back the real artifact and verify the goal, key fields, and constraints"],
+            external_effects: [],
+            risk: "medium"
+          }
+        },
+        zh: {
+          release: {
+            title: "发布准备 loop",
+            goal: "在发布前确认文档、示例和产物都经过验证，避免带着破损内容上线",
+            current_state: "核心功能已经完成，但发布证据还没有收齐",
+            recent_progress: ["主要功能工作已经完成", "发布说明已有草稿"],
+            constraints: [
+              "快速开始和生成示例验证通过前不得发布",
+              "创建 tag、GitHub release 或发包前必须由人确认"
+            ],
+            verifiers: [
+              "测试通过",
+              "快速开始能在干净环境跑通",
+              "生成示例能通过校验",
+              "发布说明与版本一致"
+            ],
+            external_effects: ["git tag", "GitHub release", "package publish"],
+            risk: "medium"
+          },
+          bugfix: {
+            title: "Bug 修复 loop",
+            goal: "修复一个可复现问题，同时不改变无关行为",
+            current_state: "失败现象已经出现，但根因还需要读取真实上下文确认",
+            recent_progress: ["复现步骤已知", "可能相关的文件或模块已经圈出"],
+            constraints: ["不要重构无关代码", "只做能让验证器通过的最小行为改动"],
+            verifiers: ["原始失败用例现在通过", "相关测试仍然通过", "diff 中没有无关文件改动"],
+            external_effects: [],
+            risk: "medium"
+          },
+          refactor: {
+            title: "渐进重构 loop",
+            goal: "在不改变公开行为的前提下，重构一个边界清楚的模块",
+            current_state: "目标区域已知，但下一步安全边界还需要确认",
+            recent_progress: ["已有行为已经识别", "测试或冒烟检查可用"],
+            constraints: ["未经确认不要改变公开 API", "每一轮改动必须小到能 review"],
+            verifiers: ["聚焦测试通过", "集成冒烟通过", "公开 import 仍然可用", "diff 没有无关格式化噪音"],
+            external_effects: [],
+            risk: "medium"
+          },
+          "agent-handoff": {
+            title: "Agent 交接 loop",
+            goal: "把一个长线程整理成下一位 Agent 可以继续执行的工作合约",
+            current_state: "已有工作散落在消息、文件或日志里，下一位 Agent 需要紧凑状态包",
+            recent_progress: ["已总结完成项和当前阻塞", "已列出相关文件或产物"],
+            constraints: ["不要只靠记忆，必须读取当前文件或远端状态", "过期假设要标明，不要当成事实"],
+            verifiers: ["当前分支和远端状态已读回", "引用的产物路径真实存在", "下一步动作至少有一个具体验证器"],
+            external_effects: ["commit", "push"],
+            risk: "medium"
+          },
+          custom: {
+            title: "自定义 loop",
+            goal: "把任务推进到可验证完成的状态",
+            current_state: "描述当前证据、缺口和已知风险",
+            recent_progress: [],
+            constraints: [],
+            verifiers: ["读回真实产物，并验证目标、关键字段和限制条件"],
+            external_effects: [],
+            risk: "medium"
+          }
+        }
+      };
+
+      const fields = {
+        preset: document.getElementById("preset"),
+        title: document.getElementById("title"),
+        goal: document.getElementById("goal"),
+        currentState: document.getElementById("currentState"),
+        progress: document.getElementById("progress"),
+        constraints: document.getElementById("constraints"),
+        verifiers: document.getElementById("verifiers"),
+        effects: document.getElementById("effects"),
+        risk: document.getElementById("risk"),
+        outputMode: document.getElementById("outputMode"),
+        outputTitle: document.getElementById("outputTitle"),
+        output: document.getElementById("output"),
+        copyButton: document.getElementById("copyButton"),
+        downloadButton: document.getElementById("downloadButton"),
+        commands: document.getElementById("commands"),
+        status: document.getElementById("status"),
+        verifierCount: document.getElementById("verifierCount"),
+        constraintCount: document.getElementById("constraintCount"),
+        effectCount: document.getElementById("effectCount")
+      };
+
+      let currentLang = "en";
+      let lastLoadedPresetSnapshot = null;
+
+      function getInitialLanguage() {
+        const params = new URLSearchParams(window.location.search);
+        const queryLang = params.get("lang");
+        if (queryLang === "zh" || queryLang === "en") {
+          return queryLang;
+        }
+        const saved = window.localStorage.getItem("ariadne-lang");
+        if (saved === "zh" || saved === "en") {
+          return saved;
+        }
+        return window.navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+      }
+
+      function toLines(value) {
+        return value
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+      }
+
+      function fromLines(values) {
+        return values.join("\n");
+      }
+
+      function snapshot() {
+        return {
+          title: fields.title.value.trim(),
+          goal: fields.goal.value.trim(),
+          current_state: fields.currentState.value.trim(),
+          recent_progress: toLines(fields.progress.value),
+          constraints: toLines(fields.constraints.value),
+          verifiers: toLines(fields.verifiers.value),
+          external_effects: toLines(fields.effects.value),
+          risk: fields.risk.value
+        };
+      }
+
+      function fitTextarea(element) {
+        element.style.height = "auto";
+        element.style.height = `${element.scrollHeight + 6}px`;
+      }
+
+      function fitAllTextareas() {
+        document.querySelectorAll("textarea").forEach(fitTextarea);
+      }
+
+      function buildLoop(value) {
+        const verifiers = value.verifiers.length
+          ? value.verifiers
+          : ["Read back the real artifact and verify the goal, key fields, and constraints"];
+        const risk = value.risk || "medium";
+        const externalEffects = value.external_effects || [];
+        const verifierSummary = verifiers.join("; ");
+        const stopRules = [
+          "Stop when every verifier has current evidence and passes.",
+          "Stop and narrow the problem after the same verifier fails twice.",
+          "Stop and ask for confirmation when the goal, input, or permissions do not match the current context."
+        ];
+        if (externalEffects.length) {
+          stopRules.push(`Ask for confirmation before external-impact actions: ${externalEffects.join(", ")}`);
+        }
+        const humanGates = [
+          "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."
+        ];
+        if (risk !== "low") {
+          humanGates.push(`Risk is ${risk}; do not expand scope after failure.`);
+        }
+        if (externalEffects.length) {
+          humanGates.push("After an external-impact action, read back the real target before reporting success.");
+        }
+        return {
+          version: "1.0",
+          name: `${value.title || "Untitled task"} Loop`,
+          goal: value.goal || `Move ${value.title || "the task"} to a verifiably complete state`,
+          context: {
+            source_title: value.title || "Untitled task",
+            current_state:
+              value.current_state || "No current state was provided. Inspect real context before acting.",
+            evidence: value.recent_progress,
+            constraints: value.constraints,
+            external_effects: externalEffects,
+            risk
+          },
+          cycle: [
+            {
+              id: "inspect",
+              instruction:
+                "Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target.",
+              expected_output: "Turn scope, known evidence, gaps, and explicit non-goals"
+            },
+            {
+              id: "act",
+              instruction: `Take the smallest useful action toward the goal: ${value.goal}`,
+              expected_output: "This turn's artifact or change list"
+            },
+            {
+              id: "verify",
+              instruction: `Run or perform these verifiers: ${verifierSummary}`,
+              expected_output: "Pass, fail, or missing-evidence status for each verifier"
+            },
+            {
+              id: "decide",
+              instruction:
+                "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
+              expected_output: "Next action and stop decision"
+            }
+          ],
+          verifiers: verifiers.map((verifier, index) => ({
+            id: `gate-${index + 1}`,
+            kind: /pytest|ruff|build|test|npm|compile/i.test(verifier) ? "command" : "checklist",
+            instruction: verifier,
+            proves: `This turn satisfies: ${verifier}`
+          })),
+          stop_rules: stopRules,
+          rollback: {
+            action:
+              "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope."
+          },
+          budget: {
+            max_iterations: risk === "high" ? 2 : 3,
+            max_minutes: risk === "high" ? 30 : 60
+          },
+          human_gates: humanGates
+        };
+      }
+
+      function markdownList(values) {
+        return values.length ? values.map((value) => `- ${value}`).join("\n") : "- None";
+      }
+
+      function renderAgentPacket(value) {
+        const loop = buildLoop(value);
+        const actionLines = loop.cycle
+          .map((step) => `- \`${step.id}\`: ${step.instruction} -> ${step.expected_output}`)
+          .join("\n");
+        const verifierLines = loop.verifiers
+          .map((gate) => `- \`${gate.id}\` (${gate.kind}): ${gate.instruction}`)
+          .join("\n");
+        return `# ${loop.name} Agent Packet
+
+## Goal
+${loop.goal}
+
+## Current State
+${loop.context.current_state}
+
+## Constraints
+${markdownList(loop.context.constraints)}
+
+## Cycle
+${actionLines}
+
+## Verifiers
+${verifierLines}
+
+## Stop Rules
+${markdownList(loop.stop_rules)}
+
+## Rollback
+${loop.rollback.action}
+
+## Human Gates
+${markdownList(loop.human_gates)}
+
+## Budget
+- max_iterations: ${loop.budget.max_iterations}
+- max_minutes: ${loop.budget.max_minutes}
+
+## Report Contract
+Return JSON only. Do not add prose outside the JSON.
+
+\`\`\`json
+{
+  "action_id": "inspect|act|verify|decide",
+  "status": "continue|stop|needs_human|rollback",
+  "evidence": ["specific evidence observed in this turn"],
+  "next_step": "the next concrete action",
+  "passed_verifiers": ["gate ids that passed in this turn"],
+  "failed_verifiers": ["gate ids that failed in this turn"]
+}
+\`\`\`
+`;
+      }
+
+      function snapshotsEqual(left, right) {
+        return JSON.stringify(left) === JSON.stringify(right);
+      }
+
+      function activePreset(name) {
+        return presets[currentLang][name] || presets[currentLang].release;
+      }
+
+      function loadPreset(name) {
+        const preset = activePreset(name);
+        fields.title.value = preset.title;
+        fields.goal.value = preset.goal;
+        fields.currentState.value = preset.current_state;
+        fields.progress.value = fromLines(preset.recent_progress);
+        fields.constraints.value = fromLines(preset.constraints);
+        fields.verifiers.value = fromLines(preset.verifiers);
+        fields.effects.value = fromLines(preset.external_effects);
+        fields.risk.value = preset.risk;
+        lastLoadedPresetSnapshot = snapshot();
+        render();
+      }
+
+      function render() {
+        const value = snapshot();
+        const mode = fields.outputMode.value;
+        const activeUi = ui[currentLang] || ui.en;
+        fields.output.value =
+          mode === "packet" ? renderAgentPacket(value) : JSON.stringify(value, null, 2) + "\n";
+        fields.outputTitle.textContent = mode === "packet" ? activeUi.outputPacket : activeUi.outputSnapshot;
+        fields.copyButton.textContent = mode === "packet" ? activeUi.copyPacket : activeUi.copyJson;
+        fields.downloadButton.textContent = mode === "packet" ? activeUi.downloadPacket : activeUi.downloadJson;
+        fields.verifierCount.textContent = String(value.verifiers.length);
+        fields.constraintCount.textContent = String(value.constraints.length);
+        fields.effectCount.textContent = String(value.external_effects.length);
+        fields.commands.textContent = [
+          "ariadne-loop write \\",
+          "  --input loop-snapshot.json \\",
+          "  --output loop-report.md \\",
+          "  --format markdown",
+          "",
+          "ariadne-loop make \\",
+          "  --input loop-snapshot.json \\",
+          "  --output loop.json \\",
+          "  --format json",
+          "",
+          "ariadne-loop check --input loop.json"
+        ].join("\n");
+        fitAllTextareas();
+      }
+
+      function setLanguage(lang) {
+        const shouldTranslatePreset =
+          lastLoadedPresetSnapshot && snapshotsEqual(snapshot(), lastLoadedPresetSnapshot);
+        currentLang = lang;
+        const activeUi = ui[currentLang] || ui.en;
+
+        document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
+        document.title = currentLang === "zh" ? "造梦构建器" : "Ariadne Loop Builder";
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (activeUi[key]) {
+            element.textContent = activeUi[key];
+          }
+        });
+        document.querySelectorAll("[data-label-key]").forEach((element) => {
+          const key = element.getAttribute("data-label-key");
+          if (activeUi[key]) {
+            element.textContent = activeUi[key];
+          }
+        });
+        document.querySelectorAll("[data-lang]").forEach((button) => {
+          button.setAttribute("aria-pressed", button.dataset.lang === currentLang ? "true" : "false");
+        });
+
+        window.localStorage.setItem("ariadne-lang", currentLang);
+        const params = new URLSearchParams(window.location.search);
+        params.set("lang", currentLang);
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+
+        if (shouldTranslatePreset) {
+          loadPreset(fields.preset.value);
+        } else {
+          render();
+        }
+      }
+
+      async function copyJson() {
+        await navigator.clipboard.writeText(fields.output.value);
+        const isPacket = fields.outputMode.value === "packet";
+        fields.status.textContent =
+          isPacket ? ui[currentLang].copiedPacket : ui[currentLang].copiedJson;
+      }
+
+      function downloadJson() {
+        const isPacket = fields.outputMode.value === "packet";
+        const blob = new Blob([fields.output.value], {
+          type: isPacket ? "text/markdown" : "application/json"
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = isPacket ? "agent-packet.md" : "loop-snapshot.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(link.href);
+        fields.status.textContent = isPacket ? ui[currentLang].downloadedPacket : ui[currentLang].downloadedJson;
+      }
+
+      fields.preset.addEventListener("change", () => loadPreset(fields.preset.value));
+      fields.outputMode.addEventListener("change", render);
+      document.querySelectorAll("input, textarea, select").forEach((element) => {
+        if (element.id !== "preset" && element.id !== "outputMode") {
+          element.addEventListener("input", () => {
+            lastLoadedPresetSnapshot = null;
+            render();
+          });
+        }
+      });
+      document.querySelectorAll("[data-lang]").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+      document.getElementById("copyButton").addEventListener("click", copyJson);
+      document.getElementById("downloadButton").addEventListener("click", downloadJson);
+      document.getElementById("resetButton").addEventListener("click", () => loadPreset(fields.preset.value));
+
+      setLanguage(getInitialLanguage());
+      loadPreset("release");
+    </script>
+  </body>
+</html>

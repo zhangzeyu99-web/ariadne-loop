@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Ariadne Loop</title>
+  <desc id="desc">Verifiable Loop Engineering specs for coding agents.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#162033"/>
+    </linearGradient>
+    <linearGradient id="thread" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#eab308"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="984" cy="130" r="140" fill="#2dd4bf" opacity="0.12"/>
+  <circle cx="198" cy="510" r="180" fill="#eab308" opacity="0.10"/>
+  <path d="M130 430 C260 210 410 520 560 300 S820 150 1055 322" fill="none" stroke="url(#thread)" stroke-width="12" stroke-linecap="round"/>
+  <g fill="#151b23" stroke="#2c3642" stroke-width="2">
+    <rect x="128" y="112" width="178" height="84" rx="8"/>
+    <rect x="388" y="396" width="178" height="84" rx="8"/>
+    <rect x="642" y="118" width="178" height="84" rx="8"/>
+    <rect x="894" y="386" width="178" height="84" rx="8"/>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" fill="#f0f6fc">
+    <text x="150" y="147" font-size="24" font-weight="700">Inspect</text>
+    <text x="150" y="176" font-size="18" fill="#9da7b3">read real state</text>
+    <text x="410" y="431" font-size="24" font-weight="700">Act</text>
+    <text x="410" y="460" font-size="18" fill="#9da7b3">small change</text>
+    <text x="664" y="153" font-size="24" font-weight="700">Verify</text>
+    <text x="664" y="182" font-size="18" fill="#9da7b3">evidence gates</text>
+    <text x="916" y="421" font-size="24" font-weight="700">Decide</text>
+    <text x="916" y="450" font-size="18" fill="#9da7b3">stop or continue</text>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="84" y="286" fill="#f0f6fc" font-size="82" font-weight="800">Ariadne Loop</text>
+    <text x="88" y="340" fill="#c9d1d9" font-size="30">Verifiable Loop Engineering specs for coding agents</text>
+    <text x="90" y="560" fill="#2dd4bf" font-size="24">Codex · Claude Code · GitHub issues · releases · refactors</text>
+  </g>
+</svg>

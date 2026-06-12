@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zhangzeyu99-web.github.io/ariadne-loop/sitemap.xml
+LLMs: https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt
