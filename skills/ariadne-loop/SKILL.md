@@ -42,10 +42,11 @@ Use this skill when the user asks for any of these:
    - `external_effects`,
    - `risk`.
 3. Generate or write an agent packet that includes:
-   - inspect -> act -> verify -> decide cycle,
+   - inspect -> act -> verify -> persist -> decide cycle,
    - concrete verifiers,
    - stop rules,
    - rollback behavior,
+   - durable memory updates before stop decisions,
    - human gates for external effects,
    - JSON-only report contract.
 4. If the user wants a first-run demo and the Ariadne Loop CLI is installed:
@@ -97,7 +98,7 @@ Use this report contract:
 
 ```json
 {
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",

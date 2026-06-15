@@ -1,0 +1,34 @@
+{
+  "title": "Desktop App Development",
+  "goal": "Build and verify a desktop app without shipping broken UI, packaging, or installer behavior",
+  "current_state": "The product direction is known, but the app still needs implementation evidence and packaging checks",
+  "recent_progress": [
+    "Initial user flow is defined",
+    "Target platform and packaging format are known"
+  ],
+  "constraints": [
+    "Do not change installer signing or release channels without human confirmation",
+    "Keep each UI change small enough to verify with a screenshot or smoke test"
+  ],
+  "verifiers": [
+    "App launches locally",
+    "Primary workflow works from a clean state",
+    "Desktop and narrow window screenshots show no obvious layout break",
+    "Packaging command completes or reports a clear blocker"
+  ],
+  "external_effects": [
+    "installer build",
+    "release upload"
+  ],
+  "risk": "medium",
+  "harness": {
+    "tools": ["python", "pytest", "Browser", "desktop smoke test"],
+    "official_sources": ["framework packaging docs", "current repository files"],
+    "browser_verification": ["Use screenshots for any webview or local preview surface"],
+    "forbidden_areas": ["Do not publish installers without human confirmation"],
+    "local_secrets": "Do not read signing keys or local secrets unless the user explicitly asks.",
+    "source_priority": ["official docs/API", "repo/tests/current files", "search", "model inference"],
+    "cost_strategy": ["Use stronger models for architecture and packaging failures", "Use cheaper models for formatting and checklist passes"]
+  }
+}
+

@@ -14,7 +14,7 @@
   "properties": {
     "action_id": {
       "type": "string",
-      "enum": ["inspect", "act", "verify", "decide"]
+      "enum": ["inspect", "act", "verify", "persist", "decide"]
     },
     "status": {
       "type": "string",

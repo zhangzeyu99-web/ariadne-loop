@@ -11,11 +11,13 @@ Ariadne Loop generates a small, explicit contract for coding agents and other AI
 | `goal` | The outcome the loop is trying to reach. |
 | `context` | Current state, evidence, constraints, risk, and external effects. |
 | `state` | Progress and open questions carried between turns. |
-| `cycle` | The `inspect -> act -> verify -> decide` loop. |
+| `cycle` | The `inspect -> act -> verify -> persist -> decide` loop. |
 | `verifiers` | Observable checks that prove whether the turn worked. |
 | `stop_rules` | Conditions for stopping, narrowing, or asking a human. |
 | `rollback` | What to do when a verifier fails or scope is crossed. |
 | `memory` | What to read and write each turn. |
+| `loop_parts` | Orange Book primitives: automation, isolation, skills, connectors, evaluator, and memory. |
+| `cost_controls` | Guardrails for verification debt, comprehension rot, token blowout, and cognitive surrender. |
 | `budget` | Iteration and time limits. |
 | `human_gates` | Actions that require explicit human confirmation. |
 | `agent_contract` | Required JSON report shape for the agent. |
@@ -40,7 +42,7 @@ Every agent turn should return parseable JSON:
 
 ```json
 {
-  "action_id": "inspect",
+  "action_id": "persist",
   "status": "continue",
   "evidence": ["checkout.spec.ts fails at shipping address wait"],
   "next_step": "inspect the address form readiness condition"
@@ -58,7 +60,7 @@ Allowed statuses:
 
 `ariadne-loop check` rejects prompt-only plans. A valid loop must include:
 
-- all four cycle steps,
+- all five cycle steps,
 - at least one verifier,
 - stop rules,
 - rollback,

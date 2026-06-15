@@ -37,7 +37,7 @@
     <meta name="twitter:title" content="AI Agent Loop Template - Ariadne Loop" />
     <meta
       name="twitter:description"
-      content="Copy a practical inspect -> act -> verify -> decide loop for Codex, Claude Code, and OpenClaw."
+      content="Copy a practical inspect -> act -> verify -> persist -> decide loop for Codex, Claude Code, and OpenClaw."
     />
     <meta
       name="twitter:image"
@@ -280,7 +280,7 @@ Rollback rules:
 
 Report after every turn as JSON only:
 {
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",

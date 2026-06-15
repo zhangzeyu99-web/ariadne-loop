@@ -8,7 +8,7 @@ from typing import Any
 
 
 ALLOWED_REPORT_STATUSES = {"continue", "stop", "needs_human", "rollback"}
-REQUIRED_STEP_IDS = {"inspect", "act", "verify", "decide"}
+REQUIRED_STEP_IDS = {"inspect", "act", "verify", "persist", "decide"}
 EXTERNAL_EFFECT_WORDS = {
     "commit",
     "push",
@@ -220,6 +220,8 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
             "read": "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
             "write": "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step.",
         },
+        "loop_parts": _build_loop_parts(),
+        "cost_controls": _build_cost_controls(),
         "budget": _build_budget(risk),
         "human_gates": _build_human_gates(risk, external_effects),
         "agent_contract": {
@@ -228,6 +230,9 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
             "allowed_statuses": sorted(ALLOWED_REPORT_STATUSES),
         },
     }
+    harness = _normalize_harness(snapshot.get("harness"))
+    if harness:
+        loop["harness"] = harness
     return loop
 
 
@@ -297,6 +302,9 @@ def render_agent_packet(loop: dict[str, Any]) -> str:
     )
     stop_lines = "\n".join(f"- {rule}" for rule in loop["stop_rules"])
     human_lines = "\n".join(f"- {gate}" for gate in loop.get("human_gates", []))
+    harness = _render_harness_section(loop.get("harness"))
+    loop_parts = _render_named_items_section("Loop Parts", loop.get("loop_parts"))
+    cost_controls = _render_named_items_section("Cost Controls", loop.get("cost_controls"))
 
     return f"""# {loop['name']} Agent Packet
 
@@ -312,8 +320,20 @@ def render_agent_packet(loop: dict[str, Any]) -> str:
 ## Cycle
 {action_lines}
 
+{loop_parts}
+
 ## Verifiers
 {verifier_lines}
+
+{harness}
+
+{cost_controls}
+
+## Operating State
+- At the start of every turn, read `PROGRESS.md`, `reports.jsonl`, and the current project state before acting.
+- Work on one verifiable change per turn. Do not batch unrelated fixes into one report.
+- Persist verifier evidence, state changes, and next action before deciding whether the loop continues.
+- If the same verifier fails in consecutive turns, return `rollback` or `needs_human` instead of retrying blindly.
 
 ## Stop Rules
 {stop_lines}
@@ -333,7 +353,7 @@ Return JSON only. Do not add prose outside the JSON.
 
 ```json
 {{
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",
@@ -342,6 +362,73 @@ Return JSON only. Do not add prose outside the JSON.
 }}
 ```
 """
+
+
+def _normalize_harness(value: object) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    normalized: dict[str, Any] = {}
+    list_fields = [
+        "tools",
+        "official_sources",
+        "browser_verification",
+        "forbidden_areas",
+        "source_priority",
+        "cost_strategy",
+    ]
+    for field in list_fields:
+        items = _string_list(value.get(field))
+        if items:
+            normalized[field] = items
+    local_secrets = _clean_text(value.get("local_secrets"))
+    if local_secrets:
+        normalized["local_secrets"] = local_secrets
+    return normalized
+
+
+def _render_harness_section(value: object) -> str:
+    if not isinstance(value, dict) or not value:
+        return """## Harness
+- No extra harness was supplied. Use the repo, current files, and listed verifiers as the source of truth."""
+
+    labels = {
+        "tools": "Tools",
+        "official_sources": "Official Sources",
+        "browser_verification": "Browser Verification",
+        "forbidden_areas": "Forbidden Areas",
+        "local_secrets": "Local Secrets",
+        "source_priority": "Source Priority",
+        "cost_strategy": "Cost Strategy",
+    }
+    blocks: list[str] = ["## Harness"]
+    for key in [
+        "tools",
+        "official_sources",
+        "browser_verification",
+        "forbidden_areas",
+        "local_secrets",
+        "source_priority",
+        "cost_strategy",
+    ]:
+        if key not in value:
+            continue
+        label = labels[key]
+        item = value[key]
+        if isinstance(item, list):
+            blocks.append(f"### {label}\n{_markdown_list(item)}")
+        else:
+            blocks.append(f"### {label}\n- {item}")
+    return "\n\n".join(blocks)
+
+
+def _render_named_items_section(title: str, value: object) -> str:
+    if not isinstance(value, dict) or not value:
+        return f"## {title}\n- None"
+    lines = [f"## {title}"]
+    for key, item in value.items():
+        label = key.replace("_", " ")
+        lines.append(f"- {label}: {item}")
+    return "\n".join(lines)
 
 
 def write_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -618,7 +705,7 @@ def _evidence_is_weak(evidence: list[str]) -> bool:
 
 
 def _next_action_id(action_id: str) -> str:
-    order = ["inspect", "act", "verify", "decide"]
+    order = ["inspect", "act", "verify", "persist", "decide"]
     if action_id not in order:
         return "inspect"
     return order[(order.index(action_id) + 1) % len(order)]
@@ -656,7 +743,7 @@ def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:
         "eval": {
             "source": "LLM eval harnesses",
             "assertions": [
-                "loop has inspect/act/verify/decide cycle",
+                "loop has inspect/act/verify/persist/decide cycle",
                 "each verifier has observable evidence",
                 "stop and rollback are explicit",
                 "agent report is machine-checkable JSON",
@@ -668,8 +755,8 @@ def _design_patterns(loop: dict[str, Any]) -> dict[str, Any]:
 def _tightened_brief(loop: dict[str, Any]) -> str:
     return (
         f"Run a stateful loop around \"{loop['goal']}\": inspect real context, "
-        "take the smallest useful action, verify each gate, then stop, continue, "
-        "rollback, or ask for human confirmation before changing external state."
+        "take the smallest useful action, verify each gate, persist evidence, then stop, "
+        "continue, rollback, or ask for human confirmation before changing external state."
     )
 
 
@@ -692,11 +779,36 @@ def _build_cycle(goal: str, verifier_inputs: list[str]) -> list[dict[str, str]]:
             "expected_output": "Pass, fail, or missing-evidence status for each verifier",
         },
         {
+            "id": "persist",
+            "instruction": "Write this turn's evidence, verifier results, state change, and next action to durable memory.",
+            "expected_output": "Updated PROGRESS.md, reports.jsonl entry, or equivalent durable state",
+        },
+        {
             "id": "decide",
             "instruction": "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
             "expected_output": "Next action and stop decision",
         },
     ]
+
+
+def _build_loop_parts() -> dict[str, str]:
+    return {
+        "automation": "Define the trigger, cadence, or wake-up condition that discovers work without a manual prompt.",
+        "isolation": "Use worktrees or an equivalent boundary when parallel agents could touch the same files.",
+        "skills": "Put repeatable project knowledge in reusable instructions instead of retyping a long prompt each turn.",
+        "connectors": "List external systems the loop may read or update; keep filesystem-only loops explicit when there are none.",
+        "evaluator": "Keep the maker away from the checker: verifier evidence must be reviewable by a separate pass or human.",
+        "memory": "Persist progress on disk or in an external tracker; do not rely on the chat context as memory.",
+    }
+
+
+def _build_cost_controls() -> dict[str, str]:
+    return {
+        "verification_debt": "Do not accept self-graded completion; require concrete verifier evidence before stop.",
+        "comprehension_rot": "Keep summaries and changed-state notes current so a human can still explain what changed.",
+        "token_blowout": "Use one bounded target per turn, max iterations, and explicit stop rules to cap runaway work.",
+        "cognitive_surrender": "Keep human gates for scope changes, external effects, and judgment calls the loop cannot own.",
+    }
 
 
 def _build_stop_rules(external_effects: list[str]) -> list[str]:

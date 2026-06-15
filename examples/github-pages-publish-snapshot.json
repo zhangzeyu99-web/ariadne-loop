@@ -1,0 +1,35 @@
+{
+  "title": "GitHub Pages Publishing",
+  "goal": "Publish a static site only after local rendering, links, and remote Pages behavior are verified",
+  "current_state": "The docs site exists locally, but remote Pages state may lag or be blocked",
+  "recent_progress": [
+    "Static files are under docs/",
+    "Local preview URL is known"
+  ],
+  "constraints": [
+    "Do not assume Pages is fixed until the public URL is read back",
+    "Do not edit GitHub Actions when account-level Actions are disabled"
+  ],
+  "verifiers": [
+    "Local homepage renders",
+    "Local mobile viewport has no obvious overlap",
+    "README and docs links resolve",
+    "Public Pages URL returns the expected page or a documented external blocker"
+  ],
+  "external_effects": [
+    "commit",
+    "push",
+    "GitHub Pages publish"
+  ],
+  "risk": "medium",
+  "harness": {
+    "tools": ["python http.server", "Browser", "git"],
+    "official_sources": ["GitHub Pages settings", "repository docs/ files"],
+    "browser_verification": ["Check homepage and main tool page at 1280x800 and 390x844"],
+    "forbidden_areas": ["Do not create releases or tags for a docs-only Pages fix"],
+    "local_secrets": "Do not read tokens or credentials.",
+    "source_priority": ["repo/tests/current files", "official docs/API", "search", "model inference"],
+    "cost_strategy": ["Use stronger models for deployment diagnosis", "Use cheaper models for link and copy checks"]
+  }
+}
+

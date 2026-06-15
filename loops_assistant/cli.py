@@ -117,6 +117,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Overwrite quickstart files if they already exist.",
     )
 
+    audit_parser = subparsers.add_parser(
+        "audit", help="Read-only audit for a Loop Run Kit directory."
+    )
+    audit_parser.add_argument("--dir", required=True, help="Loop Run Kit directory.")
+    audit_parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Audit output format.",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "make":
@@ -168,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "report":
         try:
-            parse_agent_report(Path(args.input).read_text(encoding="utf-8"))
+            parse_agent_report(Path(args.input).read_text(encoding="utf-8-sig"))
         except (json.JSONDecodeError, ValueError) as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -247,6 +258,27 @@ def main(argv: list[str] | None = None) -> int:
             ],
             "external_effects": ["commit", "push", "pull request"],
             "risk": "medium",
+            "harness": {
+                "tools": ["python", "pytest", "git"],
+                "official_sources": ["project README", "current repository files"],
+                "browser_verification": [
+                    "Use browser checks when the loop changes public pages"
+                ],
+                "forbidden_areas": [
+                    "Do not tag, release, publish, or push without human confirmation"
+                ],
+                "local_secrets": "Do not read local secrets or private config unless the user explicitly asks.",
+                "source_priority": [
+                    "official docs/API",
+                    "repo/tests/current files",
+                    "search",
+                    "model inference",
+                ],
+                "cost_strategy": [
+                    "Use stronger models for hard design or repair turns",
+                    "Use cheaper models for formatting, sync, and final checks",
+                ],
+            },
         }
         loop = build_loop(snapshot)
         package = write_loop(snapshot)
@@ -294,11 +326,41 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(decision, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
+        files["progress"].write_text(
+            _render_quickstart_progress(loop, reports, decision),
+            encoding="utf-8",
+        )
+        files["runbook"].write_text(
+            _render_quickstart_runbook(output_dir, loop),
+            encoding="utf-8",
+        )
 
-        print(f"created Ariadne Loop quickstart in {output_dir}")
+        print(f"created Ariadne Loop quickstart Loop Run Kit in {output_dir}")
         print(f"agent packet: {files['agent_packet']}")
+        print(f"runbook: {files['runbook']}")
+        print(
+            "next command: "
+            f"ariadne-loop supervise --loop {files['loop']} "
+            f"--reports {files['reports']} --output {files['decision']}"
+        )
         print(f"decision: {files['decision']}")
         return 0
+
+    if args.command == "audit":
+        result = _audit_run_kit(Path(args.dir))
+        text = (
+            json.dumps(result, ensure_ascii=False, indent=2) + "\n"
+            if args.format == "json"
+            else _render_audit_text(result)
+        )
+        if result["ok"]:
+            print(text, end="")
+            return 0
+        if args.format == "json":
+            print(text, end="")
+        else:
+            print(text, end="", file=sys.stderr)
+        return 1
 
     return 2
 
@@ -311,7 +373,106 @@ def _quickstart_files(output_dir: Path) -> dict[str, Path]:
         "loop_report": output_dir / "loop-report.md",
         "reports": output_dir / "reports.jsonl",
         "decision": output_dir / "decision.json",
+        "progress": output_dir / "PROGRESS.md",
+        "runbook": output_dir / "RUNBOOK.md",
     }
+
+
+def _render_quickstart_progress(
+    loop: dict[str, object], reports: list[dict], decision: dict[str, object]
+) -> str:
+    passed = sorted(
+        {
+            gate
+            for report in reports
+            for gate in report.get("passed_verifiers", [])
+        }
+    )
+    failed = sorted(
+        {
+            gate
+            for report in reports
+            for gate in report.get("failed_verifiers", [])
+        }
+    )
+    latest = reports[-1] if reports else {}
+    passed_lines = _markdown_lines(passed)
+    failed_lines = _markdown_lines(failed)
+    evidence_lines = _markdown_lines(latest.get("evidence", []))
+    reasons = decision.get("reasons", [])
+
+    return f"""# Loop Run Kit Progress
+
+## Current Goal
+{loop["goal"]}
+
+## Completed
+- Created `snapshot.json`, `loop.json`, `agent-packet.md`, `reports.jsonl`, and `decision.json`.
+- Recorded {len(reports)} example agent reports.
+
+## Next Step
+{decision.get("next_action_id", latest.get("next_step", "inspect current state"))}
+
+## Verifier Record
+Passed:
+{passed_lines}
+
+Failed:
+{failed_lines}
+
+## Latest Evidence
+{evidence_lines}
+
+## Current Decision
+- decision: {decision.get("decision", "continue")}
+- reasons: {"; ".join(str(reason) for reason in reasons) if reasons else "None"}
+
+## Blockers
+- None in the generated quickstart. Add real blockers here before returning `needs_human`.
+"""
+
+
+def _render_quickstart_runbook(output_dir: Path, loop: dict[str, object]) -> str:
+    return f"""# Loop Run Kit Runbook
+
+Use this directory as a complete handoff package for one coding-agent loop.
+
+## Files
+- `snapshot.json`: editable task snapshot.
+- `loop.json`: machine-checkable loop contract.
+- `agent-packet.md`: instructions to hand to the coding agent.
+- `PROGRESS.md`: current goal, latest evidence, next step, and blockers.
+- `reports.jsonl`: one JSON report per agent turn.
+- `decision.json`: latest supervise decision.
+
+## Every Turn
+1. Inspect: read `PROGRESS.md`, `reports.jsonl`, `loop.json`, and the real project state.
+2. Act: make one verifiable change only.
+3. Verify: run the listed verifier gates and collect concrete evidence.
+4. Persist: update `PROGRESS.md` and append exactly one JSON object to `reports.jsonl`.
+5. Decide: run:
+
+```bash
+ariadne-loop supervise --loop {output_dir / "loop.json"} --reports {output_dir / "reports.jsonl"} --output {output_dir / "decision.json"}
+```
+
+## Stop Rules
+- Return `stop` when all verifiers pass with current evidence.
+- Return `needs_human` when approval, missing access, or unclear product intent blocks the next turn.
+- Return `rollback` when a verifier fails repeatedly or a change crosses a constraint.
+- Do not push, publish, release, or open a pull request without human confirmation.
+
+## Current Loop
+- name: {loop["name"]}
+- max_iterations: {loop["budget"]["max_iterations"]}
+- max_minutes: {loop["budget"]["max_minutes"]}
+"""
+
+
+def _markdown_lines(values: object) -> str:
+    if not isinstance(values, list) or not values:
+        return "- None"
+    return "\n".join(f"- {value}" for value in values)
 
 
 def _load_jsonl(path: Path) -> list[dict]:
@@ -326,3 +487,110 @@ def _load_jsonl(path: Path) -> list[dict]:
             raise ValueError(f"line {line_number} is not a JSON object")
         reports.append(value)
     return reports
+
+
+def _audit_run_kit(directory: Path) -> dict[str, object]:
+    files = _quickstart_files(directory)
+    required_files = {
+        "snapshot": "snapshot.json",
+        "loop": "loop.json",
+        "agent_packet": "agent-packet.md",
+        "loop_report": "loop-report.md",
+        "reports": "reports.jsonl",
+        "decision": "decision.json",
+        "progress": "PROGRESS.md",
+        "runbook": "RUNBOOK.md",
+    }
+    issues: list[str] = []
+    for key, filename in required_files.items():
+        if not files[key].exists():
+            issues.append(f"missing {filename}")
+
+    loop: dict[str, object] | None = None
+    reports: list[dict] = []
+    expected_decision: dict[str, object] | None = None
+    actual_decision: dict[str, object] | None = None
+
+    if files["loop"].exists():
+        try:
+            loaded_loop = json.loads(files["loop"].read_text(encoding="utf-8"))
+            if not isinstance(loaded_loop, dict):
+                issues.append("loop.json must contain a JSON object")
+            else:
+                loop = loaded_loop
+                loop_errors = validate_loop(loop)
+                issues.extend(f"loop.json: {error}" for error in loop_errors)
+        except (json.JSONDecodeError, OSError) as exc:
+            issues.append(f"loop.json: {exc}")
+
+    if files["reports"].exists():
+        try:
+            for line_number, line in enumerate(
+                files["reports"].read_text(encoding="utf-8-sig").splitlines(), 1
+            ):
+                if not line.strip():
+                    continue
+                try:
+                    reports.append(parse_agent_report(line))
+                except (json.JSONDecodeError, ValueError) as exc:
+                    issues.append(f"reports.jsonl line {line_number}: {exc}")
+        except OSError as exc:
+            issues.append(f"reports.jsonl: {exc}")
+
+    if files["decision"].exists():
+        try:
+            loaded_decision = json.loads(files["decision"].read_text(encoding="utf-8"))
+            if not isinstance(loaded_decision, dict):
+                issues.append("decision.json must contain a JSON object")
+            else:
+                actual_decision = loaded_decision
+        except (json.JSONDecodeError, OSError) as exc:
+            issues.append(f"decision.json: {exc}")
+
+    if loop is not None:
+        expected_decision = supervise_loop(loop, reports)
+        if actual_decision is not None and actual_decision != expected_decision:
+            issues.append("decision.json does not match current reports")
+
+    text_checks = {
+        "agent_packet": [
+            "PROGRESS.md",
+            "reports.jsonl",
+            "one verifiable change",
+            "Report Contract",
+        ],
+        "progress": ["Current Goal", "Next Step", "Verifier Record"],
+        "runbook": [
+            "reports.jsonl",
+            "ariadne-loop supervise",
+            "needs_human",
+            "rollback",
+        ],
+    }
+    for key, required_terms in text_checks.items():
+        if not files[key].exists():
+            continue
+        text = files[key].read_text(encoding="utf-8")
+        for term in required_terms:
+            if term not in text:
+                issues.append(f"{required_files[key]} missing {term}")
+
+    return {
+        "ok": not issues,
+        "issues": issues,
+        "directory": str(directory),
+        "reports": len(reports),
+        "expected_decision": expected_decision,
+    }
+
+
+def _render_audit_text(result: dict[str, object]) -> str:
+    if result["ok"]:
+        return (
+            "run kit audit passed\n"
+            f"reports: {result['reports']}\n"
+            f"decision: {result.get('expected_decision', {}).get('decision', 'unknown')}\n"
+        )
+    issues = result.get("issues", [])
+    lines = ["run kit audit failed", *[f"- {issue}" for issue in issues]]
+    return "\n".join(lines) + "\n"

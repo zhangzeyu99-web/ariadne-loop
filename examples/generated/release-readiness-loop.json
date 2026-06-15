@@ -44,6 +44,11 @@
       "expected_output": "Pass, fail, or missing-evidence status for each verifier"
     },
     {
+      "id": "persist",
+      "instruction": "Write this turn's evidence, verifier results, state change, and next action to durable memory.",
+      "expected_output": "Updated PROGRESS.md, reports.jsonl entry, or equivalent durable state"
+    },
+    {
       "id": "decide",
       "instruction": "Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results.",
       "expected_output": "Next action and stop decision"
@@ -94,6 +99,20 @@
   "memory": {
     "read": "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
     "write": "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step."
+  },
+  "loop_parts": {
+    "automation": "Define the trigger, cadence, or wake-up condition that discovers work without a manual prompt.",
+    "isolation": "Use worktrees or an equivalent boundary when parallel agents could touch the same files.",
+    "skills": "Put repeatable project knowledge in reusable instructions instead of retyping a long prompt each turn.",
+    "connectors": "List external systems the loop may read or update; keep filesystem-only loops explicit when there are none.",
+    "evaluator": "Keep the maker away from the checker: verifier evidence must be reviewable by a separate pass or human.",
+    "memory": "Persist progress on disk or in an external tracker; do not rely on the chat context as memory."
+  },
+  "cost_controls": {
+    "verification_debt": "Do not accept self-graded completion; require concrete verifier evidence before stop.",
+    "comprehension_rot": "Keep summaries and changed-state notes current so a human can still explain what changed.",
+    "token_blowout": "Use one bounded target per turn, max iterations, and explicit stop rules to cap runaway work.",
+    "cognitive_surrender": "Keep human gates for scope changes, external effects, and judgment calls the loop cannot own."
   },
   "budget": {
     "max_iterations": 3,

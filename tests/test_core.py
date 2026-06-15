@@ -109,6 +109,80 @@ def test_render_agent_packet_contains_execution_contract_and_parseable_report():
     assert report["evidence"]
 
 
+def test_build_loop_preserves_harness_and_agent_packet_renders_it():
+    loop = build_loop(
+        {
+            "title": "Browser release loop",
+            "goal": "Ship a static page only after visible browser checks pass",
+            "current_state": "The builder exists, but release harness details are missing",
+            "verifiers": ["desktop screenshot reviewed", "mobile screenshot reviewed"],
+            "harness": {
+                "tools": ["Browser", "pytest"],
+                "official_sources": ["Python docs"],
+                "browser_verification": ["check /playground.html at 390x844"],
+                "forbidden_areas": ["do not edit GitHub Actions"],
+                "local_secrets": "Do not read .env unless the user asks.",
+                "source_priority": [
+                    "official docs/API",
+                    "repo/tests/current files",
+                    "search",
+                    "model inference",
+                ],
+                "cost_strategy": [
+                    "strong model for hard repair",
+                    "cheap model for formatting checks",
+                ],
+            },
+        }
+    )
+
+    packet = render_agent_packet(loop)
+
+    assert loop["harness"]["tools"] == ["Browser", "pytest"]
+    assert "## Harness" in packet
+    assert "Browser" in packet
+    assert "official docs/API" in packet
+    assert "Do not read .env" in packet
+
+
+def test_generated_loop_has_persist_step_parts_and_cost_controls():
+    loop = build_loop(
+        {
+            "title": "Morning triage",
+            "goal": "Find one useful maintenance task and carry evidence across turns",
+            "current_state": "The repo has prior reports and needs one bounded next action",
+            "verifiers": ["pytest passes", "PROGRESS.md records the decision"],
+        }
+    )
+    packet = render_agent_packet(loop)
+
+    assert [step["id"] for step in loop["cycle"]] == [
+        "inspect",
+        "act",
+        "verify",
+        "persist",
+        "decide",
+    ]
+    assert set(loop["loop_parts"]) >= {
+        "automation",
+        "isolation",
+        "skills",
+        "connectors",
+        "evaluator",
+        "memory",
+    }
+    assert set(loop["cost_controls"]) >= {
+        "verification_debt",
+        "comprehension_rot",
+        "token_blowout",
+        "cognitive_surrender",
+    }
+    assert "## Loop Parts" in packet
+    assert "## Cost Controls" in packet
+    assert "verification debt" in packet
+    assert "persist" in packet
+
+
 def test_write_loop_adds_clarity_review_and_design_patterns():
     draft = {
         "title": "当前线程",
@@ -253,6 +327,34 @@ def test_supervise_loop_stops_on_repeated_failed_verifier():
     assert decision["decision"] == "rollback"
     assert decision["next_action_id"] == "inspect"
     assert "gate-1" in decision["reasons"][0]
+
+
+def test_supervise_loop_routes_verify_to_persist_before_decide():
+    loop = build_loop(
+        {
+            "title": "Partial verification",
+            "goal": "Persist partial verifier evidence before deciding the next turn",
+            "current_state": "One verifier has passed and another still needs evidence",
+            "verifiers": ["pytest", "browser smoke"],
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["pytest passed"],
+                "next_step": "record evidence in PROGRESS.md",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "continue"
+    assert decision["next_action_id"] == "persist"
 
 
 def test_supervise_loop_stops_when_all_verifiers_pass():

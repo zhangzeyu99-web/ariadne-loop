@@ -292,6 +292,24 @@
         margin-bottom: 14px;
       }
 
+      details.harness {
+        margin-top: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-3);
+        padding: 12px;
+      }
+
+      details.harness summary {
+        cursor: pointer;
+        font-weight: 780;
+        color: var(--teal-dark);
+      }
+
+      .harness-body {
+        margin-top: 12px;
+      }
+
       label {
         font-size: 13px;
         font-weight: 740;
@@ -463,6 +481,8 @@
           <div class="nav-links">
             <a href="./" data-i18n="navHome">Home</a>
             <a href="https://github.com/zhangzeyu99-web/ariadne-loop">GitHub</a>
+            <a href="./reports.html" data-i18n="navReports">Reports</a>
+            <a href="./case-packs.md" data-i18n="navCases">Cases</a>
             <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md" data-i18n="navWorkflow">Workflow</a>
           </div>
           <div class="lang-toggle" aria-label="Language">
@@ -476,10 +496,10 @@
     <main class="shell">
       <section class="intro">
         <div class="eyebrow" data-i18n="eyebrow">Local loop snapshot builder</div>
-        <h1 data-i18n="title">Shape the loop before the agent runs.</h1>
-        <p class="lead" data-i18n="lead">
-          Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.
-        </p>
+          <h1 data-i18n="title">Shape Loops Agents Can Run</h1>
+          <p class="lead" data-i18n="lead">
+            Fill once. Export a snapshot or packet. CLI quickstart builds the full Loop Run Kit.
+          </p>
       </section>
 
       <section class="summary-strip" aria-label="Builder benefits">
@@ -563,6 +583,35 @@
               <option value="high" data-label-key="riskHigh">high</option>
             </select>
           </div>
+
+          <details class="harness">
+            <summary data-i18n="harnessSummary">Harness</summary>
+            <div class="harness-body">
+              <p class="panel-note" data-i18n="harnessNote">
+                Optional operating rules for the agent.
+              </p>
+              <div class="field">
+                <label for="harnessTools" data-i18n="labelHarnessTools">Tools, one per line</label>
+                <textarea id="harnessTools" class="small"></textarea>
+              </div>
+              <div class="field">
+                <label for="harnessSources" data-i18n="labelHarnessSources">Official sources, one per line</label>
+                <textarea id="harnessSources" class="small"></textarea>
+              </div>
+              <div class="field">
+                <label for="harnessBrowser" data-i18n="labelHarnessBrowser">Browser checks, one per line</label>
+                <textarea id="harnessBrowser" class="small"></textarea>
+              </div>
+              <div class="field">
+                <label for="harnessForbidden" data-i18n="labelHarnessForbidden">Do not touch, one per line</label>
+                <textarea id="harnessForbidden" class="small"></textarea>
+              </div>
+              <div class="field">
+                <label for="harnessSecrets" data-i18n="labelHarnessSecrets">Secrets and local config rule</label>
+                <textarea id="harnessSecrets" class="small"></textarea>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div class="panel output-panel">
@@ -571,11 +620,12 @@
             <select id="outputMode">
               <option value="snapshot" data-label-key="outputSnapshot">Snapshot JSON</option>
               <option value="packet" data-label-key="outputPacket">Agent packet</option>
+              <option value="run-kit" data-label-key="outputRunKit">Run Kit ZIP</option>
             </select>
           </div>
           <h2 id="outputTitle" data-i18n="outputTitle">Snapshot JSON</h2>
           <p class="panel-note" data-i18n="outputNote">
-            Copy this into Ariadne Loop or your coding agent.
+            Copy this into Ariadne Loop or your coding agent. For a full Loop Run Kit, run quickstart.
           </p>
           <textarea id="output" class="output" readonly></textarea>
           <div class="actions">
@@ -586,7 +636,7 @@
           <p class="status" id="status" aria-live="polite"></p>
           <pre class="commands"><code id="commands"></code></pre>
           <p class="hint" data-i18n="hint">
-            Save as loop-snapshot.json, then run the commands above.
+            Save as loop-snapshot.json, or run ariadne-loop quickstart for PROGRESS.md, RUNBOOK.md, and reports.jsonl.
           </p>
         </div>
       </section>
@@ -597,11 +647,13 @@
         en: {
           brandSub: "造梦构建器",
           navHome: "Home",
+          navReports: "Reports",
+          navCases: "Cases",
           navWorkflow: "Workflow",
           eyebrow: "Local loop snapshot builder",
-          title: "Shape the loop before the agent runs.",
+          title: "Shape Loops Agents Can Run",
           lead:
-            "Fill once. Copy snapshot JSON or an agent packet. Everything stays in this browser.",
+            "Fill once. Export a snapshot or packet. CLI quickstart builds the full Loop Run Kit.",
           summaryLocalTitle: "Local",
           summaryLocalBody: "No account. No upload.",
           summaryLoopTitle: "Loop first",
@@ -623,23 +675,35 @@
           labelVerifiers: "Verifiers, one per line",
           labelEffects: "External effects, one per line",
           labelRisk: "Risk",
+          harnessSummary: "Harness",
+          harnessNote: "Optional operating rules for the agent.",
+          labelHarnessTools: "Tools, one per line",
+          labelHarnessSources: "Official sources, one per line",
+          labelHarnessBrowser: "Browser checks, one per line",
+          labelHarnessForbidden: "Do not touch, one per line",
+          labelHarnessSecrets: "Secrets and local config rule",
           labelOutputMode: "Output",
           outputTitle: "Snapshot JSON",
-          outputNote: "Copy this into Ariadne Loop or your coding agent.",
+          outputNote: "Lightweight handoff. Run CLI quickstart for the full Loop Run Kit.",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent packet",
+          outputRunKit: "Run Kit ZIP",
           copyButton: "Copy JSON",
           copyJson: "Copy JSON",
           copyPacket: "Copy packet",
+          copyRunKit: "Copy file list",
           downloadButton: "Download JSON",
           downloadJson: "Download JSON",
           downloadPacket: "Download packet",
+          downloadRunKit: "Download Run Kit ZIP",
           resetButton: "Reset preset",
-          hint: "Save as loop-snapshot.json, then run the commands above.",
+          hint: "Save as loop-snapshot.json, or run ariadne-loop quickstart for PROGRESS.md, RUNBOOK.md, and reports.jsonl.",
           copiedJson: "Copied JSON to clipboard.",
           copiedPacket: "Copied agent packet to clipboard.",
+          copiedRunKit: "Copied Run Kit file list.",
           downloadedJson: "Downloaded loop-snapshot.json.",
           downloadedPacket: "Downloaded agent-packet.md.",
+          downloadedRunKit: "Downloaded ariadne-loop-run-kit.zip.",
           presetRelease: "Release readiness",
           presetBugfix: "Bug repair",
           presetRefactor: "Incremental refactor",
@@ -652,11 +716,13 @@
         zh: {
           brandSub: "造梦构建器",
           navHome: "首页",
+          navReports: "报告",
+          navCases: "案例",
           navWorkflow: "工作流",
           eyebrow: "本地 Loop Snapshot 构建器",
-          title: "先写清循环，再让 Agent 开跑。",
+          title: "先写清循环，再让 Agent 开跑",
           lead:
-            "填一次。复制 snapshot JSON 或 Agent Packet。内容只留在浏览器里。",
+            "填一次，导出 snapshot 或 packet；完整 Loop Run Kit 交给 CLI quickstart。",
           summaryLocalTitle: "本地",
           summaryLocalBody: "不用账号，不上传。",
           summaryLoopTitle: "先写循环",
@@ -677,23 +743,35 @@
           labelVerifiers: "验证器，每行一条",
           labelEffects: "外部影响，每行一条",
           labelRisk: "风险",
+          harnessSummary: "运行护栏",
+          harnessNote: "可选：告诉 Agent 能用什么、先查哪里、不要碰哪里。",
+          labelHarnessTools: "可用工具，每行一条",
+          labelHarnessSources: "优先资料源，每行一条",
+          labelHarnessBrowser: "浏览器检查，每行一条",
+          labelHarnessForbidden: "禁止触碰，每行一条",
+          labelHarnessSecrets: "密钥和本地配置规则",
           labelOutputMode: "输出",
           outputTitle: "Snapshot JSON",
-          outputNote: "复制给 Ariadne Loop 或 Coding Agent。",
+          outputNote: "轻量交接用；完整 Loop Run Kit 用 quickstart。",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent Packet",
+          outputRunKit: "Run Kit ZIP",
           copyButton: "复制 JSON",
           copyJson: "复制 JSON",
           copyPacket: "复制 Agent Packet",
+          copyRunKit: "复制文件清单",
           downloadButton: "下载 JSON",
           downloadJson: "下载 JSON",
           downloadPacket: "下载 Agent Packet",
+          downloadRunKit: "下载 Run Kit ZIP",
           resetButton: "重置模板",
-          hint: "保存为 loop-snapshot.json，再运行上面的命令。",
+          hint: "保存为 loop-snapshot.json；或运行 ariadne-loop quickstart 生成 PROGRESS.md、RUNBOOK.md 和 reports.jsonl。",
           copiedJson: "已复制 JSON。",
           copiedPacket: "已复制 Agent Packet。",
+          copiedRunKit: "已复制 Run Kit 文件清单。",
           downloadedJson: "已下载 loop-snapshot.json。",
           downloadedPacket: "已下载 agent-packet.md。",
+          downloadedRunKit: "已下载 ariadne-loop-run-kit.zip。",
           presetRelease: "发布准备",
           presetBugfix: "Bug 修复",
           presetRefactor: "渐进重构",
@@ -864,6 +942,11 @@
         verifiers: document.getElementById("verifiers"),
         effects: document.getElementById("effects"),
         risk: document.getElementById("risk"),
+        harnessTools: document.getElementById("harnessTools"),
+        harnessSources: document.getElementById("harnessSources"),
+        harnessBrowser: document.getElementById("harnessBrowser"),
+        harnessForbidden: document.getElementById("harnessForbidden"),
+        harnessSecrets: document.getElementById("harnessSecrets"),
         outputMode: document.getElementById("outputMode"),
         outputTitle: document.getElementById("outputTitle"),
         output: document.getElementById("output"),
@@ -878,6 +961,31 @@
 
       let currentLang = "en";
       let lastLoadedPresetSnapshot = null;
+      let lastLoadedHarnessDefaults = null;
+
+      const harnessDefaults = {
+        en: {
+          tools: ["python", "pytest", "git", "Browser"],
+          official_sources: ["project README", "current repository files", "official docs/API when external facts matter"],
+          browser_verification: ["Check public pages at 1280x800 and 390x844 when UI changes"],
+          forbidden_areas: ["Do not tag, release, publish, or push without human confirmation"],
+          local_secrets: "Do not read local secrets or private config unless the user explicitly asks.",
+          source_priority: ["official docs/API", "repo/tests/current files", "search", "model inference"],
+          cost_strategy: [
+            "Use stronger models for hard design or repair turns",
+            "Use cheaper models for formatting, sync, and final checks"
+          ]
+        },
+        zh: {
+          tools: ["python", "pytest", "git", "Browser"],
+          official_sources: ["项目 README", "当前仓库文件", "涉及外部事实时优先查官方文档/API"],
+          browser_verification: ["页面改动后检查 1280x800 和 390x844"],
+          forbidden_areas: ["未经人确认，不要 tag、release、publish 或 push"],
+          local_secrets: "除非用户明确要求，不读取本地密钥或私有配置。",
+          source_priority: ["官方文档/API", "当前仓库、测试和真实文件", "搜索结果", "模型推断"],
+          cost_strategy: ["复杂设计或修复用强模型", "同步、格式化和收尾检查用低成本模型"]
+        }
+      };
 
       function getInitialLanguage() {
         const params = new URLSearchParams(window.location.search);
@@ -903,6 +1011,28 @@
         return values.join("\n");
       }
 
+      function harnessSnapshot() {
+        return {
+          tools: toLines(fields.harnessTools.value),
+          official_sources: toLines(fields.harnessSources.value),
+          browser_verification: toLines(fields.harnessBrowser.value),
+          forbidden_areas: toLines(fields.harnessForbidden.value),
+          local_secrets: fields.harnessSecrets.value.trim(),
+          source_priority: harnessDefaults[currentLang].source_priority,
+          cost_strategy: harnessDefaults[currentLang].cost_strategy
+        };
+      }
+
+      function loadHarnessDefaults(lang) {
+        const defaults = harnessDefaults[lang] || harnessDefaults.en;
+        fields.harnessTools.value = fromLines(defaults.tools);
+        fields.harnessSources.value = fromLines(defaults.official_sources);
+        fields.harnessBrowser.value = fromLines(defaults.browser_verification);
+        fields.harnessForbidden.value = fromLines(defaults.forbidden_areas);
+        fields.harnessSecrets.value = defaults.local_secrets;
+        lastLoadedHarnessDefaults = harnessSnapshot();
+      }
+
       function snapshot() {
         return {
           title: fields.title.value.trim(),
@@ -912,7 +1042,8 @@
           constraints: toLines(fields.constraints.value),
           verifiers: toLines(fields.verifiers.value),
           external_effects: toLines(fields.effects.value),
-          risk: fields.risk.value
+          risk: fields.risk.value,
+          harness: harnessSnapshot()
         };
       }
 
@@ -962,6 +1093,11 @@
             external_effects: externalEffects,
             risk
           },
+          state: {
+            status: "ready",
+            progress: value.recent_progress || [],
+            open_questions: []
+          },
           cycle: [
             {
               id: "inspect",
@@ -978,6 +1114,12 @@
               id: "verify",
               instruction: `Run or perform these verifiers: ${verifierSummary}`,
               expected_output: "Pass, fail, or missing-evidence status for each verifier"
+            },
+            {
+              id: "persist",
+              instruction:
+                "Write this turn's evidence, verifier results, state change, and next action to durable memory.",
+              expected_output: "Updated PROGRESS.md, reports.jsonl entry, or equivalent durable state"
             },
             {
               id: "decide",
@@ -997,16 +1139,84 @@
             action:
               "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope."
           },
+          memory: {
+            read:
+              "At the start of each turn, read prior state, failures, passed verifiers, and human approvals.",
+            write:
+              "At the end of each turn, write action_id, evidence, verifier results, stop decision, and next step."
+          },
+          loop_parts: {
+            automation:
+              "Define the trigger, cadence, or wake-up condition that discovers work without a manual prompt.",
+            isolation:
+              "Use worktrees or an equivalent boundary when parallel agents could touch the same files.",
+            skills:
+              "Put repeatable project knowledge in reusable instructions instead of retyping a long prompt each turn.",
+            connectors:
+              "List external systems the loop may read or update; keep filesystem-only loops explicit when there are none.",
+            evaluator:
+              "Keep the maker away from the checker: verifier evidence must be reviewable by a separate pass or human.",
+            memory:
+              "Persist progress on disk or in an external tracker; do not rely on the chat context as memory."
+          },
+          cost_controls: {
+            verification_debt:
+              "Do not accept self-graded completion; require concrete verifier evidence before stop.",
+            comprehension_rot:
+              "Keep summaries and changed-state notes current so a human can still explain what changed.",
+            token_blowout:
+              "Use one bounded target per turn, max iterations, and explicit stop rules to cap runaway work.",
+            cognitive_surrender:
+              "Keep human gates for scope changes, external effects, and judgment calls the loop cannot own."
+          },
           budget: {
             max_iterations: risk === "high" ? 2 : 3,
             max_minutes: risk === "high" ? 30 : 60
           },
-          human_gates: humanGates
+          human_gates: humanGates,
+          harness: value.harness,
+          agent_contract: {
+            output_format: "json",
+            required_fields: ["action_id", "status", "evidence", "next_step"],
+            allowed_statuses: ["continue", "needs_human", "rollback", "stop"]
+          }
         };
       }
 
       function markdownList(values) {
         return values.length ? values.map((value) => `- ${value}`).join("\n") : "- None";
+      }
+
+      function renderNamedItems(title, value) {
+        if (!value || !Object.keys(value).length) return `## ${title}\n- None`;
+        return `## ${title}\n${Object.entries(value)
+          .map(([key, item]) => `- ${key.replaceAll("_", " ")}: ${item}`)
+          .join("\n")}`;
+      }
+
+      function renderHarness(value) {
+        const harness = value.harness || {};
+        return `## Harness
+### Tools
+${markdownList(harness.tools || [])}
+
+### Official Sources
+${markdownList(harness.official_sources || [])}
+
+### Browser Verification
+${markdownList(harness.browser_verification || [])}
+
+### Forbidden Areas
+${markdownList(harness.forbidden_areas || [])}
+
+### Local Secrets
+- ${harness.local_secrets || "Do not read local secrets unless the user explicitly asks."}
+
+### Source Priority
+${markdownList(harness.source_priority || [])}
+
+### Cost Strategy
+${markdownList(harness.cost_strategy || [])}`;
       }
 
       function renderAgentPacket(value) {
@@ -1031,8 +1241,20 @@ ${markdownList(loop.context.constraints)}
 ## Cycle
 ${actionLines}
 
+${renderNamedItems("Loop Parts", loop.loop_parts)}
+
 ## Verifiers
 ${verifierLines}
+
+${renderHarness(value)}
+
+${renderNamedItems("Cost Controls", loop.cost_controls)}
+
+## Operating State
+- At the start of every turn, read \`PROGRESS.md\`, \`reports.jsonl\`, and the current project state before acting.
+- Work on one verifiable change per turn. Do not batch unrelated fixes into one report.
+- Persist verifier evidence, state changes, and next action before deciding whether the loop continues.
+- If the same verifier fails in consecutive turns, return \`rollback\` or \`needs_human\` instead of retrying blindly.
 
 ## Stop Rules
 ${markdownList(loop.stop_rules)}
@@ -1052,7 +1274,7 @@ Return JSON only. Do not add prose outside the JSON.
 
 \`\`\`json
 {
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",
@@ -1061,6 +1283,220 @@ Return JSON only. Do not add prose outside the JSON.
 }
 \`\`\`
 `;
+      }
+
+      function renderLoopReport(value) {
+        const loop = buildLoop(value);
+        return `# Ariadne Loop Report
+
+## Clear Loop
+- Name: ${loop.name}
+- Goal: ${loop.goal}
+- Current State: ${loop.context.current_state}
+
+## Harness
+${renderHarness(value)}
+
+## Agent Packet
+${renderAgentPacket(value)}`;
+      }
+
+      function emptyDecision() {
+        return {
+          decision: "continue",
+          next_action_id: "inspect",
+          reasons: ["no reports yet; start with inspect"],
+          iteration: 0,
+          covered_verifiers: [],
+          failed_verifiers: []
+        };
+      }
+
+      function renderProgress(value) {
+        const decision = emptyDecision();
+        return `# Loop Run Kit Progress
+
+## Current Goal
+${value.goal || `Move ${value.title || "the task"} to a verifiably complete state`}
+
+## Completed
+- Created \`snapshot.json\`, \`loop.json\`, \`agent-packet.md\`, \`reports.jsonl\`, and \`decision.json\`.
+- Generated an initial empty report log for the next agent turn.
+
+## Next Step
+${decision.next_action_id}
+
+## Verifier Record
+Passed:
+- None
+
+Failed:
+- None
+
+## Latest Evidence
+- None yet. The next agent must inspect real state before acting.
+
+## Current Decision
+- decision: ${decision.decision}
+- reasons: ${decision.reasons.join("; ")}
+
+## Blockers
+- None recorded. Add real blockers here before returning \`needs_human\`.
+`;
+      }
+
+      function renderRunbook(value) {
+        const loop = buildLoop(value);
+        return `# Loop Run Kit Runbook
+
+Use this directory as a complete handoff package for one coding-agent loop.
+
+## Files
+- \`snapshot.json\`: editable task snapshot.
+- \`loop.json\`: machine-checkable loop contract.
+- \`agent-packet.md\`: instructions to hand to the coding agent.
+- \`PROGRESS.md\`: current goal, latest evidence, next step, and blockers.
+- \`reports.jsonl\`: one JSON report per agent turn.
+- \`decision.json\`: latest supervise decision.
+
+## Every Turn
+1. Inspect: read \`PROGRESS.md\`, \`reports.jsonl\`, \`loop.json\`, and the real project state.
+2. Act: make one verifiable change only.
+3. Verify: run the listed verifier gates and collect concrete evidence.
+4. Persist: update \`PROGRESS.md\` and append exactly one JSON object to \`reports.jsonl\`.
+5. Decide: run:
+
+\`\`\`bash
+ariadne-loop supervise --loop loop.json --reports reports.jsonl --output decision.json
+ariadne-loop audit --dir .
+\`\`\`
+
+## Stop Rules
+- Return \`stop\` when all verifiers pass with current evidence.
+- Return \`needs_human\` when approval, missing access, or unclear product intent blocks the next turn.
+- Return \`rollback\` when a verifier fails repeatedly or a change crosses a constraint.
+- Do not push, publish, release, or open a pull request without human confirmation.
+
+## Current Loop
+- name: ${loop.name}
+- max_iterations: ${loop.budget.max_iterations}
+- max_minutes: ${loop.budget.max_minutes}
+`;
+      }
+
+      function runKitFiles(value) {
+        const loop = buildLoop(value);
+        return [
+          { name: "snapshot.json", content: JSON.stringify(value, null, 2) + "\n" },
+          { name: "loop.json", content: JSON.stringify(loop, null, 2) + "\n" },
+          { name: "agent-packet.md", content: renderAgentPacket(value) },
+          { name: "loop-report.md", content: renderLoopReport(value) },
+          { name: "PROGRESS.md", content: renderProgress(value) },
+          { name: "RUNBOOK.md", content: renderRunbook(value) },
+          { name: "reports.jsonl", content: "" },
+          { name: "decision.json", content: JSON.stringify(emptyDecision(), null, 2) + "\n" }
+        ];
+      }
+
+      function renderRunKitManifest(value) {
+        const files = runKitFiles(value).map((file) => `- ${file.name}`).join("\n");
+        return `Run Kit ZIP: ariadne-loop-run-kit.zip
+
+Files:
+${files}
+
+Next command:
+ariadne-loop audit --dir .
+
+Then give agent-packet.md to your coding agent.`;
+      }
+
+      function crcTable() {
+        const table = [];
+        for (let i = 0; i < 256; i += 1) {
+          let c = i;
+          for (let k = 0; k < 8; k += 1) {
+            c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          }
+          table[i] = c >>> 0;
+        }
+        return table;
+      }
+
+      const crcLookup = crcTable();
+
+      function crc32(bytes) {
+        let crc = 0xffffffff;
+        for (const byte of bytes) {
+          crc = crcLookup[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+        }
+        return (crc ^ 0xffffffff) >>> 0;
+      }
+
+      function dosDateTime(date) {
+        const year = Math.max(1980, date.getFullYear());
+        return {
+          date: ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate(),
+          time: (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2)
+        };
+      }
+
+      function makeZip(files) {
+        const encoder = new TextEncoder();
+        const now = dosDateTime(new Date());
+        const chunks = [];
+        const central = [];
+        let offset = 0;
+
+        files.forEach((file) => {
+          const name = encoder.encode(file.name);
+          const data = encoder.encode(file.content);
+          const checksum = crc32(data);
+          const localOffset = offset;
+          const local = new Uint8Array(30 + name.length);
+          const localView = new DataView(local.buffer);
+          localView.setUint32(0, 0x04034b50, true);
+          localView.setUint16(4, 20, true);
+          localView.setUint16(6, 0x0800, true);
+          localView.setUint16(8, 0, true);
+          localView.setUint16(10, now.time, true);
+          localView.setUint16(12, now.date, true);
+          localView.setUint32(14, checksum, true);
+          localView.setUint32(18, data.length, true);
+          localView.setUint32(22, data.length, true);
+          localView.setUint16(26, name.length, true);
+          local.set(name, 30);
+          chunks.push(local, data);
+          offset += local.length + data.length;
+
+          const dir = new Uint8Array(46 + name.length);
+          const dirView = new DataView(dir.buffer);
+          dirView.setUint32(0, 0x02014b50, true);
+          dirView.setUint16(4, 20, true);
+          dirView.setUint16(6, 20, true);
+          dirView.setUint16(8, 0x0800, true);
+          dirView.setUint16(10, 0, true);
+          dirView.setUint16(12, now.time, true);
+          dirView.setUint16(14, now.date, true);
+          dirView.setUint32(16, checksum, true);
+          dirView.setUint32(20, data.length, true);
+          dirView.setUint32(24, data.length, true);
+          dirView.setUint16(28, name.length, true);
+          dirView.setUint32(42, localOffset, true);
+          dir.set(name, 46);
+          central.push(dir);
+        });
+
+        const centralOffset = offset;
+        const centralSize = central.reduce((total, chunk) => total + chunk.length, 0);
+        const end = new Uint8Array(22);
+        const endView = new DataView(end.buffer);
+        endView.setUint32(0, 0x06054b50, true);
+        endView.setUint16(8, files.length, true);
+        endView.setUint16(10, files.length, true);
+        endView.setUint32(12, centralSize, true);
+        endView.setUint32(16, centralOffset, true);
+        return new Blob([...chunks, ...central, end], { type: "application/zip" });
       }
 
       function snapshotsEqual(left, right) {
@@ -1089,15 +1525,30 @@ Return JSON only. Do not add prose outside the JSON.
         const value = snapshot();
         const mode = fields.outputMode.value;
         const activeUi = ui[currentLang] || ui.en;
-        fields.output.value =
-          mode === "packet" ? renderAgentPacket(value) : JSON.stringify(value, null, 2) + "\n";
-        fields.outputTitle.textContent = mode === "packet" ? activeUi.outputPacket : activeUi.outputSnapshot;
-        fields.copyButton.textContent = mode === "packet" ? activeUi.copyPacket : activeUi.copyJson;
-        fields.downloadButton.textContent = mode === "packet" ? activeUi.downloadPacket : activeUi.downloadJson;
+        if (mode === "packet") {
+          fields.output.value = renderAgentPacket(value);
+          fields.outputTitle.textContent = activeUi.outputPacket;
+          fields.copyButton.textContent = activeUi.copyPacket;
+          fields.downloadButton.textContent = activeUi.downloadPacket;
+        } else if (mode === "run-kit") {
+          fields.output.value = renderRunKitManifest(value);
+          fields.outputTitle.textContent = activeUi.outputRunKit;
+          fields.copyButton.textContent = activeUi.copyRunKit;
+          fields.downloadButton.textContent = activeUi.downloadRunKit;
+        } else {
+          fields.output.value = JSON.stringify(value, null, 2) + "\n";
+          fields.outputTitle.textContent = activeUi.outputSnapshot;
+          fields.copyButton.textContent = activeUi.copyJson;
+          fields.downloadButton.textContent = activeUi.downloadJson;
+        }
         fields.verifierCount.textContent = String(value.verifiers.length);
         fields.constraintCount.textContent = String(value.constraints.length);
         fields.effectCount.textContent = String(value.external_effects.length);
-        fields.commands.textContent = [
+        fields.commands.textContent = mode === "run-kit" ? [
+          "unzip ariadne-loop-run-kit.zip -d .ariadne/run-kit",
+          "ariadne-loop audit --dir .ariadne/run-kit",
+          "# then hand .ariadne/run-kit/agent-packet.md to your coding agent"
+        ].join("\n") : [
           "ariadne-loop write \\",
           "  --input loop-snapshot.json \\",
           "  --output loop-report.md \\",
@@ -1116,6 +1567,8 @@ Return JSON only. Do not add prose outside the JSON.
       function setLanguage(lang) {
         const shouldTranslatePreset =
           lastLoadedPresetSnapshot && snapshotsEqual(snapshot(), lastLoadedPresetSnapshot);
+        const shouldTranslateHarness =
+          !lastLoadedHarnessDefaults || snapshotsEqual(harnessSnapshot(), lastLoadedHarnessDefaults);
         currentLang = lang;
         const activeUi = ui[currentLang] || ui.en;
 
@@ -1142,6 +1595,9 @@ Return JSON only. Do not add prose outside the JSON.
         params.set("lang", currentLang);
         window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
 
+        if (shouldTranslateHarness) {
+          loadHarnessDefaults(currentLang);
+        }
         if (shouldTranslatePreset) {
           loadPreset(fields.preset.value);
         } else {
@@ -1151,24 +1607,39 @@ Return JSON only. Do not add prose outside the JSON.
 
       async function copyJson() {
         await navigator.clipboard.writeText(fields.output.value);
-        const isPacket = fields.outputMode.value === "packet";
-        fields.status.textContent =
-          isPacket ? ui[currentLang].copiedPacket : ui[currentLang].copiedJson;
+        const mode = fields.outputMode.value;
+        fields.status.textContent = mode === "packet"
+          ? ui[currentLang].copiedPacket
+          : mode === "run-kit"
+            ? ui[currentLang].copiedRunKit
+            : ui[currentLang].copiedJson;
       }
 
       function downloadJson() {
-        const isPacket = fields.outputMode.value === "packet";
-        const blob = new Blob([fields.output.value], {
-          type: isPacket ? "text/markdown" : "application/json"
-        });
+        const mode = fields.outputMode.value;
+        const isPacket = mode === "packet";
+        const isRunKit = mode === "run-kit";
+        const blob = isRunKit
+          ? makeZip(runKitFiles(snapshot()))
+          : new Blob([fields.output.value], {
+              type: isPacket ? "text/markdown" : "application/json"
+            });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = isPacket ? "agent-packet.md" : "loop-snapshot.json";
+        link.download = isRunKit
+          ? "ariadne-loop-run-kit.zip"
+          : isPacket
+            ? "agent-packet.md"
+            : "loop-snapshot.json";
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(link.href);
-        fields.status.textContent = isPacket ? ui[currentLang].downloadedPacket : ui[currentLang].downloadedJson;
+        fields.status.textContent = isRunKit
+          ? ui[currentLang].downloadedRunKit
+          : isPacket
+            ? ui[currentLang].downloadedPacket
+            : ui[currentLang].downloadedJson;
       }
 
       fields.preset.addEventListener("change", () => loadPreset(fields.preset.value));
@@ -1177,6 +1648,9 @@ Return JSON only. Do not add prose outside the JSON.
         if (element.id !== "preset" && element.id !== "outputMode") {
           element.addEventListener("input", () => {
             lastLoadedPresetSnapshot = null;
+            if (element.id.startsWith("harness")) {
+              lastLoadedHarnessDefaults = null;
+            }
             render();
           });
         }
@@ -1189,6 +1663,7 @@ Return JSON only. Do not add prose outside the JSON.
       document.getElementById("resetButton").addEventListener("click", () => loadPreset(fields.preset.value));
 
       setLanguage(getInitialLanguage());
+      loadHarnessDefaults(currentLang);
       loadPreset("release");
     </script>
   </body>

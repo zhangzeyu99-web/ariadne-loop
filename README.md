@@ -4,27 +4,28 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Release](https://img.shields.io/github/v/release/zhangzeyu99-web/ariadne-loop?sort=semver)](https://github.com/zhangzeyu99-web/ariadne-loop/releases)
 
-Write verifiable Loop Engineering specs for Codex, Claude Code, OpenClaw, and AI coding agents.
+Write verifiable Loop Engineering specs and Loop Run Kit handoffs for Codex, Claude Code, OpenClaw, and AI coding agents.
 
-Ariadne Loop turns messy project notes, issue context, or an active coding-agent thread into a verifiable Loop Engineering spec: goal, state, cycle, verifiers, stop rules, rollback, budget, supervision rules, and a JSON report contract.
+Ariadne Loop turns messy project notes, issue context, or an active coding-agent thread into a verifiable Loop Engineering spec: goal, state, cycle, verifiers, stop rules, rollback, budget, supervision rules, and a JSON report contract. The quickstart command also writes a Loop Run Kit with progress tracking, reports, and a runbook the next agent can follow.
 
 It is not a prompt template library. It is a small loop-writing workbench for people who want agents to keep working without losing the evidence trail.
 
 ```mermaid
 flowchart LR
     A["Rough context"] --> B["Ariadne Loop"]
-    B --> C["Loop spec"]
-    B --> D["Agent packet"]
+    B --> C["Loop Run Kit"]
+    C --> D["Agent packet + PROGRESS.md"]
     D --> E["AI agent turn"]
-    E --> F["JSON report"]
-    F --> G{"Verifier passes?"}
-    G -- yes --> H["Stop or continue"]
-    G -- no --> I["Rollback or ask human"]
+    E --> F["reports.jsonl"]
+    F --> G["supervise decision"]
+    G --> H{"Verifier passes?"}
+    H -- yes --> I["Stop or continue"]
+    H -- no --> J["Rollback or ask human"]
 ```
 
 ## Why It Exists
 
-Loop Engineering is the move from one-off prompts to systems that repeatedly inspect, act, verify, and decide. The hard part is not making the prompt longer. The hard part is writing down:
+Loop Engineering is the move from one-off prompts to systems that repeatedly inspect, act, verify, persist, and decide. The hard part is not making the prompt longer. The hard part is writing down:
 
 - what the agent is allowed to change,
 - what external evidence proves progress,
@@ -83,6 +84,8 @@ Claude Code.
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
 If you want a copy-paste starting point for Codex or Claude Code, start with
 [Agent Recipes](docs/agent-recipes.md).
+For ready-made scenarios, use [Case Packs](docs/case-packs.md).
+To inspect an agent run, open the local [Reports viewer](https://zhangzeyu99-web.github.io/ariadne-loop/reports.html).
 If you want a reusable loop prompt template, use the
 [Agent Loop Template](https://zhangzeyu99-web.github.io/ariadne-loop/agent-loop-template.html).
 AI agents and search crawlers can start from
@@ -93,6 +96,16 @@ Create a complete demo loop:
 ```bash
 ariadne-loop quickstart --output .ariadne/quickstart
 ```
+
+This creates a Loop Run Kit: `agent-packet.md`, `PROGRESS.md`, `RUNBOOK.md`, `reports.jsonl`, `loop.json`, and `decision.json`.
+
+Audit a run kit before handing it to another agent:
+
+```bash
+ariadne-loop audit --dir .ariadne/quickstart
+```
+
+Project optimization work is tracked in [Project Optimization Roadmap](docs/project-optimization-roadmap.md).
 
 Create a starter snapshot:
 
@@ -207,10 +220,12 @@ ariadne-loop from-issue \
 
 A valid loop includes:
 
-- `inspect -> act -> verify -> decide` cycle,
+- `inspect -> act -> verify -> persist -> decide` cycle,
+- loop parts for automation, isolation, skills, connectors, evaluator, and memory,
 - observable verifiers,
 - stop rules,
 - rollback behavior,
+- cost controls for verification debt, comprehension rot, token blowout, and cognitive surrender,
 - human gates for external-impact actions,
 - budget limits,
 - a strict agent report contract.
@@ -219,7 +234,7 @@ Agent reports must be JSON:
 
 ```json
 {
-  "action_id": "verify",
+  "action_id": "persist",
   "status": "continue",
   "evidence": ["pytest passed", "README quick start generated expected files"],
   "next_step": "prepare release notes",
@@ -267,6 +282,7 @@ Ariadne Loop does not execute external actions. It only makes the decision expli
 - [Reference patterns](docs/reference-patterns.md)
 - [Use-case gallery](docs/use-cases.md)
 - [Loop spec anatomy](docs/loop-spec.md)
+- [Orange Book alignment](docs/orange-book-alignment.md)
 
 ## Development
 

@@ -14,7 +14,16 @@ Core tests pass, but the README quick start and generated examples need to be ch
 - `inspect`: Read real context, existing artifacts, and previous state. Confirm this turn has one verifiable target. -> Turn scope, known evidence, gaps, and explicit non-goals
 - `act`: Take the smallest useful action toward the goal: Prepare a public release without shipping broken docs, stale generated examples, or an unverified tag -> This turn's artifact or change list
 - `verify`: Run or perform these verifiers: pytest; python -m compileall loops_assistant; README quick start generates expected files; ariadne-loop check validates generated loop JSON; GitHub release target commit matches local HEAD -> Pass, fail, or missing-evidence status for each verifier
+- `persist`: Write this turn's evidence, verifier results, state change, and next action to durable memory. -> Updated PROGRESS.md, reports.jsonl entry, or equivalent durable state
 - `decide`: Decide whether to continue, stop, rollback, or ask for human confirmation based on verifier results. -> Next action and stop decision
+
+## Loop Parts
+- automation: Define the trigger, cadence, or wake-up condition that discovers work without a manual prompt.
+- isolation: Use worktrees or an equivalent boundary when parallel agents could touch the same files.
+- skills: Put repeatable project knowledge in reusable instructions instead of retyping a long prompt each turn.
+- connectors: List external systems the loop may read or update; keep filesystem-only loops explicit when there are none.
+- evaluator: Keep the maker away from the checker: verifier evidence must be reviewable by a separate pass or human.
+- memory: Persist progress on disk or in an external tracker; do not rely on the chat context as memory.
 
 ## Verifiers
 - `gate-1` (command): pytest
@@ -22,6 +31,21 @@ Core tests pass, but the README quick start and generated examples need to be ch
 - `gate-3` (checklist): README quick start generates expected files
 - `gate-4` (checklist): ariadne-loop check validates generated loop JSON
 - `gate-5` (checklist): GitHub release target commit matches local HEAD
+
+## Harness
+- No extra harness was supplied. Use the repo, current files, and listed verifiers as the source of truth.
+
+## Cost Controls
+- verification debt: Do not accept self-graded completion; require concrete verifier evidence before stop.
+- comprehension rot: Keep summaries and changed-state notes current so a human can still explain what changed.
+- token blowout: Use one bounded target per turn, max iterations, and explicit stop rules to cap runaway work.
+- cognitive surrender: Keep human gates for scope changes, external effects, and judgment calls the loop cannot own.
+
+## Operating State
+- At the start of every turn, read `PROGRESS.md`, `reports.jsonl`, and the current project state before acting.
+- Work on one verifiable change per turn. Do not batch unrelated fixes into one report.
+- Persist verifier evidence, state changes, and next action before deciding whether the loop continues.
+- If the same verifier fails in consecutive turns, return `rollback` or `needs_human` instead of retrying blindly.
 
 ## Stop Rules
 - Stop when every verifier has current evidence and passes.
@@ -46,7 +70,7 @@ Return JSON only. Do not add prose outside the JSON.
 
 ```json
 {
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",

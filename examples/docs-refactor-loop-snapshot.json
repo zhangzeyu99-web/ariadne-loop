@@ -1,0 +1,34 @@
+{
+  "title": "Documentation Refactor",
+  "goal": "Restructure documentation so readers can find the right workflow without breaking links or examples",
+  "current_state": "Useful docs exist, but the navigation and duplicated explanations need cleanup",
+  "recent_progress": [
+    "Main docs files are identified",
+    "Current link checker test exists"
+  ],
+  "constraints": [
+    "Do not remove examples unless a replacement link exists",
+    "Keep Chinese text readable and free of mojibake"
+  ],
+  "verifiers": [
+    "README and docs links resolve",
+    "Generated examples still match the CLI",
+    "Chinese docs contain no mojibake",
+    "Docs explain the next action without extra conceptual filler"
+  ],
+  "external_effects": [
+    "commit",
+    "push"
+  ],
+  "risk": "low",
+  "harness": {
+    "tools": ["pytest", "rg", "Browser"],
+    "official_sources": ["current docs", "README files"],
+    "browser_verification": ["Check changed public pages on desktop and mobile"],
+    "forbidden_areas": ["Do not rewrite unrelated docs sections"],
+    "local_secrets": "No secrets needed for docs refactor.",
+    "source_priority": ["repo/tests/current files", "official docs/API", "search", "model inference"],
+    "cost_strategy": ["Use stronger models for information architecture", "Use cheaper models for link checks and copy passes"]
+  }
+}
+

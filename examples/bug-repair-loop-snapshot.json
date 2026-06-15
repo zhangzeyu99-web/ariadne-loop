@@ -1,0 +1,33 @@
+{
+  "title": "Bug Repair",
+  "goal": "Fix a reproducible bug with a focused regression test and no unrelated behavior changes",
+  "current_state": "A failure has been observed, but root cause and safe repair boundary still need inspection",
+  "recent_progress": [
+    "Reproduction path is known",
+    "Likely files are identified"
+  ],
+  "constraints": [
+    "Do not refactor unrelated modules",
+    "Do not claim the bug is fixed without rerunning the failing path"
+  ],
+  "verifiers": [
+    "Regression test fails before the fix and passes after",
+    "Related tests pass",
+    "Diff contains no unrelated formatting churn"
+  ],
+  "external_effects": [
+    "commit",
+    "push"
+  ],
+  "risk": "medium",
+  "harness": {
+    "tools": ["pytest", "git"],
+    "official_sources": ["current tests", "current source files"],
+    "browser_verification": ["Use Browser only when the bug is visible in UI"],
+    "forbidden_areas": ["Do not change public API unless the bug requires it and the user agrees"],
+    "local_secrets": "No secrets needed for this loop.",
+    "source_priority": ["repo/tests/current files", "official docs/API", "search", "model inference"],
+    "cost_strategy": ["Use stronger models for unclear root cause", "Use cheaper models for repeated test runs and cleanup"]
+  }
+}
+

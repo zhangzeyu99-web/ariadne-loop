@@ -1,13 +1,16 @@
 # Ariadne Loop
 
-Ariadne Loop 是一个 Loop Engineering 写作工具。它把项目现状、线程上下文、GitHub issue 或粗略任务想法整理成可验证的 loop spec，并生成可以交给 AI agent 执行的任务包。
+Ariadne Loop 是一个 Loop Engineering 写作工具。它把项目现状、线程上下文、GitHub issue 或粗略任务想法整理成可验证的 loop spec，并生成可以交给 AI agent 执行的 Loop Run Kit（可运行任务包）。
 
 它不是 prompt 模板库。它解决的是：
 
 - AI 每轮到底 inspect 什么；
 - act 的范围怎么收紧；
 - verifier 用什么证据证明通过；
+- 证据和下一步怎么写进持久状态，而不是留在聊天里；
 - 什么时候继续、停止、回滚或找人确认；
+- 自动化、隔离、技能、连接器、评判器、记忆这六个零件是否齐；
+- 验证债、理解腐烂、token 失控、认知投降这四个成本有没有护栏；
 - agent 每轮必须返回什么结构化报告。
 
 ## 为什么叫 Ariadne
@@ -18,12 +21,24 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 
 可以先打开网页生成 snapshot：[Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)。
 如果要直接复制给 Codex 或 Claude Code，用这页开始：[Agent Recipes](docs/agent-recipes.md)。
+如果想从常见场景开始，用 [Case Packs](docs/case-packs.md)。
+如果要看 Agent 每轮报告，用 [Reports viewer](https://zhangzeyu99-web.github.io/ariadne-loop/reports.html)。
 
 一条命令生成完整 demo loop：
 
 ```bash
 ariadne-loop quickstart --output .ariadne/quickstart
 ```
+
+这会生成一套 Loop Run Kit：`agent-packet.md`、`PROGRESS.md`、`RUNBOOK.md`、`reports.jsonl`、`loop.json` 和 `decision.json`。
+
+交给下一个 Agent 前可以先审计：
+
+```bash
+ariadne-loop audit --dir .ariadne/quickstart
+```
+
+项目后续优化记录在 [Project Optimization Roadmap](docs/project-optimization-roadmap.md)。
 
 Codex skill 安装：
 
@@ -130,3 +145,4 @@ python -m compileall loops_assistant
 接入 Codex/Claude Code 的完整流程见 [Coding Agent Workflow](docs/coding-agent-workflow.md)。
 可复制的 agent recipes 见 [Agent Recipes](docs/agent-recipes.md)。
 常见验证器模板见 [Verifier Recipes](docs/verifier-recipes.md)。
+橙皮书研究和项目落地映射见 [Orange Book Alignment](docs/orange-book-alignment.md)。

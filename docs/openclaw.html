@@ -22,7 +22,7 @@
     <meta property="og:title" content="Ariadne Loop for OpenClaw" />
     <meta
       property="og:description"
-      content="Wrap OpenClaw tasks in inspect -> act -> verify -> decide loops with evidence-first reports."
+      content="Wrap OpenClaw tasks in inspect -> act -> verify -> persist -> decide loops with evidence-first reports."
     />
     <meta property="og:type" content="article" />
     <meta
@@ -298,7 +298,7 @@ curl -L https://raw.githubusercontent.com/zhangzeyu99-web/ariadne-loop/main/skil
 python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output openclaw-loop-demo
 # give openclaw-loop-demo/agent-packet.md to OpenClaw</code></pre>
-        <p>The packet follows inspect -> act -> verify -> decide, then returns a JSON-only status report.</p>
+        <p>The packet follows inspect -> act -> verify -> persist -> decide, then returns a JSON-only status report.</p>
       </section>
 
       <section>

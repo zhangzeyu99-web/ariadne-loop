@@ -32,16 +32,18 @@ Follow this process:
 
 4. If `ariadne-loop` is not installed, do not install it automatically. Write
    the snapshot and agent packet manually under `.ariadne/` using the same
-   inspect -> act -> verify -> decide structure.
+   inspect -> act -> verify -> persist -> decide structure.
 5. Execute only the smallest safe next action from the packet. Do not publish,
    push, send, delete, pay, or change external state unless the packet allows it
    and a human has explicitly approved.
 6. Run or perform the verifiers named in the packet.
-7. End with JSON only:
+7. Persist the verifier evidence and next action in `.ariadne/` state files when
+   the task has a run kit.
+8. End with JSON only:
 
 ```json
 {
-  "action_id": "inspect|act|verify|decide",
+  "action_id": "inspect|act|verify|persist|decide",
   "status": "continue|stop|needs_human|rollback",
   "evidence": ["specific evidence observed in this turn"],
   "next_step": "the next concrete action",

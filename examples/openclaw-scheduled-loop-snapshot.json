@@ -1,0 +1,34 @@
+{
+  "title": "OpenClaw Scheduled Work",
+  "goal": "Run recurring OpenClaw work with evidence, stop rules, and clear human handoff points",
+  "current_state": "The recurring task exists, but it needs stronger state tracking and repeated-failure handling",
+  "recent_progress": [
+    "Schedule is defined",
+    "Expected reports format is known"
+  ],
+  "constraints": [
+    "Do not keep retrying the same failed verifier without rollback or human input",
+    "Do not publish, delete, or send external output without confirmation"
+  ],
+  "verifiers": [
+    "Each scheduled run reads previous reports.jsonl",
+    "Each run appends exactly one JSON report",
+    "Repeated verifier failures trigger rollback or needs_human",
+    "Stop gates have current evidence"
+  ],
+  "external_effects": [
+    "scheduled run",
+    "notification",
+    "push"
+  ],
+  "risk": "medium",
+  "harness": {
+    "tools": ["OpenClaw", "ariadne-loop supervise", "ariadne-loop audit"],
+    "official_sources": ["current run kit files", "OpenClaw task configuration"],
+    "browser_verification": ["Only required when the scheduled task changes public pages"],
+    "forbidden_areas": ["Do not change production schedules without human confirmation"],
+    "local_secrets": "Do not read local credentials unless required by the scheduled task and approved.",
+    "source_priority": ["repo/tests/current files", "official docs/API", "search", "model inference"],
+    "cost_strategy": ["Use stronger models for loop redesign", "Use cheaper models for scheduled readback and report formatting"]
+  }
+}

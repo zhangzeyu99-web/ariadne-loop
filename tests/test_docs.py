@@ -63,6 +63,7 @@ def test_homepage_has_share_and_search_metadata():
     assert "Sitemap:" in robots
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/playground.html" in sitemap
+    assert "https://zhangzeyu99-web.github.io/ariadne-loop/reports.html" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/openclaw.html" in sitemap
     assert "https://zhangzeyu99-web.github.io/ariadne-loop/llms.txt" in sitemap
     assert "LLMs:" in robots
@@ -72,6 +73,45 @@ def test_homepage_has_share_and_search_metadata():
     assert "https://github.com/zhangzeyu99-web/ariadne-loop" in llms
     assert og_image.read_bytes().startswith(b"\x89PNG")
     assert hero_image.read_bytes().startswith(b"RIFF")
+
+
+def test_run_kit_public_docs_are_linked():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_zh = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+    index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    playground = (ROOT / "docs" / "playground.html").read_text(encoding="utf-8")
+    roadmap = (ROOT / "docs" / "project-optimization-roadmap.md").read_text(
+        encoding="utf-8"
+    )
+    reports = (ROOT / "docs" / "reports.html").read_text(encoding="utf-8")
+    case_packs = (ROOT / "docs" / "case-packs.md").read_text(encoding="utf-8")
+    orange_book = (ROOT / "docs" / "orange-book-alignment.md").read_text(
+        encoding="utf-8"
+    )
+
+    for source in [readme, readme_zh, index]:
+        assert "Loop Run Kit" in source
+        assert "project-optimization-roadmap.md" in source
+        assert "reports.html" in source
+        assert "case-packs.md" in source
+
+    assert "可运行任务包" in readme_zh
+    assert "Loop Run Kit" in playground
+    assert "Run Kit ZIP" in playground
+    assert "ariadne-loop audit --dir" in playground
+    assert "orange-book-alignment.md" in readme
+    assert "orange-book-alignment.md" in readme_zh
+    assert "reports.jsonl" in reports
+    assert "persist" in reports
+    assert "粘贴" in reports
+    assert "Desktop App" in case_packs
+    assert "GitHub Pages" in case_packs
+    assert "Loop Engineering Orange Book" in orange_book
+    assert "inspect -> act -> verify -> persist -> decide" in orange_book
+    assert "P1" in roadmap
+    assert "P2" in roadmap
+    assert "GitHub Pages" in roadmap
+    assert "Actions disabled" in roadmap
 
 
 def test_openclaw_page_has_search_metadata_and_setup():
@@ -85,7 +125,7 @@ def test_openclaw_page_has_search_metadata_and_setup():
     assert "application/ld+json" in page
     assert '"@type": "TechArticle"' in page
     assert "ariadne-loop quickstart" in page
-    assert "inspect -> act -> verify -> decide" in page
+    assert "inspect -> act -> verify -> persist -> decide" in page
 
 
 def test_playground_has_share_and_search_metadata():
@@ -123,6 +163,14 @@ def test_playground_contains_required_static_controls():
     assert "loop-snapshot.json" in playground
     assert "agent-packet.md" in playground
     assert "Agent packet" in playground
+    assert "Run Kit ZIP" in playground
+    assert "ariadne-loop-run-kit.zip" in playground
+    assert "PROGRESS.md" in playground
+    assert "RUNBOOK.md" in playground
+    assert "reports.jsonl" in playground
+    assert "loop_parts" in playground
+    assert "cost_controls" in playground
+    assert '"action_id": "inspect|act|verify|persist|decide"' in playground
     assert "Return JSON only" in playground
     assert "ariadne-loop check" in playground
     assert "造梦构建器" in playground
@@ -197,6 +245,7 @@ def test_public_chinese_content_has_no_mojibake():
         ROOT / "README.zh-CN.md",
         ROOT / "docs" / "index.html",
         ROOT / "docs" / "playground.html",
+        ROOT / "docs" / "reports.html",
     ]
     bad_tokens = [
         "\ufffd",
@@ -269,7 +318,7 @@ def test_codex_skill_is_installable_from_readme():
     assert "name: ariadne-loop" in skill
     assert "description:" in skill
     assert "short-description:" in skill
-    assert "inspect -> act -> verify -> decide" in skill
+    assert "inspect -> act -> verify -> persist -> decide" in skill
     assert "ariadne-loop quickstart" in skill
     assert "ariadne-loop init" in skill
     assert "ariadne-loop from-issue" in skill
@@ -294,7 +343,7 @@ def test_claude_code_command_is_documented_and_bounded():
     assert command.startswith("---\n")
     assert "allowed-tools:" in command
     assert "$ARGUMENTS" in command
-    assert "inspect -> act -> verify -> decide" in command
+    assert "inspect -> act -> verify -> persist -> decide" in command
     assert "do not install it automatically" in command
     assert "dangerously-skip-permissions" not in command
     assert '"status": "continue|stop|needs_human|rollback"' in command

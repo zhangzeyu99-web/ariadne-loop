@@ -295,6 +295,28 @@ def test_cli_report_validates_agent_json_report(tmp_path):
     assert "valid" in result.stdout
 
 
+def test_cli_report_accepts_utf8_bom_json(tmp_path):
+    report_path = tmp_path / "agent-report.json"
+    report_path.write_bytes(
+        b"\xef\xbb\xbf"
+        + json.dumps(
+            {
+                "action_id": "persist",
+                "status": "continue",
+                "evidence": ["PROGRESS.md was updated"],
+                "next_step": "decide",
+                "passed_verifiers": [],
+                "failed_verifiers": [],
+            }
+        ).encode("utf-8")
+    )
+
+    result = run_cli("report", "--input", str(report_path))
+
+    assert result.returncode == 0, result.stderr
+    assert "valid" in result.stdout
+
+
 def test_agent_report_example_matches_public_schema_contract():
     schema = json.loads(
         (ROOT / "schemas" / "agent-report.schema.json").read_text(encoding="utf-8")
@@ -305,6 +327,7 @@ def test_agent_report_example_matches_public_schema_contract():
 
     assert set(schema["required"]).issubset(report)
     assert report["action_id"] in schema["properties"]["action_id"]["enum"]
+    assert "persist" in schema["properties"]["action_id"]["enum"]
     assert report["status"] in schema["properties"]["status"]["enum"]
     assert isinstance(report["evidence"], list) and report["evidence"]
     assert isinstance(report["passed_verifiers"], list)
@@ -317,6 +340,28 @@ def test_agent_report_example_matches_public_schema_contract():
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_cli_report_accepts_persist_agent_report(tmp_path):
+    report_path = tmp_path / "persist-report.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "action_id": "persist",
+                "status": "continue",
+                "evidence": ["PROGRESS.md records latest verifier result"],
+                "next_step": "decide whether the loop can stop",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli("report", "--input", str(report_path))
+
+    assert result.returncode == 0, result.stderr
+    assert "valid" in result.stdout
 
 
 def test_cli_write_outputs_human_readable_loop_report(tmp_path):
@@ -431,6 +476,7 @@ def test_cli_supervise_accepts_utf8_bom_jsonl(tmp_path):
                     {"id": "inspect", "instruction": "inspect"},
                     {"id": "act", "instruction": "act"},
                     {"id": "verify", "instruction": "verify"},
+                    {"id": "persist", "instruction": "persist"},
                     {"id": "decide", "instruction": "decide"},
                 ],
                 "verifiers": [{"id": "gate-1", "instruction": "pytest"}],
@@ -492,6 +538,8 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
         "loop-report.md",
         "reports.jsonl",
         "decision.json",
+        "PROGRESS.md",
+        "RUNBOOK.md",
     ]
     for name in expected_files:
         assert (output_dir / name).exists(), name
@@ -499,10 +547,25 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
     loop = json.loads((output_dir / "loop.json").read_text(encoding="utf-8"))
     decision = json.loads((output_dir / "decision.json").read_text(encoding="utf-8"))
     packet = (output_dir / "agent-packet.md").read_text(encoding="utf-8")
+    progress = (output_dir / "PROGRESS.md").read_text(encoding="utf-8")
+    runbook = (output_dir / "RUNBOOK.md").read_text(encoding="utf-8")
 
     assert loop["name"] == "Quickstart bug repair Loop"
     assert decision["decision"] == "stop"
+    assert "Loop Run Kit" in result.stdout
     assert "Return JSON only" in packet
+    assert "PROGRESS.md" in packet
+    assert "reports.jsonl" in packet
+    assert "one verifiable change" in packet
+    assert "rollback" in packet
+    assert "needs_human" in packet
+    assert "Current Goal" in progress
+    assert "Next Step" in progress
+    assert "Verifier Record" in progress
+    assert "reports.jsonl" in runbook
+    assert "ariadne-loop supervise" in runbook
+    assert "needs_human" in runbook
+    assert "rollback" in runbook
     assert "created Ariadne Loop quickstart" in result.stdout
 
 
@@ -518,3 +581,74 @@ def test_cli_quickstart_does_not_overwrite_without_force(tmp_path):
     assert json.loads((output_dir / "snapshot.json").read_text(encoding="utf-8"))[
         "title"
     ] == "keep"
+
+
+def test_cli_audit_accepts_complete_quickstart_run_kit(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    quickstart = run_cli("quickstart", "--output", str(output_dir))
+
+    result = run_cli("audit", "--dir", str(output_dir))
+
+    assert quickstart.returncode == 0, quickstart.stderr
+    assert result.returncode == 0, result.stderr
+    assert "run kit audit passed" in result.stdout
+
+
+def test_cli_audit_reports_missing_run_kit_file(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    (output_dir / "PROGRESS.md").unlink()
+
+    result = run_cli("audit", "--dir", str(output_dir), "--format", "json")
+    audit = json.loads(result.stdout)
+
+    assert result.returncode == 1
+    assert any("missing PROGRESS.md" in issue for issue in audit["issues"])
+
+
+def test_cli_audit_rejects_bad_jsonl_report(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    (output_dir / "reports.jsonl").write_text("{not json}\n", encoding="utf-8")
+
+    result = run_cli("audit", "--dir", str(output_dir))
+
+    assert result.returncode == 1
+    assert "reports.jsonl line 1" in result.stderr
+
+
+def test_cli_audit_rejects_stale_decision(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    decision_path = output_dir / "decision.json"
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["decision"] = "continue"
+    decision_path.write_text(json.dumps(decision), encoding="utf-8")
+
+    result = run_cli("audit", "--dir", str(output_dir))
+
+    assert result.returncode == 1
+    assert "decision.json does not match current reports" in result.stderr
+
+
+def test_cli_audit_accepts_empty_reports_jsonl(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    (output_dir / "reports.jsonl").write_text("", encoding="utf-8")
+    decision = {
+        "decision": "continue",
+        "next_action_id": "inspect",
+        "reasons": ["no reports yet; start with inspect"],
+        "iteration": 0,
+        "covered_verifiers": [],
+        "failed_verifiers": [],
+    }
+    (output_dir / "decision.json").write_text(
+        json.dumps(decision, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    result = run_cli("audit", "--dir", str(output_dir))
+
+    assert result.returncode == 0, result.stderr
+    assert "run kit audit passed" in result.stdout
