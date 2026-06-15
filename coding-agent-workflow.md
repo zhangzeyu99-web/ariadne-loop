@@ -99,7 +99,7 @@ The decision is explicit:
 ```text
 Use this Ariadne Loop packet as your execution contract.
 
-Follow the inspect -> act -> verify -> decide cycle.
+Follow the inspect -> act -> verify -> persist -> decide cycle.
 Do not skip verifiers.
 Do not take external-impact actions unless the packet allows them and a human has approved.
 At the end of this turn, return only the JSON report requested by the packet.

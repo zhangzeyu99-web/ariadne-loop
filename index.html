@@ -523,6 +523,7 @@
             <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/use-cases.md" data-i18n="navUseCases">Use cases</a>
             <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/agent-recipes.md" data-i18n="navRecipes">Recipes</a>
             <a href="https://github.com/zhangzeyu99-web/ariadne-loop/blob/main/docs/coding-agent-workflow.md" data-i18n="navWorkflow">Workflow</a>
+            <a href="./project-optimization-roadmap.md" data-i18n="navRoadmap">Roadmap</a>
           </div>
           <div class="lang-toggle" aria-label="Language">
             <button type="button" data-lang="en" aria-pressed="true">EN</button>
@@ -538,8 +539,8 @@
           <div class="eyebrow" data-i18n="eyebrow">Loop Engineering for agents</div>
           <h1 data-i18n="heroTitle">Give Agents a Loop That Closes</h1>
           <p class="lead" data-i18n="heroLead">
-            Ariadne Loop turns scattered context into a loop contract:
-            inspect, act, verify, decide.
+            Ariadne Loop turns scattered context into a Loop Run Kit:
+            snapshot, packet, progress, reports, supervise.
           </p>
           <div class="actions">
             <a class="button primary" href="./playground.html" data-i18n="openBuilder">Open Builder</a>
@@ -548,7 +549,7 @@
           </div>
 <pre><code>python -m pip install git+https://github.com/zhangzeyu99-web/ariadne-loop.git
 ariadne-loop quickstart --output .ariadne/quickstart
-# hand agent-packet.md to your coding agent</code></pre>
+# hand the Loop Run Kit to your coding agent</code></pre>
         </div>
         <figure class="visual" aria-label="Ariadne Loop dream architect hero image">
           <picture>
@@ -571,10 +572,10 @@ ariadne-loop quickstart --output .ariadne/quickstart
 
       <section>
         <div class="shell">
-          <h2 data-i18n="whyTitle">For evidence-led agent work</h2>
+          <h2 data-i18n="whyTitle">From snapshot to running loop</h2>
           <p class="section-lead" data-i18n="whyLead">
-            Prompts are not enough. Keep scope, gates, reports, and human
-            handoffs in one place.
+            Keep the packet, progress file, report log, and supervise command
+            in one place.
           </p>
           <div class="grid">
             <div class="card">
@@ -586,8 +587,8 @@ ariadne-loop quickstart --output .ariadne/quickstart
               <p data-i18n="cardBuilderBody">Draft snapshot JSON in the browser.</p>
             </div>
             <div class="card">
-              <h3 data-i18n="cardPacketsTitle">Agent packets</h3>
-              <p data-i18n="cardPacketsBody">Hand off scope, constraints, gates, and budget.</p>
+              <h3 data-i18n="cardPacketsTitle">Loop Run Kit</h3>
+              <p data-i18n="cardPacketsBody">Hand off packet, progress, reports, and runbook.</p>
             </div>
             <div class="card">
               <h3 data-i18n="cardReportsTitle">Report validation</h3>
@@ -610,6 +611,11 @@ ariadne-loop quickstart --output .ariadne/quickstart
               <p data-i18n="cardOpenClawBody">Put scheduled work behind checks and stop rules.</p>
             </div>
           </div>
+          <p class="section-lead">
+            <a href="./reports.html" data-i18n="reportsLink">Open reports viewer</a>
+            ·
+            <a href="./case-packs.md" data-i18n="casesLink">Browse case packs</a>
+          </p>
         </div>
       </section>
 
@@ -676,10 +682,13 @@ ariadne-loop quickstart --output .ariadne/quickstart
           navUseCases: "Use cases",
           navRecipes: "Recipes",
           navWorkflow: "Workflow",
+          navRoadmap: "Roadmap",
+          reportsLink: "Open reports viewer",
+          casesLink: "Browse case packs",
           eyebrow: "Loop Engineering for agents",
           heroTitle: "Give Agents a Loop That Closes",
           heroLead:
-            "Ariadne Loop turns scattered context into a loop contract: inspect, act, verify, decide.",
+            "Ariadne Loop turns scattered context into a Loop Run Kit: snapshot, packet, progress, reports, supervise.",
           openBuilder: "Open Builder",
           viewGithub: "View on GitHub",
           quickStart: "Quick start",
@@ -687,18 +696,18 @@ ariadne-loop quickstart --output .ariadne/quickstart
           captionAct: "Act",
           captionVerify: "Verify",
           captionDecide: "Decide",
-          whyTitle: "For evidence-led agent work",
+          whyTitle: "From snapshot to running loop",
           whyLead:
-            "Prompts are not enough. Keep scope, gates, reports, and human handoffs in one place.",
+            "Keep the packet, progress file, report log, and supervise command in one place.",
           cardSpecsTitle: "Loop specs",
           cardSpecsBody:
             "Turn rough notes into inspect-act-verify-decide loops.",
           cardBuilderTitle: "Browser builder",
           cardBuilderBody:
             "Draft snapshot JSON in the browser.",
-          cardPacketsTitle: "Agent packets",
+          cardPacketsTitle: "Loop Run Kit",
           cardPacketsBody:
-            "Hand off scope, constraints, gates, and budget.",
+            "Hand off packet, progress, reports, and runbook.",
           cardReportsTitle: "Report validation",
           cardReportsBody:
             "Require parseable evidence, not status prose.",
@@ -739,54 +748,57 @@ ariadne-loop quickstart --output .ariadne/quickstart
           brandSub: "造梦师",
           navBuilder: "构建器",
           navTemplate: "模板",
-          navSpec: "规格",
+          navSpec: "说明",
           navUseCases: "场景",
-          navRecipes: "配方",
-          navWorkflow: "工作流",
-          eyebrow: "给 Agent 用的 Loop Engineering",
+          navRecipes: "模板库",
+          navWorkflow: "流程",
+          navRoadmap: "路线图",
+          reportsLink: "查看报告",
+          casesLink: "浏览案例包",
+          eyebrow: "给 Agent 的任务闭环工具",
           heroTitle: "给 Agent 一个能收口的循环",
           heroLead:
-            "造梦师把零散上下文变成 Loop 合约：读状态、小步改、验证、决策。",
+            "造梦师把零散需求整理成一套可运行任务包：现状、执行说明、进度、报告和护航命令都在里面。",
           openBuilder: "打开构建器",
           viewGithub: "查看 GitHub",
           quickStart: "快速开始",
-          captionInspect: "读状态",
-          captionAct: "小步改",
-          captionVerify: "验结果",
-          captionDecide: "做决策",
-          whyTitle: "为有证据的 Agent 工作而做",
+          captionInspect: "先看",
+          captionAct: "再改",
+          captionVerify: "验证",
+          captionDecide: "决策",
+          whyTitle: "从一段现状，到一套可跑的任务包",
           whyLead:
-            "提示词不够。造梦师把范围、门禁、报告和人工确认放在一处。",
-          cardSpecsTitle: "Loop 规格",
-          cardSpecsBody: "把粗略笔记变成 inspect-act-verify-decide 循环。",
+            "不用让 Agent 猜下一步；把说明、进度、报告和检查命令放在同一个包里。",
+          cardSpecsTitle: "把任务写清楚",
+          cardSpecsBody: "写明要做什么、现在到哪、什么算完成。",
           cardBuilderTitle: "浏览器构建器",
-          cardBuilderBody: "在浏览器里生成 snapshot JSON。",
-          cardPacketsTitle: "Agent Packet",
-          cardPacketsBody: "交接范围、限制、门禁和预算。",
-          cardReportsTitle: "报告校验",
-          cardReportsBody: "要可解析证据，不要口头进度。",
+          cardBuilderBody: "在网页里填一次，就能生成给 Agent 用的内容。",
+          cardPacketsTitle: "可运行任务包",
+          cardPacketsBody: "交给 Agent 后，它知道该读什么、做什么、怎么汇报。",
+          cardReportsTitle: "报告检查",
+          cardReportsBody: "要求写出证据，不能只说“完成了”。",
           cardSuperviseTitle: "持续护航",
-          cardSuperviseBody: "抓住跑偏、重复失败和回滚信号。",
-          cardRecipesTitle: "Agent 配方",
-          cardRecipesBody: "修复、发布、交接、PR 跟进直接可用。",
+          cardSuperviseBody: "发现跑偏、重复失败或需要回滚时，及时停下来。",
+          cardRecipesTitle: "常用模板",
+          cardRecipesBody: "修 Bug、发版、交接、PR 跟进都有现成写法。",
           cardClaudeTitle: "Claude Code 命令",
           cardClaudeBody: "在项目里运行 /ariadne-loop。",
-          cardOpenClawTitle: "OpenClaw 运维",
-          cardOpenClawBody: "给定时任务加检查和停止规则。",
-          flowTitle: "循环本身就是护栏",
+          cardOpenClawTitle: "OpenClaw 定时任务",
+          cardOpenClawBody: "给长期跑的任务加检查、停止和人工确认规则。",
+          flowTitle: "每一轮都按同一个节奏走",
           flowLead:
-            "Ariadne 先建迷宫，再留下线索。每一轮都必须可观察。",
-          stepInspectTitle: "读取真实状态",
-          stepInspectBody: "先读真实项目，再动手。",
-          stepActTitle: "小步行动",
-          stepActBody: "只做一个有边界的改动。",
-          stepVerifyTitle: "验证证据",
-          stepVerifyBody: "跑门禁，留下证据。",
+            "先看真实状态，再做一个小改动，然后验证并决定下一步。长任务不会跑散。",
+          stepInspectTitle: "先看清楚",
+          stepInspectBody: "先读真实项目、页面或日志，再开始改。",
+          stepActTitle: "只做一小步",
+          stepActBody: "每轮只做一个能验证的改动。",
+          stepVerifyTitle: "拿证据验证",
+          stepVerifyBody: "跑测试、看页面或读回结果，把证据留下。",
           stepDecideTitle: "决定下一轮",
-          stepDecideBody: "停止、继续、回滚，或找人确认。",
-          calloutTitle: "先写 snapshot。",
+          stepDecideBody: "继续、停止、回滚，还是找人确认。",
+          calloutTitle: "先把任务写清楚",
           calloutBody:
-            "记录一次状态，把 packet 交给 Agent。",
+            "打开构建器，填目标、现状、限制和验收方式，再交给 Agent 跑。",
           calloutButton: "打开构建器",
           footer: "MIT 许可。Aaron Zhang 制作。"
         }
