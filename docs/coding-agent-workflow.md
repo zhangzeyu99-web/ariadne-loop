@@ -19,9 +19,16 @@ For a complete demo directory first:
 ariadne-loop quickstart --output .ariadne/quickstart
 ```
 
-This creates a snapshot, loop JSON, agent packet, sample reports, and a
-supervision decision. Use it to see the full shape before writing your own
-snapshot.
+This creates a Loop Run Kit with a snapshot, loop JSON, agent packet,
+`PROGRESS.md`, `RUNBOOK.md`, `CONTROL.md`, `reports.jsonl`, and `decision.json`.
+Use it to see the full shape before writing your own snapshot.
+
+To continue the loop in plain language, generate the next agent prompt from the
+current decision:
+
+```bash
+ariadne-loop prompt --dir .ariadne/quickstart
+```
 
 For real work, start from a preset:
 
@@ -84,6 +91,13 @@ ariadne-loop supervise \
   --loop .ariadne/bugfix-loop.json \
   --reports .ariadne/reports.jsonl \
   --output .ariadne/decision.json
+```
+
+If the files live in a complete Run Kit directory with `loop.json`,
+`PROGRESS.md`, `reports.jsonl`, and `decision.json`, use:
+
+```bash
+ariadne-loop prompt --dir .ariadne/run-kit
 ```
 
 The decision is explicit:

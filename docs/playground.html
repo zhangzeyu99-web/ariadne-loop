@@ -461,11 +461,25 @@
 
       @media (max-width: 560px) {
         .shell {
-          width: min(100% - 28px, 1180px);
+          width: min(1180px, calc(100% - 28px));
+        }
+
+        nav {
+          gap: 12px;
+        }
+
+        .nav-row {
+          gap: 10px;
+        }
+
+        .lang-toggle button {
+          min-width: 38px;
         }
 
         h1 {
-          font-size: 34px;
+          font-size: 28px;
+          line-height: 1.16;
+          word-break: break-word;
         }
       }
     </style>
@@ -498,7 +512,7 @@
         <div class="eyebrow" data-i18n="eyebrow">Local loop snapshot builder</div>
           <h1 data-i18n="title">Shape Loops Agents Can Run</h1>
           <p class="lead" data-i18n="lead">
-            Fill once. Export a snapshot or packet. CLI quickstart builds the full Loop Run Kit.
+            Fill once. Export a snapshot, packet, or Run Kit ZIP with a next-turn prompt.
           </p>
       </section>
 
@@ -625,7 +639,7 @@
           </div>
           <h2 id="outputTitle" data-i18n="outputTitle">Snapshot JSON</h2>
           <p class="panel-note" data-i18n="outputNote">
-            Copy this into Ariadne Loop or your coding agent. For a full Loop Run Kit, run quickstart.
+            Copy this into Ariadne Loop or your coding agent. Run Kit ZIP includes progress, runbook, reports, and control prompts.
           </p>
           <textarea id="output" class="output" readonly></textarea>
           <div class="actions">
@@ -636,7 +650,7 @@
           <p class="status" id="status" aria-live="polite"></p>
           <pre class="commands"><code id="commands"></code></pre>
           <p class="hint" data-i18n="hint">
-            Save as loop-snapshot.json, or run ariadne-loop quickstart for PROGRESS.md, RUNBOOK.md, and reports.jsonl.
+            Save as loop-snapshot.json, or use Run Kit ZIP and ariadne-loop prompt --dir for the next agent turn.
           </p>
         </div>
       </section>
@@ -653,7 +667,7 @@
           eyebrow: "Local loop snapshot builder",
           title: "Shape Loops Agents Can Run",
           lead:
-            "Fill once. Export a snapshot or packet. CLI quickstart builds the full Loop Run Kit.",
+            "Fill once. Export a snapshot, packet, or Run Kit ZIP with a next-turn prompt.",
           summaryLocalTitle: "Local",
           summaryLocalBody: "No account. No upload.",
           summaryLoopTitle: "Loop first",
@@ -684,7 +698,7 @@
           labelHarnessSecrets: "Secrets and local config rule",
           labelOutputMode: "Output",
           outputTitle: "Snapshot JSON",
-          outputNote: "Lightweight handoff. Run CLI quickstart for the full Loop Run Kit.",
+          outputNote: "Snapshot and packet are lightweight. Run Kit ZIP adds progress, reports, and control prompts.",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent packet",
           outputRunKit: "Run Kit ZIP",
@@ -697,7 +711,7 @@
           downloadPacket: "Download packet",
           downloadRunKit: "Download Run Kit ZIP",
           resetButton: "Reset preset",
-          hint: "Save as loop-snapshot.json, or run ariadne-loop quickstart for PROGRESS.md, RUNBOOK.md, and reports.jsonl.",
+          hint: "Save as loop-snapshot.json, or use Run Kit ZIP and ariadne-loop prompt --dir for the next agent turn.",
           copiedJson: "Copied JSON to clipboard.",
           copiedPacket: "Copied agent packet to clipboard.",
           copiedRunKit: "Copied Run Kit file list.",
@@ -720,9 +734,9 @@
           navCases: "案例",
           navWorkflow: "工作流",
           eyebrow: "本地 Loop Snapshot 构建器",
-          title: "先写清循环，再让 Agent 开跑",
+          title: "写好循环，让 Agent 跑",
           lead:
-            "填一次，导出 snapshot 或 packet；完整 Loop Run Kit 交给 CLI quickstart。",
+            "填一次，导出 snapshot、packet，或带下一轮提示词的 Run Kit ZIP。",
           summaryLocalTitle: "本地",
           summaryLocalBody: "不用账号，不上传。",
           summaryLoopTitle: "先写循环",
@@ -752,7 +766,7 @@
           labelHarnessSecrets: "密钥和本地配置规则",
           labelOutputMode: "输出",
           outputTitle: "Snapshot JSON",
-          outputNote: "轻量交接用；完整 Loop Run Kit 用 quickstart。",
+          outputNote: "Snapshot 和 packet 适合轻量交接；Run Kit ZIP 会带进度、报告和控制提示词。",
           outputSnapshot: "Snapshot JSON",
           outputPacket: "Agent Packet",
           outputRunKit: "Run Kit ZIP",
@@ -765,7 +779,7 @@
           downloadPacket: "下载 Agent Packet",
           downloadRunKit: "下载 Run Kit ZIP",
           resetButton: "重置模板",
-          hint: "保存为 loop-snapshot.json；或运行 ariadne-loop quickstart 生成 PROGRESS.md、RUNBOOK.md 和 reports.jsonl。",
+          hint: "保存为 loop-snapshot.json；或下载 Run Kit ZIP，再用 ariadne-loop prompt --dir 接上下一轮。",
           copiedJson: "已复制 JSON。",
           copiedPacket: "已复制 Agent Packet。",
           copiedRunKit: "已复制 Run Kit 文件清单。",
@@ -1356,6 +1370,7 @@ Use this directory as a complete handoff package for one coding-agent loop.
 - \`loop.json\`: machine-checkable loop contract.
 - \`agent-packet.md\`: instructions to hand to the coding agent.
 - \`PROGRESS.md\`: current goal, latest evidence, next step, and blockers.
+- \`CONTROL.md\`: copyable natural-language prompts for continuing the loop.
 - \`reports.jsonl\`: one JSON report per agent turn.
 - \`decision.json\`: latest supervise decision.
 
@@ -1384,6 +1399,37 @@ ariadne-loop audit --dir .
 `;
       }
 
+      function renderControl(value) {
+        const loop = buildLoop(value);
+        return `# Natural Language Control
+
+Use this file when you want to steer the loop through plain language instead of rebuilding the prompt by hand.
+
+## Next Prompt Command
+
+\`\`\`bash
+ariadne-loop prompt --dir .
+ariadne-loop prompt --dir . --lang zh
+\`\`\`
+
+## English Prompt
+
+Continue this Loop Run Kit: \`.\`.
+Goal: ${loop.goal}
+Next action: inspect
+
+First read \`PROGRESS.md\`, \`reports.jsonl\`, \`decision.json\`, \`loop.json\`, and the real project state. Make one verifiable change only. Then run the verifiers, update \`PROGRESS.md\`, append one JSON line to \`reports.jsonl\`, and run \`ariadne-loop supervise\` to refresh \`decision.json\`. Return \`needs_human\` for missing access, unclear intent, or external effects. Return \`rollback\` when the same verifier fails repeatedly or a constraint is crossed.
+
+## 中文提示
+
+继续执行这个 Loop Run Kit：\`.\`。
+目标：${loop.goal}
+下一步动作：inspect
+
+先读 \`PROGRESS.md\`、\`reports.jsonl\`、\`decision.json\`、\`loop.json\` 和真实项目状态。本轮只做一个可验证改动；完成后运行验证器，更新 \`PROGRESS.md\`，向 \`reports.jsonl\` 追加一行 JSON，再运行 \`ariadne-loop supervise\` 刷新 \`decision.json\`。如果权限、目标或外部影响不清楚，返回 \`needs_human\`；如果同一验证器连续失败或改动越界，返回 \`rollback\`。
+`;
+      }
+
       function runKitFiles(value) {
         const loop = buildLoop(value);
         return [
@@ -1393,6 +1439,7 @@ ariadne-loop audit --dir .
           { name: "loop-report.md", content: renderLoopReport(value) },
           { name: "PROGRESS.md", content: renderProgress(value) },
           { name: "RUNBOOK.md", content: renderRunbook(value) },
+          { name: "CONTROL.md", content: renderControl(value) },
           { name: "reports.jsonl", content: "" },
           { name: "decision.json", content: JSON.stringify(emptyDecision(), null, 2) + "\n" }
         ];
@@ -1407,6 +1454,7 @@ ${files}
 
 Next command:
 ariadne-loop audit --dir .
+ariadne-loop prompt --dir .
 
 Then give agent-packet.md to your coding agent.`;
       }
@@ -1547,7 +1595,8 @@ Then give agent-packet.md to your coding agent.`;
         fields.commands.textContent = mode === "run-kit" ? [
           "unzip ariadne-loop-run-kit.zip -d .ariadne/run-kit",
           "ariadne-loop audit --dir .ariadne/run-kit",
-          "# then hand .ariadne/run-kit/agent-packet.md to your coding agent"
+          "ariadne-loop prompt --dir .ariadne/run-kit --lang zh",
+          "# paste the prompt into your coding agent"
         ].join("\n") : [
           "ariadne-loop write \\",
           "  --input loop-snapshot.json \\",

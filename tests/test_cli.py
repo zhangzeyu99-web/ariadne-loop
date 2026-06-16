@@ -540,6 +540,7 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
         "decision.json",
         "PROGRESS.md",
         "RUNBOOK.md",
+        "CONTROL.md",
     ]
     for name in expected_files:
         assert (output_dir / name).exists(), name
@@ -549,6 +550,7 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
     packet = (output_dir / "agent-packet.md").read_text(encoding="utf-8")
     progress = (output_dir / "PROGRESS.md").read_text(encoding="utf-8")
     runbook = (output_dir / "RUNBOOK.md").read_text(encoding="utf-8")
+    control = (output_dir / "CONTROL.md").read_text(encoding="utf-8")
 
     assert loop["name"] == "Quickstart bug repair Loop"
     assert decision["decision"] == "stop"
@@ -566,7 +568,11 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
     assert "ariadne-loop supervise" in runbook
     assert "needs_human" in runbook
     assert "rollback" in runbook
+    assert "Natural Language Control" in control
+    assert "ariadne-loop prompt --dir" in control
+    assert "one verifiable change" in control
     assert "created Ariadne Loop quickstart" in result.stdout
+    assert "next prompt:" in result.stdout
 
 
 def test_cli_quickstart_does_not_overwrite_without_force(tmp_path):
@@ -592,6 +598,68 @@ def test_cli_audit_accepts_complete_quickstart_run_kit(tmp_path):
     assert quickstart.returncode == 0, quickstart.stderr
     assert result.returncode == 0, result.stderr
     assert "run kit audit passed" in result.stdout
+
+
+def test_cli_prompt_outputs_natural_language_continue_instruction(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    reports = output_dir / "reports.jsonl"
+    decision = output_dir / "decision.json"
+    reports.write_text(
+        json.dumps(
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["Regression test covers the reported bug"],
+                "next_step": "persist verifier evidence before deciding",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    supervise = run_cli(
+        "supervise",
+        "--loop",
+        str(output_dir / "loop.json"),
+        "--reports",
+        str(reports),
+        "--output",
+        str(decision),
+    )
+
+    result = run_cli("prompt", "--dir", str(output_dir), "--lang", "zh")
+
+    assert supervise.returncode == 0, supervise.stderr
+    assert result.returncode == 0, result.stderr
+    assert "继续执行这个 Loop Run Kit" in result.stdout
+    assert "下一步动作：persist" in result.stdout
+    assert "PROGRESS.md" in result.stdout
+    assert "reports.jsonl" in result.stdout
+    assert "只做一个可验证改动" in result.stdout
+
+
+def test_cli_prompt_outputs_stop_instruction_for_completed_run_kit(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+
+    result = run_cli("prompt", "--dir", str(output_dir))
+
+    assert result.returncode == 0, result.stderr
+    assert "The loop can stop" in result.stdout
+    assert "summarize the evidence" in result.stdout
+
+
+def test_cli_prompt_works_for_run_kit_without_control_file(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    (output_dir / "CONTROL.md").unlink()
+
+    result = run_cli("prompt", "--dir", str(output_dir))
+
+    assert result.returncode == 0, result.stderr
+    assert "The loop can stop" in result.stdout
 
 
 def test_cli_audit_reports_missing_run_kit_file(tmp_path):

@@ -55,8 +55,16 @@ Use this skill when the user asks for any of these:
    ariadne-loop quickstart --output .ariadne/quickstart
    ```
 
-   This creates a snapshot, loop JSON, agent packet, sample reports, and a
-   supervision decision.
+   This creates a Loop Run Kit with a snapshot, loop JSON, agent packet,
+   progress file, runbook, control prompts, report log, and supervision
+   decision.
+
+   To continue the loop through natural-language control, generate the next
+   prompt from the current decision:
+
+   ```bash
+   ariadne-loop prompt --dir .ariadne/quickstart
+   ```
 
 5. For real work, prefer using the CLI:
 
@@ -83,6 +91,7 @@ Use this skill when the user asks for any of these:
      --loop loop.json \
      --reports reports.jsonl \
      --output decision.json
+   ariadne-loop prompt --dir .
    ```
 
 ## If the CLI Is Not Installed

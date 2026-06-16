@@ -30,12 +30,18 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 ariadne-loop quickstart --output .ariadne/quickstart
 ```
 
-这会生成一套 Loop Run Kit：`agent-packet.md`、`PROGRESS.md`、`RUNBOOK.md`、`reports.jsonl`、`loop.json` 和 `decision.json`。
+这会生成一套 Loop Run Kit：`agent-packet.md`、`PROGRESS.md`、`RUNBOOK.md`、`CONTROL.md`、`reports.jsonl`、`loop.json` 和 `decision.json`。
 
 交给下一个 Agent 前可以先审计：
 
 ```bash
 ariadne-loop audit --dir .ariadne/quickstart
+```
+
+生成下一轮可以直接粘给 Agent 的自然语言指令：
+
+```bash
+ariadne-loop prompt --dir .ariadne/quickstart --lang zh
 ```
 
 项目后续优化记录在 [Project Optimization Roadmap](docs/project-optimization-roadmap.md)。

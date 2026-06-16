@@ -97,12 +97,19 @@ Create a complete demo loop:
 ariadne-loop quickstart --output .ariadne/quickstart
 ```
 
-This creates a Loop Run Kit: `agent-packet.md`, `PROGRESS.md`, `RUNBOOK.md`, `reports.jsonl`, `loop.json`, and `decision.json`.
+This creates a Loop Run Kit: `agent-packet.md`, `PROGRESS.md`, `RUNBOOK.md`, `CONTROL.md`, `reports.jsonl`, `loop.json`, and `decision.json`.
 
 Audit a run kit before handing it to another agent:
 
 ```bash
 ariadne-loop audit --dir .ariadne/quickstart
+```
+
+Generate the next natural-language control prompt:
+
+```bash
+ariadne-loop prompt --dir .ariadne/quickstart
+ariadne-loop prompt --dir .ariadne/quickstart --lang zh
 ```
 
 Project optimization work is tracked in [Project Optimization Roadmap](docs/project-optimization-roadmap.md).

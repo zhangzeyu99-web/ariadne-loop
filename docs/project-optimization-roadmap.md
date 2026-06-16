@@ -29,6 +29,14 @@ Status: implemented in the current P1/P2 pass.
 - Added a `reports.jsonl` visualization page for progress, passed verifiers, repeated failures, and next action.
 - Added a read-only `ariadne-loop audit --dir <run-kit-dir>` command to check whether a run kit is complete and supervisable.
 
+## Product Flow: Natural-Language Control
+
+Status: implemented in the current product-flow pass.
+
+- Added `CONTROL.md` to new Loop Run Kits so users can copy a plain-language continuation prompt.
+- Added `ariadne-loop prompt --dir <run-kit-dir>` to generate the next prompt from the current `decision.json`.
+- Updated Builder Run Kit ZIP, README, and workflow docs so the standard flow is: create kit, audit kit, generate prompt, run one verified agent turn, append report, supervise again.
+
 ## External Blocker
 
 GitHub Pages is currently excluded from P0 acceptance because the repository is blocked by a GitHub account-level Actions disabled state. Repository settings already allow Actions and Pages, but workflow dispatch still returns `Actions has been disabled for this user`, and the public Pages URL remains 404 until GitHub restores the account capability.

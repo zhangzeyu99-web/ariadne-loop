@@ -99,8 +99,13 @@ def test_run_kit_public_docs_are_linked():
     assert "Loop Run Kit" in playground
     assert "Run Kit ZIP" in playground
     assert "ariadne-loop audit --dir" in playground
+    assert "ariadne-loop prompt --dir" in playground
+    assert "CONTROL.md" in playground
+    assert "Natural Language Control" in playground
     assert "orange-book-alignment.md" in readme
     assert "orange-book-alignment.md" in readme_zh
+    assert "ariadne-loop prompt --dir" in readme
+    assert "ariadne-loop prompt --dir" in readme_zh
     assert "reports.jsonl" in reports
     assert "persist" in reports
     assert "粘贴" in reports
@@ -167,7 +172,9 @@ def test_playground_contains_required_static_controls():
     assert "ariadne-loop-run-kit.zip" in playground
     assert "PROGRESS.md" in playground
     assert "RUNBOOK.md" in playground
+    assert "CONTROL.md" in playground
     assert "reports.jsonl" in playground
+    assert "ariadne-loop prompt --dir" in playground
     assert "loop_parts" in playground
     assert "cost_controls" in playground
     assert '"action_id": "inspect|act|verify|persist|decide"' in playground
@@ -175,7 +182,7 @@ def test_playground_contains_required_static_controls():
     assert "ariadne-loop check" in playground
     assert "造梦构建器" in playground
     assert "造梦师构建器" not in playground
-    assert "先写清循环" in playground
+    assert "写好循环，让 Agent 跑" in playground
     assert "presetRelease" in playground
 
 

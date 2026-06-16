@@ -128,6 +128,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Audit output format.",
     )
 
+    prompt_parser = subparsers.add_parser(
+        "prompt", help="Print the next natural-language control prompt for a Run Kit."
+    )
+    prompt_parser.add_argument("--dir", required=True, help="Loop Run Kit directory.")
+    prompt_parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default="en",
+        help="Prompt language.",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "make":
@@ -334,6 +345,10 @@ def main(argv: list[str] | None = None) -> int:
             _render_quickstart_runbook(output_dir, loop),
             encoding="utf-8",
         )
+        files["control"].write_text(
+            _render_control_file(output_dir, loop, decision),
+            encoding="utf-8",
+        )
 
         print(f"created Ariadne Loop quickstart Loop Run Kit in {output_dir}")
         print(f"agent packet: {files['agent_packet']}")
@@ -343,6 +358,7 @@ def main(argv: list[str] | None = None) -> int:
             f"ariadne-loop supervise --loop {files['loop']} "
             f"--reports {files['reports']} --output {files['decision']}"
         )
+        print(f"next prompt: ariadne-loop prompt --dir {output_dir}")
         print(f"decision: {files['decision']}")
         return 0
 
@@ -362,6 +378,14 @@ def main(argv: list[str] | None = None) -> int:
             print(text, end="", file=sys.stderr)
         return 1
 
+    if args.command == "prompt":
+        try:
+            print(_render_next_control_prompt(Path(args.dir), args.lang))
+        except (json.JSONDecodeError, OSError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        return 0
+
     return 2
 
 
@@ -375,6 +399,7 @@ def _quickstart_files(output_dir: Path) -> dict[str, Path]:
         "decision": output_dir / "decision.json",
         "progress": output_dir / "PROGRESS.md",
         "runbook": output_dir / "RUNBOOK.md",
+        "control": output_dir / "CONTROL.md",
     }
 
 
@@ -444,6 +469,7 @@ Use this directory as a complete handoff package for one coding-agent loop.
 - `PROGRESS.md`: current goal, latest evidence, next step, and blockers.
 - `reports.jsonl`: one JSON report per agent turn.
 - `decision.json`: latest supervise decision.
+- `CONTROL.md`: copyable natural-language control prompts.
 
 ## Every Turn
 1. Inspect: read `PROGRESS.md`, `reports.jsonl`, `loop.json`, and the real project state.
@@ -467,6 +493,132 @@ ariadne-loop supervise --loop {output_dir / "loop.json"} --reports {output_dir /
 - max_iterations: {loop["budget"]["max_iterations"]}
 - max_minutes: {loop["budget"]["max_minutes"]}
 """
+
+
+def _render_control_file(
+    output_dir: Path, loop: dict[str, object], decision: dict[str, object]
+) -> str:
+    next_prompt = _render_control_prompt(
+        directory=output_dir,
+        loop=loop,
+        decision=decision,
+        lang="en",
+    )
+    zh_prompt = _render_control_prompt(
+        directory=output_dir,
+        loop=loop,
+        decision=decision,
+        lang="zh",
+    )
+    return f"""# Natural Language Control
+
+Use this file when you want to steer a coding agent in plain language instead of rebuilding the prompt by hand.
+
+## Copy The Current Prompt
+
+```bash
+ariadne-loop prompt --dir {output_dir}
+ariadne-loop prompt --dir {output_dir} --lang zh
+```
+
+## English
+
+{next_prompt}
+
+## 中文
+
+{zh_prompt}
+
+## Control Rules
+
+- Point the agent at this Run Kit directory, not at scattered chat history.
+- Ask for one verifiable change per turn.
+- Require updates to `PROGRESS.md`, one appended JSON line in `reports.jsonl`, and a refreshed `decision.json`.
+- Use `needs_human` for missing access, unclear product intent, or external effects.
+- Use `rollback` when the same verifier fails repeatedly or the change crosses a constraint.
+"""
+
+
+def _render_next_control_prompt(directory: Path, lang: str) -> str:
+    files = _quickstart_files(directory)
+    required = [files["loop"], files["decision"], files["progress"], files["reports"]]
+    missing = [path.name for path in required if not path.exists()]
+    if missing:
+        raise ValueError(f"run kit missing files: {', '.join(missing)}")
+    loop = json.loads(files["loop"].read_text(encoding="utf-8"))
+    decision = json.loads(files["decision"].read_text(encoding="utf-8"))
+    return _render_control_prompt(directory=directory, loop=loop, decision=decision, lang=lang)
+
+
+def _render_control_prompt(
+    directory: Path,
+    loop: dict[str, object],
+    decision: dict[str, object],
+    lang: str,
+) -> str:
+    next_action = str(decision.get("next_action_id", "inspect"))
+    decision_name = str(decision.get("decision", "continue"))
+    reasons = decision.get("reasons", [])
+    reason_text = "; ".join(str(reason) for reason in reasons) if isinstance(reasons, list) else str(reasons)
+    goal = str(loop.get("goal", "complete the loop with current evidence"))
+    directory_text = str(directory)
+
+    if lang == "zh":
+        if decision_name == "stop":
+            return (
+                f"这个 Loop Run Kit 可以停止。请读取 `{directory_text}` 中的 `PROGRESS.md`、"
+                "`reports.jsonl` 和 `decision.json`，总结已通过的证据、剩余风险和是否需要人工收尾。"
+                "不要继续改代码，除非发现证据缺口。"
+            )
+        if decision_name == "needs_human":
+            return (
+                f"暂停这个 Loop Run Kit，并向人类确认下一步。目录：`{directory_text}`。"
+                f"原因：{reason_text or 'decision.json 要求人类确认'}。"
+                "不要继续执行外部影响动作。"
+            )
+        if decision_name == "rollback":
+            return (
+                f"回滚或收窄这个 Loop Run Kit 的上一轮改动。目录：`{directory_text}`。"
+                f"原因：{reason_text or 'decision.json 要求 rollback'}。"
+                "先记录失败证据，再回到 inspect。"
+            )
+        return (
+            f"继续执行这个 Loop Run Kit：`{directory_text}`。\n"
+            f"目标：{goal}\n"
+            f"下一步动作：{next_action}\n"
+            "先读 `PROGRESS.md`、`reports.jsonl`、`decision.json`、`loop.json` 和真实项目状态。"
+            "本轮只做一个可验证改动；完成后运行验证器，更新 `PROGRESS.md`，"
+            "向 `reports.jsonl` 追加一行 JSON，再运行 `ariadne-loop supervise` 刷新 `decision.json`。"
+            "如果需要 push、release、deploy、delete、send 或权限不清，返回 `needs_human`。"
+        )
+
+    if decision_name == "stop":
+        return (
+            f"The loop can stop. Read `{directory_text}/PROGRESS.md`, `reports.jsonl`, "
+            "and `decision.json`, then summarize the evidence, remaining risk, and any human handoff. "
+            "Do not keep changing files unless you find missing evidence."
+        )
+    if decision_name == "needs_human":
+        return (
+            f"Pause this Loop Run Kit and ask a human for the next decision. Directory: `{directory_text}`. "
+            f"Reason: {reason_text or 'decision.json requires human input'}. "
+            "Do not continue external-impact actions."
+        )
+    if decision_name == "rollback":
+        return (
+            f"Rollback or narrow the previous turn for this Loop Run Kit. Directory: `{directory_text}`. "
+            f"Reason: {reason_text or 'decision.json requests rollback'}. "
+            "Record failing evidence, then return to inspect."
+        )
+    return (
+        f"Continue this Loop Run Kit: `{directory_text}`.\n"
+        f"Goal: {goal}\n"
+        f"Next action: {next_action}\n"
+        "Read `PROGRESS.md`, `reports.jsonl`, `decision.json`, `loop.json`, and the real project state first. "
+        "Make one verifiable change only. Then run the verifiers, update `PROGRESS.md`, append exactly one JSON "
+        "line to `reports.jsonl`, and run `ariadne-loop supervise` to refresh `decision.json`. "
+        "Return `needs_human` before push, release, deploy, delete, send, or unclear permissions."
+    )
 
 
 def _markdown_lines(values: object) -> str:
@@ -500,6 +652,7 @@ def _audit_run_kit(directory: Path) -> dict[str, object]:
         "decision": "decision.json",
         "progress": "PROGRESS.md",
         "runbook": "RUNBOOK.md",
+        "control": "CONTROL.md",
     }
     issues: list[str] = []
     for key, filename in required_files.items():
@@ -565,6 +718,12 @@ def _audit_run_kit(directory: Path) -> dict[str, object]:
             "ariadne-loop supervise",
             "needs_human",
             "rollback",
+        ],
+        "control": [
+            "Natural Language Control",
+            "ariadne-loop prompt",
+            "one verifiable change",
+            "needs_human",
         ],
     }
     for key, required_terms in text_checks.items():
