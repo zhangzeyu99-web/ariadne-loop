@@ -44,6 +44,12 @@ ariadne-loop audit --dir .ariadne/quickstart
 ariadne-loop prompt --dir .ariadne/quickstart --lang zh
 ```
 
+这段提示词的意思是“连续跑 loop”：每轮只做一个可验证改动，然后刷新
+`decision.json`。如果结果还是 `continue`，Agent 应该立刻进入下一轮
+inspect，而不是做完一轮就总结收工。
+`stop` 只有在验证门槛都有当前证据时才会被接受，不能只靠 Agent 自报
+`status: stop`。
+
 项目后续优化记录在 [Project Optimization Roadmap](docs/project-optimization-roadmap.md)。
 
 Codex skill 安装：

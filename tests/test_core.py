@@ -382,3 +382,64 @@ def test_supervise_loop_stops_when_all_verifiers_pass():
 
     assert decision["decision"] == "stop"
     assert any("all verifiers passed" in reason for reason in decision["reasons"])
+
+
+def test_supervise_loop_rejects_agent_stop_when_verifiers_are_missing():
+    loop = build_loop(
+        {
+            "title": "Stop gate enforcement",
+            "goal": "Only stop after every verifier has current evidence",
+            "current_state": "One verifier still lacks evidence",
+            "verifiers": ["pytest", "browser smoke"],
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "stop",
+                "evidence": ["pytest passed"],
+                "next_step": "summarize",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "continue"
+    assert decision["next_action_id"] == "inspect"
+    assert decision["missing_verifiers"] == ["gate-2"]
+    assert any("agent reported stop" in reason for reason in decision["reasons"])
+
+
+def test_supervise_loop_budget_exhaustion_needs_human_before_completion():
+    loop = build_loop(
+        {
+            "title": "Budget is not completion",
+            "goal": "Do not call the loop complete just because budget ran out",
+            "current_state": "Verifier evidence is incomplete",
+            "verifiers": ["pytest", "browser smoke"],
+        }
+    )
+    loop["budget"]["max_iterations"] = 1
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["pytest passed"],
+                "next_step": "inspect remaining browser gate",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "needs_human"
+    assert decision["next_action_id"] == "decide"
+    assert decision["missing_verifiers"] == ["gate-2"]
+    assert any("budget exhausted" in reason for reason in decision["reasons"])

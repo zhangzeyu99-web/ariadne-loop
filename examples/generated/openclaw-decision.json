@@ -11,5 +11,7 @@
     "gate-3",
     "gate-4"
   ],
-  "failed_verifiers": []
+  "failed_verifiers": [],
+  "missing_verifiers": [],
+  "unresolved_failed_verifiers": []
 }

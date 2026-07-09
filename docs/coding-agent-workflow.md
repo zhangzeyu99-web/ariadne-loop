@@ -103,18 +103,21 @@ ariadne-loop prompt --dir .ariadne/run-kit
 The decision is explicit:
 
 - `continue`: keep working.
-- `stop`: all verifiers passed or the budget is exhausted.
+- `stop`: all verifier gates have current evidence and no unresolved failed gate remains.
 - `rollback`: the same verifier failed twice.
 - `needs_human`: the next step touches an external-impact action or the agent
-  requested help.
+  requested help. Budget exhaustion before the gates pass also routes here.
 
 ## Copyable Agent Prompt
 
 ```text
 Use this Ariadne Loop packet as your execution contract.
 
-Follow the inspect -> act -> verify -> persist -> decide cycle.
+Follow repeated inspect -> act -> verify -> persist -> decide iterations.
 Do not skip verifiers.
+One verifiable change means one change per iteration, not one change total.
+If the refreshed decision is continue, immediately start the next inspect iteration.
+Only return stop when stop gates have current evidence. Pause and explain the reason on needs_human, rollback, or budget exhaustion.
 Do not take external-impact actions unless the packet allows them and a human has approved.
 At the end of this turn, return only the JSON report requested by the packet.
 ```

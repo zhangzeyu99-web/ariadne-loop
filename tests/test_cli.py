@@ -558,7 +558,8 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
     assert "Return JSON only" in packet
     assert "PROGRESS.md" in packet
     assert "reports.jsonl" in packet
-    assert "one verifiable change" in packet
+    assert "one change per iteration" in packet
+    assert "If the refreshed decision is `continue`" in packet
     assert "rollback" in packet
     assert "needs_human" in packet
     assert "Current Goal" in progress
@@ -566,11 +567,14 @@ def test_cli_quickstart_creates_complete_demo(tmp_path):
     assert "Verifier Record" in progress
     assert "reports.jsonl" in runbook
     assert "ariadne-loop supervise" in runbook
+    assert "one change per iteration" in runbook
+    assert "immediately start the next inspect" in runbook
     assert "needs_human" in runbook
     assert "rollback" in runbook
     assert "Natural Language Control" in control
     assert "ariadne-loop prompt --dir" in control
-    assert "one verifiable change" in control
+    assert "one verifiable change per iteration" in control
+    assert "begin the next iteration" in control
     assert "created Ariadne Loop quickstart" in result.stdout
     assert "next prompt:" in result.stdout
 
@@ -637,7 +641,8 @@ def test_cli_prompt_outputs_natural_language_continue_instruction(tmp_path):
     assert "下一步动作：persist" in result.stdout
     assert "PROGRESS.md" in result.stdout
     assert "reports.jsonl" in result.stdout
-    assert "只做一个可验证改动" in result.stdout
+    assert "每轮只做一个可验证改动" in result.stdout
+    assert "立刻开始下一轮 inspect" in result.stdout
 
 
 def test_cli_prompt_outputs_stop_instruction_for_completed_run_kit(tmp_path):

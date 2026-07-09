@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Hardened Run Kit supervision so `status: stop` is accepted only after verifier gates have current evidence, and budget exhaustion now pauses for human review instead of pretending the goal is complete.
+
 ## 0.10.3 - 2026-06-11
 
 - Added `llms.txt` so AI agents and search crawlers can discover the project, docs, browser builder, and Claude Code command quickly.

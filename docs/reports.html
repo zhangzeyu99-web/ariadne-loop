@@ -524,19 +524,32 @@
           return { decision: "continue", next_action_id: "inspect", reasons: [copy[currentLang].noReports] };
         }
         const latest = reports[reports.length - 1];
-        if (["stop", "needs_human", "rollback"].includes(latest.status)) {
+        const verifierIds = loop && Array.isArray(loop.verifiers) ? loop.verifiers.map((gate) => gate.id) : [];
+        const passed = unique(reports.flatMap((report) => report.passed_verifiers || []));
+        const failed = unique(reports.flatMap((report) => report.failed_verifiers || []));
+        const latestFailed = latest.failed_verifiers || [];
+        const missing = verifierIds.filter((id) => !passed.includes(id));
+        const unresolved = unique([...latestFailed, ...failed.filter((id) => !passed.includes(id))]);
+        if (["needs_human", "rollback"].includes(latest.status)) {
           return { decision: latest.status, next_action_id: latest.status === "needs_human" ? "decide" : "inspect", reasons: [`agent reported ${latest.status}`] };
         }
         const repeated = repeatedFailure(reports);
         if (repeated) {
           return { decision: "rollback", next_action_id: "inspect", reasons: [`${repeated} failed in two consecutive reports`] };
         }
-        const verifierIds = loop && Array.isArray(loop.verifiers) ? loop.verifiers.map((gate) => gate.id) : [];
-        const passed = unique(reports.flatMap((report) => report.passed_verifiers || []));
-        if (verifierIds.length && verifierIds.every((id) => passed.includes(id))) {
+        if (latest.status === "stop" && (missing.length || unresolved.length)) {
+          const reasons = ["agent reported stop before stop gates were satisfied"];
+          if (missing.length) reasons.push(`missing verifier evidence: ${missing.join(", ")}`);
+          if (unresolved.length) reasons.push(`unresolved failed verifiers: ${unresolved.join(", ")}`);
+          return { decision: "continue", next_action_id: "inspect", reasons };
+        }
+        if (verifierIds.length && !missing.length && !unresolved.length) {
           return { decision: "stop", next_action_id: "decide", reasons: ["all verifiers passed"] };
         }
-        return { decision: "continue", next_action_id: nextActionId(latest.action_id), reasons: ["guardrails clear for next iteration"] };
+        const reasons = [];
+        if (missing.length) reasons.push(`missing verifier evidence: ${missing.join(", ")}`);
+        if (unresolved.length) reasons.push(`unresolved failed verifiers: ${unresolved.join(", ")}`);
+        return { decision: "continue", next_action_id: nextActionId(latest.action_id), reasons: reasons.length ? reasons : ["guardrails clear for next iteration"] };
       }
 
       function renderList(target, values) {

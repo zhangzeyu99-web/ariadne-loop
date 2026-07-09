@@ -331,8 +331,11 @@ def render_agent_packet(loop: dict[str, Any]) -> str:
 
 ## Operating State
 - At the start of every turn, read `PROGRESS.md`, `reports.jsonl`, and the current project state before acting.
-- Work on one verifiable change per turn. Do not batch unrelated fixes into one report.
+- Run repeated loop iterations when the user asks to execute a Run Kit. `One verifiable change` means one change per iteration, not one change total.
+- Work on one verifiable change per iteration. Do not batch unrelated fixes into one report.
 - Persist verifier evidence, state changes, and next action before deciding whether the loop continues.
+- If the refreshed decision is `continue`, immediately start the next inspect iteration unless a human gate, rollback, or budget limit blocks progress.
+- Return `stop` only when the stop rules have current evidence; do not stop just because one useful change passed.
 - If the same verifier fails in consecutive turns, return `rollback` or `needs_human` instead of retrying blindly.
 
 ## Stop Rules
@@ -529,9 +532,15 @@ def supervise_loop(
     failed = _unique_items(
         item for report in normalized_reports for item in report["failed_verifiers"]
     )
+    verifier_ids = [gate["id"] for gate in loop.get("verifiers", [])]
+    missing_verifiers = [item for item in verifier_ids if item not in set(covered)]
+    unresolved_failed = _unique_items(
+        list(latest["failed_verifiers"])
+        + [item for item in failed if item not in set(covered)]
+    )
 
     latest_status = latest["status"]
-    if latest_status in {"stop", "needs_human", "rollback"}:
+    if latest_status in {"needs_human", "rollback"}:
         return {
             "decision": latest_status,
             "next_action_id": "decide" if latest_status == "needs_human" else "inspect",
@@ -564,19 +573,24 @@ def supervise_loop(
             "failed_verifiers": failed,
         }
 
-    max_iterations = int(loop.get("budget", {}).get("max_iterations", 0))
-    if max_iterations and iteration >= max_iterations:
+    if latest_status == "stop" and (missing_verifiers or unresolved_failed):
+        reasons = ["agent reported stop before stop gates were satisfied"]
+        if missing_verifiers:
+            reasons.append("missing verifier evidence: " + ", ".join(missing_verifiers))
+        if unresolved_failed:
+            reasons.append("unresolved failed verifiers: " + ", ".join(unresolved_failed))
         return {
-            "decision": "stop",
-            "next_action_id": "decide",
-            "reasons": [f"budget exhausted at {iteration} iterations"],
+            "decision": "continue",
+            "next_action_id": "inspect",
+            "reasons": reasons,
             "iteration": iteration,
             "covered_verifiers": covered,
             "failed_verifiers": failed,
+            "missing_verifiers": missing_verifiers,
+            "unresolved_failed_verifiers": unresolved_failed,
         }
 
-    verifier_ids = [gate["id"] for gate in loop.get("verifiers", [])]
-    if verifier_ids and set(verifier_ids).issubset(set(covered)):
+    if verifier_ids and not missing_verifiers and not unresolved_failed:
         return {
             "decision": "stop",
             "next_action_id": "decide",
@@ -584,11 +598,35 @@ def supervise_loop(
             "iteration": iteration,
             "covered_verifiers": covered,
             "failed_verifiers": failed,
+            "missing_verifiers": [],
+            "unresolved_failed_verifiers": [],
+        }
+
+    max_iterations = int(loop.get("budget", {}).get("max_iterations", 0))
+    if max_iterations and iteration >= max_iterations:
+        reasons = [f"budget exhausted at {iteration} iterations before stop gates passed"]
+        if missing_verifiers:
+            reasons.append("missing verifier evidence: " + ", ".join(missing_verifiers))
+        if unresolved_failed:
+            reasons.append("unresolved failed verifiers: " + ", ".join(unresolved_failed))
+        return {
+            "decision": "needs_human",
+            "next_action_id": "decide",
+            "reasons": reasons,
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+            "missing_verifiers": missing_verifiers,
+            "unresolved_failed_verifiers": unresolved_failed,
         }
 
     reasons = []
     if _evidence_is_weak(latest["evidence"]):
         reasons.append("latest report evidence is weak; require concrete readback evidence")
+    if missing_verifiers:
+        reasons.append("missing verifier evidence: " + ", ".join(missing_verifiers))
+    if unresolved_failed:
+        reasons.append("unresolved failed verifiers: " + ", ".join(unresolved_failed))
 
     return {
         "decision": "continue",
@@ -597,6 +635,8 @@ def supervise_loop(
         "iteration": iteration,
         "covered_verifiers": covered,
         "failed_verifiers": failed,
+        "missing_verifiers": missing_verifiers,
+        "unresolved_failed_verifiers": unresolved_failed,
     }
 
 

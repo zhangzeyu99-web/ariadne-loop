@@ -112,6 +112,12 @@ ariadne-loop prompt --dir .ariadne/quickstart
 ariadne-loop prompt --dir .ariadne/quickstart --lang zh
 ```
 
+The generated prompt is meant to run a real loop: one verifiable change per
+iteration, then refresh `decision.json`. If the decision is still `continue`,
+the agent should start the next inspect step instead of summarizing as done.
+`stop` is accepted only when verifier gates have current evidence; an agent
+cannot stop the loop just by reporting `status: stop`.
+
 Project optimization work is tracked in [Project Optimization Roadmap](docs/project-optimization-roadmap.md).
 
 Create a starter snapshot:

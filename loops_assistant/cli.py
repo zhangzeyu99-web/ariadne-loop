@@ -460,7 +460,7 @@ Failed:
 def _render_quickstart_runbook(output_dir: Path, loop: dict[str, object]) -> str:
     return f"""# Loop Run Kit Runbook
 
-Use this directory as a complete handoff package for one coding-agent loop.
+Use this directory as a complete handoff package for a continuous coding-agent loop.
 
 ## Files
 - `snapshot.json`: editable task snapshot.
@@ -481,6 +481,12 @@ Use this directory as a complete handoff package for one coding-agent loop.
 ```bash
 ariadne-loop supervise --loop {output_dir / "loop.json"} --reports {output_dir / "reports.jsonl"} --output {output_dir / "decision.json"}
 ```
+
+## Loop Mode
+- `one verifiable change` means one change per iteration, not one change total.
+- If `decision.json` says `continue`, immediately start the next inspect -> act -> verify -> persist -> decide iteration.
+- Do not summarize and stop after a single successful iteration unless the stop rules have current evidence.
+- Stop only for `stop`, `needs_human`, `rollback`, or the loop budget.
 
 ## Stop Rules
 - Return `stop` when all verifiers pass with current evidence.
@@ -532,8 +538,10 @@ ariadne-loop prompt --dir {output_dir} --lang zh
 ## Control Rules
 
 - Point the agent at this Run Kit directory, not at scattered chat history.
-- Ask for one verifiable change per turn.
+- Ask for continuous execution until `stop`, `needs_human`, `rollback`, or budget exhaustion. Budget exhaustion is a pause, not proof that the goal is complete.
+- Ask for one verifiable change per iteration.
 - Require updates to `PROGRESS.md`, one appended JSON line in `reports.jsonl`, and a refreshed `decision.json`.
+- If `decision.json` says `continue`, require the agent to begin the next iteration instead of summarizing as done.
 - Use `needs_human` for missing access, unclear product intent, or external effects.
 - Use `rollback` when the same verifier fails repeatedly or the change crosses a constraint.
 """
@@ -586,9 +594,12 @@ def _render_control_prompt(
             f"继续执行这个 Loop Run Kit：`{directory_text}`。\n"
             f"目标：{goal}\n"
             f"下一步动作：{next_action}\n"
+            "连续运行 inspect -> act -> verify -> persist -> decide；每轮只做一个可验证改动，不是总共只做一个。"
             "先读 `PROGRESS.md`、`reports.jsonl`、`decision.json`、`loop.json` 和真实项目状态。"
-            "本轮只做一个可验证改动；完成后运行验证器，更新 `PROGRESS.md`，"
+            "完成一轮后运行验证器，更新 `PROGRESS.md`，"
             "向 `reports.jsonl` 追加一行 JSON，再运行 `ariadne-loop supervise` 刷新 `decision.json`。"
+            "如果刷新后仍是 `continue`，不要总结收工，立刻开始下一轮 inspect。"
+            "只有 stop gate 有当前证据时才返回 `stop`；遇到 `needs_human`、`rollback` 或预算耗尽时暂停并说明原因。"
             "如果需要 push、release、deploy、delete、send 或权限不清，返回 `needs_human`。"
         )
 
@@ -614,9 +625,13 @@ def _render_control_prompt(
         f"Continue this Loop Run Kit: `{directory_text}`.\n"
         f"Goal: {goal}\n"
         f"Next action: {next_action}\n"
-        "Read `PROGRESS.md`, `reports.jsonl`, `decision.json`, `loop.json`, and the real project state first. "
-        "Make one verifiable change only. Then run the verifiers, update `PROGRESS.md`, append exactly one JSON "
-        "line to `reports.jsonl`, and run `ariadne-loop supervise` to refresh `decision.json`. "
+        "Run repeated inspect -> act -> verify -> persist -> decide iterations. One verifiable change means one "
+        "change per iteration, not one change total. Read `PROGRESS.md`, `reports.jsonl`, `decision.json`, "
+        "`loop.json`, and the real project state first. After each iteration, run the verifiers, update "
+        "`PROGRESS.md`, append exactly one JSON line to `reports.jsonl`, and run `ariadne-loop supervise` to "
+        "refresh `decision.json`. If the refreshed decision is `continue`, immediately begin the next inspect "
+        "iteration instead of summarizing as done. Return `stop` only when stop gates have current evidence; "
+        "pause and explain the reason on `needs_human`, `rollback`, or budget exhaustion. "
         "Return `needs_human` before push, release, deploy, delete, send, or unclear permissions."
     )
 

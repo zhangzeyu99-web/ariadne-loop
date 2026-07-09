@@ -43,8 +43,11 @@ Gateway 自启动已修复，备份由 OpenClaw 自己执行
 
 ## Operating State
 - At the start of every turn, read `PROGRESS.md`, `reports.jsonl`, and the current project state before acting.
-- Work on one verifiable change per turn. Do not batch unrelated fixes into one report.
+- Run repeated loop iterations when the user asks to execute a Run Kit. `One verifiable change` means one change per iteration, not one change total.
+- Work on one verifiable change per iteration. Do not batch unrelated fixes into one report.
 - Persist verifier evidence, state changes, and next action before deciding whether the loop continues.
+- If the refreshed decision is `continue`, immediately start the next inspect iteration unless a human gate, rollback, or budget limit blocks progress.
+- Return `stop` only when the stop rules have current evidence; do not stop just because one useful change passed.
 - If the same verifier fails in consecutive turns, return `rollback` or `needs_human` instead of retrying blindly.
 
 ## Stop Rules
