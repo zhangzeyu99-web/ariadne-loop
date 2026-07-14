@@ -609,3 +609,95 @@ def test_unattended_policy_allows_declared_effects_but_blocks_undeclared_risk():
     assert deploy_decision["allowed_external_effects"] == ["deploy"]
     assert delete_decision["decision"] == "needs_human"
     assert delete_decision["blocked_external_effects"] == ["delete"]
+
+
+def test_supervise_loop_escalates_semantically_repeated_reports_as_stagnation():
+    loop = build_loop(
+        {
+            "title": "Stagnating repair",
+            "goal": "Stop repeating the same unsuccessful repair attempt",
+            "current_state": "The agent keeps observing the same failure",
+            "verifiers": ["regression test passes"],
+        }
+    )
+    reports = [
+        {
+            "action_id": "act",
+            "status": "continue",
+            "evidence": [
+                "2026-07-14T10:01:02Z failure at D:\\tmp\\run-101\\test_cli.py:42"
+            ],
+            "next_step": "retry repair attempt 1",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+        {
+            "action_id": "act",
+            "status": "continue",
+            "evidence": [
+                "2026-07-14T10:02:03Z failure at D:\\tmp\\run-202\\test_cli.py:57"
+            ],
+            "next_step": "retry repair attempt 2",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+        {
+            "action_id": "act",
+            "status": "continue",
+            "evidence": [
+                "2026-07-14T10:03:04Z failure at D:\\tmp\\run-303\\test_cli.py:88"
+            ],
+            "next_step": "retry repair attempt 3",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+    ]
+
+    decision = supervise_loop(loop, reports)
+
+    assert decision["decision"] == "needs_human"
+    assert decision["circuit_breaker"] == "stagnation"
+    assert any("same attempt" in reason for reason in decision["reasons"])
+
+
+def test_supervise_loop_escalates_repeated_next_step_without_new_verifier_progress():
+    loop = build_loop(
+        {
+            "title": "No progress repair",
+            "goal": "Escalate when multiple turns add no verifier evidence",
+            "current_state": "The agent is producing different notes but not clearing gates",
+            "verifiers": ["regression test passes", "related tests pass"],
+        }
+    )
+    reports = [
+        {
+            "action_id": "inspect",
+            "status": "continue",
+            "evidence": ["Inspected parser inputs"],
+            "next_step": "inspect parser again",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+        {
+            "action_id": "act",
+            "status": "continue",
+            "evidence": ["Tried a local parser adjustment"],
+            "next_step": "inspect parser again",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+        {
+            "action_id": "verify",
+            "status": "continue",
+            "evidence": ["Could not produce a passing verifier"],
+            "next_step": "inspect parser again",
+            "passed_verifiers": [],
+            "failed_verifiers": [],
+        },
+    ]
+
+    decision = supervise_loop(loop, reports)
+
+    assert decision["decision"] == "needs_human"
+    assert decision["circuit_breaker"] == "no_progress"
+    assert any("no new verifier" in reason for reason in decision["reasons"])

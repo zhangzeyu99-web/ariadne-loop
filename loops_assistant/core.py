@@ -643,6 +643,36 @@ def supervise_loop(
             "blocked_external_effects": effect_policy["blocked"],
         }
 
+    if _reports_are_stagnating(normalized_reports, threshold=3):
+        return {
+            "decision": "needs_human",
+            "next_action_id": "decide",
+            "reasons": [
+                "circuit breaker: the same attempt repeated three times; change the approach or ask a human"
+            ],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+            "missing_verifiers": missing_verifiers,
+            "unresolved_failed_verifiers": unresolved_failed,
+            "circuit_breaker": "stagnation",
+        }
+
+    if _reports_show_no_progress(normalized_reports, threshold=3):
+        return {
+            "decision": "needs_human",
+            "next_action_id": "decide",
+            "reasons": [
+                "circuit breaker: three consecutive reports added no new verifier evidence and repeated the same next step"
+            ],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+            "missing_verifiers": missing_verifiers,
+            "unresolved_failed_verifiers": unresolved_failed,
+            "circuit_breaker": "no_progress",
+        }
+
     if effect_policy["allowed"]:
         return {
             "decision": "continue",
@@ -813,6 +843,77 @@ def _first_repeated_failure(reports: list[dict[str, Any]], threshold: int) -> st
     for report in recent[1:]:
         common &= set(report["failed_verifiers"])
     return sorted(common)[0] if common else ""
+
+
+def _reports_are_stagnating(
+    reports: list[dict[str, Any]], threshold: int
+) -> bool:
+    if len(reports) < threshold:
+        return False
+    recent = reports[-threshold:]
+    signatures = [_report_attempt_signature(report) for report in recent]
+    return bool(signatures[0]) and len(set(signatures)) == 1
+
+
+def _reports_show_no_progress(
+    reports: list[dict[str, Any]], threshold: int
+) -> bool:
+    if len(reports) < threshold:
+        return False
+    recent = reports[-threshold:]
+    next_steps = {
+        _stable_text_signature(report["next_step"]) for report in recent
+    }
+    if len(next_steps) != 1 or not next(iter(next_steps), ""):
+        return False
+
+    seen = {
+        gate
+        for report in reports[:-threshold]
+        for gate in report["passed_verifiers"]
+    }
+    for report in recent:
+        current = set(report["passed_verifiers"])
+        if current - seen:
+            return False
+        seen.update(current)
+    return True
+
+
+def _report_attempt_signature(report: dict[str, Any]) -> str:
+    evidence = " | ".join(
+        _stable_text_signature(item) for item in report["evidence"]
+    )
+    failed = ",".join(sorted(report["failed_verifiers"]))
+    return " || ".join(
+        [
+            report["action_id"],
+            evidence,
+            _stable_text_signature(report["next_step"]),
+            failed,
+        ]
+    )
+
+
+def _stable_text_signature(value: str) -> str:
+    text = value.strip().lower().splitlines()[0] if value.strip() else ""
+    text = re.sub(
+        r"\b\d{4}-\d{2}-\d{2}[t ][\d:.]+z?\b",
+        "<ts>",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"0x[0-9a-f]+", "<addr>", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"[a-z]:[\\/][^\s:]+|(?:[\\/][^\s:/\\]+)+",
+        lambda match: re.split(r"[\\/]", match.group(0))[-1]
+        or match.group(0),
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r":\d+(?::\d+)?", "", text)
+    text = re.sub(r"\b\d+\b", "#", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def _effective_execution_policy(loop: dict[str, Any]) -> dict[str, Any]:
