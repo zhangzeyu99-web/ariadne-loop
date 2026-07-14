@@ -749,12 +749,126 @@ def _audit_run_kit(directory: Path) -> dict[str, object]:
             if term not in text:
                 issues.append(f"{required_files[key]} missing {term}")
 
+    readiness = _score_run_kit_readiness(
+        issues=issues,
+        loop=loop,
+        reports=reports,
+        expected_decision=expected_decision,
+        actual_decision=actual_decision,
+    )
     return {
         "ok": not issues,
         "issues": issues,
         "directory": str(directory),
         "reports": len(reports),
         "expected_decision": expected_decision,
+        **readiness,
+    }
+
+
+def _score_run_kit_readiness(
+    *,
+    issues: list[str],
+    loop: dict[str, object] | None,
+    reports: list[dict],
+    expected_decision: dict[str, object] | None,
+    actual_decision: dict[str, object] | None,
+) -> dict[str, object]:
+    policy = loop.get("execution_policy", {}) if isinstance(loop, dict) else {}
+    if not isinstance(policy, dict):
+        policy = {}
+    policy_mode = str(policy.get("mode", "assisted"))
+    allowed_effects = policy.get("allowed_effects", [])
+    if not isinstance(allowed_effects, list):
+        allowed_effects = []
+
+    covered = (
+        expected_decision.get("covered_verifiers", [])
+        if isinstance(expected_decision, dict)
+        else []
+    )
+    missing = (
+        expected_decision.get("missing_verifiers", [])
+        if isinstance(expected_decision, dict)
+        else []
+    )
+    unresolved = (
+        expected_decision.get("unresolved_failed_verifiers", [])
+        if isinstance(expected_decision, dict)
+        else []
+    )
+    decision_name = (
+        str(expected_decision.get("decision", "unknown"))
+        if isinstance(expected_decision, dict)
+        else "unknown"
+    )
+    signals = {
+        "integrity": not issues,
+        "decision_current": (
+            expected_decision is not None
+            and actual_decision is not None
+            and expected_decision == actual_decision
+        ),
+        "has_reports": bool(reports),
+        "has_verifier_evidence": bool(covered),
+        "all_verifiers_passed": (
+            decision_name == "stop" and not missing and not unresolved
+        ),
+        "supervision_clear": decision_name not in {"needs_human", "rollback", "unknown"},
+        "policy_mode": policy_mode,
+        "has_effect_allowlist": bool(allowed_effects),
+    }
+
+    score = 0
+    if signals["integrity"]:
+        score += 40
+    if signals["decision_current"]:
+        score += 15
+    if signals["has_reports"]:
+        score += 10
+    if signals["has_verifier_evidence"]:
+        score += 15
+    if signals["all_verifiers_passed"]:
+        score += 10
+    if policy_mode in {"assisted", "unattended"}:
+        score += 5
+    if signals["has_effect_allowlist"]:
+        score += 5
+
+    if not signals["integrity"]:
+        score = min(score, 39)
+    elif (
+        policy_mode == "report_only"
+        or not signals["has_reports"]
+        or not signals["has_verifier_evidence"]
+    ):
+        score = min(score, 69)
+    elif not (
+        policy_mode == "unattended"
+        and signals["has_effect_allowlist"]
+        and signals["all_verifiers_passed"]
+        and signals["supervision_clear"]
+    ):
+        score = min(score, 89)
+
+    if score < 40:
+        level = "L0"
+        assessment = "Run Kit is incomplete, invalid, or stale."
+    elif score < 70:
+        level = "L1"
+        assessment = "Run Kit is valid for report-only operation."
+    elif score < 90:
+        level = "L2"
+        assessment = "Run Kit has evidence for supervised execution."
+    else:
+        level = "L3"
+        assessment = "Run Kit has evidence for allowlisted unattended execution."
+
+    return {
+        "score": score,
+        "level": level,
+        "assessment": assessment,
+        "signals": signals,
     }
 
 
@@ -762,9 +876,16 @@ def _render_audit_text(result: dict[str, object]) -> str:
     if result["ok"]:
         return (
             "run kit audit passed\n"
+            f"readiness: {result['level']} ({result['score']}/100)\n"
+            f"assessment: {result['assessment']}\n"
             f"reports: {result['reports']}\n"
             f"decision: {result.get('expected_decision', {}).get('decision', 'unknown')}\n"
         )
     issues = result.get("issues", [])
-    lines = ["run kit audit failed", *[f"- {issue}" for issue in issues]]
+    lines = [
+        "run kit audit failed",
+        f"readiness: {result['level']} ({result['score']}/100)",
+        f"assessment: {result['assessment']}",
+        *[f"- {issue}" for issue in issues],
+    ]
     return "\n".join(lines) + "\n"

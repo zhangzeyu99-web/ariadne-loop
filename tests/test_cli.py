@@ -602,6 +602,90 @@ def test_cli_audit_accepts_complete_quickstart_run_kit(tmp_path):
     assert quickstart.returncode == 0, quickstart.stderr
     assert result.returncode == 0, result.stderr
     assert "run kit audit passed" in result.stdout
+    assert "readiness: L2" in result.stdout
+
+
+def test_cli_audit_scores_valid_report_only_kit_without_reports_as_l1(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    loop_path = output_dir / "loop.json"
+    reports_path = output_dir / "reports.jsonl"
+    decision_path = output_dir / "decision.json"
+    loop = json.loads(loop_path.read_text(encoding="utf-8"))
+    loop["execution_policy"] = {
+        "mode": "report_only",
+        "allowed_effects": [],
+        "human_required_effects": loop["context"]["external_effects"],
+    }
+    loop_path.write_text(
+        json.dumps(loop, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    reports_path.write_text("", encoding="utf-8")
+    supervise = run_cli(
+        "supervise",
+        "--loop",
+        str(loop_path),
+        "--reports",
+        str(reports_path),
+        "--output",
+        str(decision_path),
+    )
+
+    result = run_cli("audit", "--dir", str(output_dir), "--format", "json")
+    audit = json.loads(result.stdout)
+
+    assert supervise.returncode == 0, supervise.stderr
+    assert result.returncode == 0, result.stderr
+    assert audit["level"] == "L1"
+    assert audit["signals"]["policy_mode"] == "report_only"
+    assert audit["signals"]["has_reports"] is False
+
+
+def test_cli_audit_scores_evidenced_assisted_kit_as_l2(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+
+    result = run_cli("audit", "--dir", str(output_dir), "--format", "json")
+    audit = json.loads(result.stdout)
+
+    assert result.returncode == 0, result.stderr
+    assert audit["level"] == "L2"
+    assert audit["signals"]["policy_mode"] == "assisted"
+    assert audit["signals"]["has_verifier_evidence"] is True
+
+
+def test_cli_audit_scores_evidenced_unattended_allowlist_as_l3(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    loop_path = output_dir / "loop.json"
+    decision_path = output_dir / "decision.json"
+    loop = json.loads(loop_path.read_text(encoding="utf-8"))
+    loop["execution_policy"] = {
+        "mode": "unattended",
+        "allowed_effects": ["commit", "push"],
+        "human_required_effects": ["pull request"],
+    }
+    loop_path.write_text(
+        json.dumps(loop, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    supervise = run_cli(
+        "supervise",
+        "--loop",
+        str(loop_path),
+        "--reports",
+        str(output_dir / "reports.jsonl"),
+        "--output",
+        str(decision_path),
+    )
+
+    result = run_cli("audit", "--dir", str(output_dir), "--format", "json")
+    audit = json.loads(result.stdout)
+
+    assert supervise.returncode == 0, supervise.stderr
+    assert result.returncode == 0, result.stderr
+    assert audit["level"] == "L3"
+    assert audit["score"] >= 90
+    assert audit["signals"]["has_effect_allowlist"] is True
 
 
 def test_cli_prompt_outputs_natural_language_continue_instruction(tmp_path):
@@ -677,6 +761,7 @@ def test_cli_audit_reports_missing_run_kit_file(tmp_path):
 
     assert result.returncode == 1
     assert any("missing PROGRESS.md" in issue for issue in audit["issues"])
+    assert audit["level"] == "L0"
 
 
 def test_cli_audit_rejects_bad_jsonl_report(tmp_path):
