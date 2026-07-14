@@ -8,6 +8,7 @@ from typing import Any
 
 
 ALLOWED_REPORT_STATUSES = {"continue", "stop", "needs_human", "rollback"}
+ALLOWED_EXECUTION_MODES = {"report_only", "assisted", "unattended"}
 REQUIRED_STEP_IDS = {"inspect", "act", "verify", "persist", "decide"}
 EXTERNAL_EFFECT_WORDS = {
     "commit",
@@ -183,6 +184,9 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
     verifier_inputs = _string_list(snapshot.get("verifiers")) or _infer_verifiers(
         recent_progress, external_effects
     )
+    execution_policy = _normalize_execution_policy(
+        snapshot.get("execution_policy"), external_effects
+    )
 
     loop = {
         "version": "1.0",
@@ -211,7 +215,7 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
             }
             for index, verifier in enumerate(verifier_inputs, start=1)
         ],
-        "stop_rules": _build_stop_rules(external_effects),
+        "stop_rules": _build_stop_rules(external_effects, execution_policy),
         "rollback": {
             "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",
             "action": "Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.",
@@ -223,7 +227,10 @@ def build_loop(snapshot: dict[str, Any]) -> dict[str, Any]:
         "loop_parts": _build_loop_parts(),
         "cost_controls": _build_cost_controls(),
         "budget": _build_budget(risk),
-        "human_gates": _build_human_gates(risk, external_effects),
+        "human_gates": _build_human_gates(
+            risk, external_effects, execution_policy
+        ),
+        "execution_policy": execution_policy,
         "agent_contract": {
             "output_format": "json",
             "required_fields": ["action_id", "status", "evidence", "next_step"],
@@ -284,6 +291,20 @@ def validate_loop(loop: dict[str, Any]) -> list[str]:
         if {"action_id", "status", "evidence", "next_step"} - required_fields:
             errors.append("agent contract missing report fields")
 
+    execution_policy = loop.get("execution_policy")
+    if execution_policy is not None:
+        if not isinstance(execution_policy, dict):
+            errors.append("execution policy must be an object")
+        else:
+            mode = execution_policy.get("mode")
+            if mode not in ALLOWED_EXECUTION_MODES:
+                errors.append(
+                    "execution policy mode must be report_only, assisted, or unattended"
+                )
+            for field in ["allowed_effects", "human_required_effects"]:
+                if not isinstance(execution_policy.get(field, []), list):
+                    errors.append(f"execution policy {field} must be a list")
+
     return errors
 
 
@@ -303,6 +324,7 @@ def render_agent_packet(loop: dict[str, Any]) -> str:
     stop_lines = "\n".join(f"- {rule}" for rule in loop["stop_rules"])
     human_lines = "\n".join(f"- {gate}" for gate in loop.get("human_gates", []))
     harness = _render_harness_section(loop.get("harness"))
+    execution_policy = _render_execution_policy_section(loop)
     loop_parts = _render_named_items_section("Loop Parts", loop.get("loop_parts"))
     cost_controls = _render_named_items_section("Cost Controls", loop.get("cost_controls"))
 
@@ -326,6 +348,8 @@ def render_agent_packet(loop: dict[str, Any]) -> str:
 {verifier_lines}
 
 {harness}
+
+{execution_policy}
 
 {cost_controls}
 
@@ -387,6 +411,45 @@ def _normalize_harness(value: object) -> dict[str, Any]:
     if local_secrets:
         normalized["local_secrets"] = local_secrets
     return normalized
+
+
+def _normalize_execution_policy(
+    value: object, external_effects: list[str]
+) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {
+            "mode": "assisted",
+            "allowed_effects": [],
+            "human_required_effects": list(external_effects),
+        }
+
+    mode = (_clean_text(value.get("mode")) or "assisted").lower()
+    allowed = _unique_items(_string_list(value.get("allowed_effects")))
+    human_required = _unique_items(
+        _string_list(value.get("human_required_effects"))
+    )
+    if mode == "report_only":
+        human_required = _unique_items([*external_effects, *human_required])
+    return {
+        "mode": mode,
+        "allowed_effects": allowed,
+        "human_required_effects": human_required,
+    }
+
+
+def _render_execution_policy_section(loop: dict[str, Any]) -> str:
+    policy = _effective_execution_policy(loop)
+    return "\n".join(
+        [
+            "## Execution Policy",
+            f"- mode: {policy['mode']}",
+            "- allowed effects: "
+            + (", ".join(policy["allowed_effects"]) or "None"),
+            "- human-required effects: "
+            + (", ".join(policy["human_required_effects"]) or "None"),
+            "- Undeclared external effects always require human confirmation.",
+        ]
+    )
 
 
 def _render_harness_section(value: object) -> str:
@@ -563,14 +626,39 @@ def supervise_loop(
             "failed_verifiers": failed,
         }
 
-    if _has_external_effect_request(loop, latest["next_step"]):
+    effect_policy = _evaluate_external_effects(loop, latest["next_step"])
+    if effect_policy["blocked"]:
         return {
             "decision": "needs_human",
             "next_action_id": "decide",
-            "reasons": ["external effect requested; human confirmation required"],
+            "reasons": [
+                "external effect requires human confirmation: "
+                + ", ".join(effect_policy["blocked"])
+            ],
             "iteration": iteration,
             "covered_verifiers": covered,
             "failed_verifiers": failed,
+            "requested_external_effects": effect_policy["requested"],
+            "allowed_external_effects": effect_policy["allowed"],
+            "blocked_external_effects": effect_policy["blocked"],
+        }
+
+    if effect_policy["allowed"]:
+        return {
+            "decision": "continue",
+            "next_action_id": "act",
+            "reasons": [
+                "execution policy allows external effect: "
+                + ", ".join(effect_policy["allowed"])
+            ],
+            "iteration": iteration,
+            "covered_verifiers": covered,
+            "failed_verifiers": failed,
+            "missing_verifiers": missing_verifiers,
+            "unresolved_failed_verifiers": unresolved_failed,
+            "requested_external_effects": effect_policy["requested"],
+            "allowed_external_effects": effect_policy["allowed"],
+            "blocked_external_effects": [],
         }
 
     if latest_status == "stop" and (missing_verifiers or unresolved_failed):
@@ -727,14 +815,67 @@ def _first_repeated_failure(reports: list[dict[str, Any]], threshold: int) -> st
     return sorted(common)[0] if common else ""
 
 
-def _has_external_effect_request(loop: dict[str, Any], next_step: str) -> bool:
-    lowered = next_step.lower()
-    configured = [
-        str(item).lower()
-        for item in loop.get("context", {}).get("external_effects", [])
+def _effective_execution_policy(loop: dict[str, Any]) -> dict[str, Any]:
+    external_effects = _string_list(
+        loop.get("context", {}).get("external_effects")
+        if isinstance(loop.get("context"), dict)
+        else []
+    )
+    return _normalize_execution_policy(loop.get("execution_policy"), external_effects)
+
+
+def _evaluate_external_effects(
+    loop: dict[str, Any], next_step: str
+) -> dict[str, list[str]]:
+    context = loop.get("context", {})
+    declared = _string_list(
+        context.get("external_effects") if isinstance(context, dict) else []
+    )
+    policy = _effective_execution_policy(loop)
+    candidates = _unique_items(
+        [
+            *declared,
+            *policy["allowed_effects"],
+            *policy["human_required_effects"],
+            *sorted(EXTERNAL_EFFECT_WORDS),
+        ]
+    )
+    requested = [
+        effect for effect in candidates if _text_mentions_effect(next_step, effect)
     ]
-    words = set(configured) | EXTERNAL_EFFECT_WORDS
-    return any(word and word in lowered for word in words)
+    if not requested:
+        return {"requested": [], "allowed": [], "blocked": []}
+
+    human_required = set(policy["human_required_effects"])
+    if policy["mode"] == "report_only":
+        permitted: set[str] = set()
+    elif policy["mode"] == "unattended":
+        permitted = set(declared) | set(policy["allowed_effects"])
+    else:
+        permitted = set(policy["allowed_effects"])
+
+    allowed = [
+        effect
+        for effect in requested
+        if effect in permitted and effect not in human_required
+    ]
+    blocked = [effect for effect in requested if effect not in set(allowed)]
+    return {"requested": requested, "allowed": allowed, "blocked": blocked}
+
+
+def _text_mentions_effect(text: str, effect: str) -> bool:
+    lowered_text = text.lower()
+    lowered_effect = effect.lower().strip()
+    if not lowered_effect:
+        return False
+    if re.fullmatch(r"[a-z0-9_-]+", lowered_effect):
+        return bool(
+            re.search(
+                rf"(?<![a-z0-9_-]){re.escape(lowered_effect)}(?![a-z0-9_-])",
+                lowered_text,
+            )
+        )
+    return lowered_effect in lowered_text
 
 
 def _evidence_is_weak(evidence: list[str]) -> bool:
@@ -851,20 +992,50 @@ def _build_cost_controls() -> dict[str, str]:
     }
 
 
-def _build_stop_rules(external_effects: list[str]) -> list[str]:
+def _build_stop_rules(
+    external_effects: list[str], execution_policy: dict[str, Any]
+) -> list[str]:
     rules = [
         "Stop when every verifier has current evidence and passes.",
         "Stop and narrow the problem after the same verifier fails twice.",
         "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
     ]
     if external_effects:
-        joined = ", ".join(external_effects)
-        rules.append(f"Ask for confirmation before external-impact actions: {joined}")
+        rules.append(
+            "Apply the execution policy before external-impact actions: "
+            + ", ".join(external_effects)
+        )
+        if execution_policy["human_required_effects"]:
+            rules.append(
+                "Ask for confirmation before human-required effects: "
+                + ", ".join(execution_policy["human_required_effects"])
+            )
     return rules
 
 
-def _build_human_gates(risk: str, external_effects: list[str]) -> list[str]:
-    gates = ["Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."]
+def _build_human_gates(
+    risk: str,
+    external_effects: list[str],
+    execution_policy: dict[str, Any],
+) -> list[str]:
+    gates = [
+        "Follow execution_policy: only declared and permitted effects may run without confirmation."
+    ]
+    if execution_policy["mode"] == "report_only":
+        gates.append("Mode is report_only; ask before every external effect.")
+    elif execution_policy["mode"] == "assisted":
+        allowed = ", ".join(execution_policy["allowed_effects"]) or "none"
+        gates.append(f"Mode is assisted; effects allowed without confirmation: {allowed}.")
+    else:
+        gates.append(
+            "Mode is unattended; only declared external effects may run without confirmation."
+        )
+    if execution_policy["human_required_effects"]:
+        gates.append(
+            "Always ask before: "
+            + ", ".join(execution_policy["human_required_effects"])
+            + "."
+        )
     if risk in {"medium", "high", "critical"}:
         gates.append(f"Risk is {risk}; do not expand scope after failure.")
     if external_effects:

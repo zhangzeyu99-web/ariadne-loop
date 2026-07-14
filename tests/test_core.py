@@ -443,3 +443,169 @@ def test_supervise_loop_budget_exhaustion_needs_human_before_completion():
     assert decision["next_action_id"] == "decide"
     assert decision["missing_verifiers"] == ["gate-2"]
     assert any("budget exhausted" in reason for reason in decision["reasons"])
+
+
+def test_execution_policy_defaults_to_assisted_with_no_allowed_effects():
+    loop = build_loop(
+        {
+            "title": "Backward-compatible publish guard",
+            "goal": "Keep old snapshots safe when execution policy is absent",
+            "current_state": "Tests passed and push is the proposed next step",
+            "verifiers": ["tests pass", "remote branch readback"],
+            "external_effects": ["push"],
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["tests pass"],
+                "next_step": "push to GitHub",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert loop["execution_policy"] == {
+        "mode": "assisted",
+        "allowed_effects": [],
+        "human_required_effects": ["push"],
+    }
+    assert decision["decision"] == "needs_human"
+    assert decision["blocked_external_effects"] == ["push"]
+
+
+def test_assisted_execution_policy_allows_only_allowlisted_effects():
+    loop = build_loop(
+        {
+            "title": "Assisted delivery",
+            "goal": "Allow routine Git writes while keeping releases behind a human gate",
+            "current_state": "Tests pass; remote readback remains",
+            "verifiers": ["tests pass", "remote branch readback"],
+            "external_effects": ["commit", "push", "release"],
+            "execution_policy": {
+                "mode": "assisted",
+                "allowed_effects": ["commit", "push"],
+                "human_required_effects": ["release"],
+            },
+        }
+    )
+
+    push_decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["tests pass"],
+                "next_step": "commit changes and push to main",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+    release_decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["tests pass"],
+                "next_step": "create a release",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert push_decision["decision"] == "continue"
+    assert push_decision["next_action_id"] == "act"
+    assert push_decision["allowed_external_effects"] == ["commit", "push"]
+    assert release_decision["decision"] == "needs_human"
+    assert release_decision["blocked_external_effects"] == ["release"]
+
+
+def test_human_required_effects_override_assisted_allowlist():
+    loop = build_loop(
+        {
+            "title": "Conflicting execution policy",
+            "goal": "Prefer the stricter rule when an effect appears in both lists",
+            "current_state": "Push is ready",
+            "verifiers": ["tests pass", "remote branch readback"],
+            "external_effects": ["push"],
+            "execution_policy": {
+                "mode": "assisted",
+                "allowed_effects": ["push"],
+                "human_required_effects": ["push"],
+            },
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["tests pass"],
+                "next_step": "push to main",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "needs_human"
+    assert decision["blocked_external_effects"] == ["push"]
+
+
+def test_unattended_policy_allows_declared_effects_but_blocks_undeclared_risk():
+    loop = build_loop(
+        {
+            "title": "Unattended preview deploy",
+            "goal": "Deploy an allowlisted preview without broad external authority",
+            "current_state": "Preview build passes",
+            "verifiers": ["preview build passes", "preview URL readback"],
+            "external_effects": ["deploy"],
+            "execution_policy": {
+                "mode": "unattended",
+                "human_required_effects": [],
+            },
+        }
+    )
+
+    deploy_decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["preview build passes"],
+                "next_step": "deploy preview",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+    delete_decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["preview build passes"],
+                "next_step": "delete the old environment",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert deploy_decision["decision"] == "continue"
+    assert deploy_decision["allowed_external_effects"] == ["deploy"]
+    assert delete_decision["decision"] == "needs_human"
+    assert delete_decision["blocked_external_effects"] == ["delete"]
