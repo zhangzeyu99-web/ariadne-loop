@@ -84,6 +84,7 @@ def test_run_kit_public_docs_are_linked():
         encoding="utf-8"
     )
     reports = (ROOT / "docs" / "reports.html").read_text(encoding="utf-8")
+    loop_spec = (ROOT / "docs" / "loop-spec.md").read_text(encoding="utf-8")
     case_packs = (ROOT / "docs" / "case-packs.md").read_text(encoding="utf-8")
     orange_book = (ROOT / "docs" / "orange-book-alignment.md").read_text(
         encoding="utf-8"
@@ -109,6 +110,17 @@ def test_run_kit_public_docs_are_linked():
     assert "reports.jsonl" in reports
     assert "persist" in reports
     assert "粘贴" in reports
+    assert "circuit_breaker" in reports
+    assert "stagnation" in reports
+    assert "no_progress" in reports
+    assert "execution_policy" in reports
+    assert "execution_policy" in loop_spec
+    assert "report_only" in loop_spec
+    assert "assisted" in loop_spec
+    assert "unattended" in loop_spec
+    assert "L0" in loop_spec and "L3" in loop_spec
+    assert "最简单用法" in readme_zh
+    assert "Simplest workflow" in readme
     assert "Desktop App" in case_packs
     assert "GitHub Pages" in case_packs
     assert "Loop Engineering Orange Book" in orange_book
@@ -158,6 +170,9 @@ def test_playground_contains_required_static_controls():
         'id="goal"',
         'id="currentState"',
         'id="verifiers"',
+        'id="executionMode"',
+        'id="allowedEffects"',
+        'id="humanRequiredEffects"',
         'id="output"',
         'id="copyButton"',
         'id="downloadButton"',
@@ -177,6 +192,10 @@ def test_playground_contains_required_static_controls():
     assert "ariadne-loop prompt --dir" in playground
     assert "loop_parts" in playground
     assert "cost_controls" in playground
+    assert "execution_policy" in playground
+    assert 'value="report_only"' in playground
+    assert 'value="assisted"' in playground
+    assert 'value="unattended"' in playground
     assert '"action_id": "inspect|act|verify|persist|decide"' in playground
     assert "Return JSON only" in playground
     assert "ariadne-loop check" in playground

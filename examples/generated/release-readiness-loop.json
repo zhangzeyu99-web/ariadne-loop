@@ -90,7 +90,8 @@
     "Stop when every verifier has current evidence and passes.",
     "Stop and narrow the problem after the same verifier fails twice.",
     "Stop and ask for confirmation when the goal, input, or permissions do not match the current context.",
-    "Ask for confirmation before external-impact actions: git tag, GitHub release"
+    "Apply the execution policy before external-impact actions: git tag, GitHub release",
+    "Ask for confirmation before human-required effects: git tag, GitHub release"
   ],
   "rollback": {
     "trigger": "Any verifier fails, evidence is missing, or an action crosses a constraint",
@@ -119,10 +120,20 @@
     "max_minutes": 60
   },
   "human_gates": [
-    "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying.",
+    "Follow execution_policy: only declared and permitted effects may run without confirmation.",
+    "Mode is assisted; effects allowed without confirmation: none.",
+    "Always ask before: git tag, GitHub release.",
     "Risk is medium; do not expand scope after failure.",
     "After an external-impact action, read back the real target before reporting success."
   ],
+  "execution_policy": {
+    "mode": "assisted",
+    "allowed_effects": [],
+    "human_required_effects": [
+      "git tag",
+      "GitHub release"
+    ]
+  },
   "agent_contract": {
     "output_format": "json",
     "required_fields": [

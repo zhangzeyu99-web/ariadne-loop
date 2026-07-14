@@ -506,6 +506,108 @@
         return Array.from(new Set(values.filter(Boolean))).sort();
       }
 
+      const externalEffectWords = [
+        "commit", "push", "publish", "release", "deploy", "send", "delete", "payment",
+        "付款", "删除", "发送", "发布", "推送"
+      ];
+
+      function executionPolicy(loop) {
+        const declared = loop && loop.context && Array.isArray(loop.context.external_effects)
+          ? loop.context.external_effects
+          : [];
+        const policy = loop && loop.execution_policy && typeof loop.execution_policy === "object"
+          ? loop.execution_policy
+          : {};
+        return {
+          mode: ["report_only", "assisted", "unattended"].includes(policy.mode)
+            ? policy.mode
+            : "assisted",
+          declared,
+          allowed: Array.isArray(policy.allowed_effects) ? policy.allowed_effects : [],
+          humanRequired: Array.isArray(policy.human_required_effects)
+            ? policy.human_required_effects
+            : declared
+        };
+      }
+
+      function evaluateExternalEffects(loop, nextStep) {
+        const policy = executionPolicy(loop);
+        const candidates = unique([
+          ...policy.declared,
+          ...policy.allowed,
+          ...policy.humanRequired,
+          ...externalEffectWords
+        ]);
+        const matched = candidates.filter((effect) => mentionsEffect(nextStep, effect));
+        const requested = matched.filter((effect) => !matched.some((other) => (
+          String(other).toLowerCase() !== String(effect).toLowerCase()
+          && mentionsEffect(other, effect)
+        )));
+        const permitted = policy.mode === "report_only"
+          ? []
+          : policy.mode === "unattended"
+            ? unique([...policy.declared, ...policy.allowed])
+            : policy.allowed;
+        const allowed = requested.filter((effect) => permitted.includes(effect) && !policy.humanRequired.includes(effect));
+        return {
+          requested,
+          allowed,
+          blocked: requested.filter((effect) => !allowed.includes(effect))
+        };
+      }
+
+      function mentionsEffect(text, effect) {
+        const loweredText = String(text || "").toLowerCase();
+        const loweredEffect = String(effect || "").toLowerCase().trim();
+        if (!loweredEffect) return false;
+        if (/^[a-z0-9_-]+$/.test(loweredEffect)) {
+          const escaped = loweredEffect.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          return new RegExp(`(^|[^a-z0-9_-])${escaped}([^a-z0-9_-]|$)`).test(loweredText);
+        }
+        return loweredText.includes(loweredEffect);
+      }
+
+      function stableTextSignature(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .split(/\r?\n/)[0]
+          .replace(/\b\d{4}-\d{2}-\d{2}[t ][\d:.]+z?\b/gi, "<ts>")
+          .replace(/0x[0-9a-f]+/gi, "<addr>")
+          .replace(/[a-z]:[\\/][^\s:]+|(?:[\\/][^\s:/\\]+)+/gi, (path) => path.split(/[\\/]/).pop() || path)
+          .replace(/:\d+(?::\d+)?/g, "")
+          .replace(/\b\d+\b/g, "#")
+          .replace(/\s+/g, " ");
+      }
+
+      function reportSignature(report) {
+        return [
+          report.action_id || "inspect",
+          (report.evidence || []).map(stableTextSignature).join(" | "),
+          stableTextSignature(report.next_step),
+          unique(report.failed_verifiers || []).join(",")
+        ].join(" || ");
+      }
+
+      function stagnating(reports) {
+        if (reports.length < 3) return false;
+        const signatures = reports.slice(-3).map(reportSignature);
+        return signatures[0] && new Set(signatures).size === 1;
+      }
+
+      function noProgress(reports) {
+        if (reports.length < 3) return false;
+        const recent = reports.slice(-3);
+        if (new Set(recent.map((report) => stableTextSignature(report.next_step))).size !== 1) return false;
+        const seen = new Set(reports.slice(0, -3).flatMap((report) => report.passed_verifiers || []));
+        for (const report of recent) {
+          const current = report.passed_verifiers || [];
+          if (current.some((gate) => !seen.has(gate))) return false;
+          current.forEach((gate) => seen.add(gate));
+        }
+        return true;
+      }
+
       function repeatedFailure(reports) {
         if (reports.length < 2) return "";
         const latest = new Set(reports[reports.length - 1].failed_verifiers || []);
@@ -536,6 +638,41 @@
         const repeated = repeatedFailure(reports);
         if (repeated) {
           return { decision: "rollback", next_action_id: "inspect", reasons: [`${repeated} failed in two consecutive reports`] };
+        }
+        const effects = evaluateExternalEffects(loop, latest.next_step);
+        if (effects.blocked.length) {
+          return {
+            decision: "needs_human",
+            next_action_id: "decide",
+            reasons: [`external effect requires human confirmation: ${effects.blocked.join(", ")}`],
+            requested_external_effects: effects.requested,
+            allowed_external_effects: effects.allowed,
+            blocked_external_effects: effects.blocked
+          };
+        }
+        if (stagnating(reports)) {
+          return {
+            decision: "needs_human",
+            next_action_id: "decide",
+            reasons: ["circuit_breaker: stagnation — the same attempt repeated three times"],
+            circuit_breaker: "stagnation"
+          };
+        }
+        if (noProgress(reports)) {
+          return {
+            decision: "needs_human",
+            next_action_id: "decide",
+            reasons: ["circuit_breaker: no_progress — no new verifier evidence in three reports"],
+            circuit_breaker: "no_progress"
+          };
+        }
+        if (effects.allowed.length) {
+          return {
+            decision: "continue",
+            next_action_id: "act",
+            reasons: [`execution_policy allows: ${effects.allowed.join(", ")}`],
+            allowed_external_effects: effects.allowed
+          };
         }
         if (latest.status === "stop" && (missing.length || unresolved.length)) {
           const reasons = ["agent reported stop before stop gates were satisfied"];

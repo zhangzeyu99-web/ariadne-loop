@@ -81,6 +81,14 @@ Claude Code.
 
 ## Quick Start
 
+### Simplest workflow
+
+1. Open the [Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html), fill in the goal and checks, then choose what the agent may do without asking.
+2. Download the Run Kit ZIP and unzip it into the project.
+3. Tell the coding agent: `Run this Loop Run Kit until it reaches stop, needs_human, or rollback.`
+
+Use `report_only` for observation, `assisted` for a small external-action allowlist, and `unattended` only after the Run Kit has real verifier evidence.
+
 Try the browser builder first: [Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html).
 If you want a copy-paste starting point for Codex or Claude Code, start with
 [Agent Recipes](docs/agent-recipes.md).
@@ -104,6 +112,8 @@ Audit a run kit before handing it to another agent:
 ```bash
 ariadne-loop audit --dir .ariadne/quickstart
 ```
+
+The audit reports L0-L3 readiness. L0 is invalid, L1 is report-only, L2 is ready for supervised execution, and L3 has evidence for allowlisted unattended execution.
 
 Generate the next natural-language control prompt:
 
@@ -261,9 +271,11 @@ Agent reports must be JSON:
 `ariadne-loop supervise` reads a loop JSON file and a JSONL stream of agent reports, then outputs a supervision decision:
 
 - `continue`: keep working.
-- `stop`: budget is exhausted or all verifiers have passed.
+- `stop`: all verifiers have current passing evidence.
 - `rollback`: the same verifier keeps failing.
-- `needs_human`: the agent asks for help, the next step touches external-impact actions, or the loop is invalid.
+- `needs_human`: the agent asks for help, permission is missing, the loop stalls, the budget is exhausted before completion, or the loop is invalid.
+
+`execution_policy` separates actions the loop may run from actions that still require confirmation. Undeclared external effects always require a human.
 
 Ariadne Loop does not execute external actions. It only makes the decision explicit so a human or outer harness can take the next step.
 

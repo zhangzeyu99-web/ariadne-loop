@@ -40,6 +40,7 @@ Use this skill when the user asks for any of these:
    - `constraints`,
    - `verifiers`,
    - `external_effects`,
+   - `execution_policy` when the agent may perform selected external effects,
    - `risk`.
 3. Generate or write an agent packet that includes:
    - inspect -> act -> verify -> persist -> decide cycle,
@@ -47,7 +48,7 @@ Use this skill when the user asks for any of these:
    - stop rules,
    - rollback behavior,
    - durable memory updates before stop decisions,
-   - human gates for external effects,
+   - policy-aware human gates for external effects,
    - JSON-only report contract.
 4. If the user wants a first-run demo and the Ariadne Loop CLI is installed:
 
@@ -137,7 +138,7 @@ Avoid weak gates:
 
 ## Human Gates
 
-Require human confirmation before:
+By default, require human confirmation before:
 
 - `commit`,
 - `push`,
@@ -147,6 +148,10 @@ Require human confirmation before:
 - deletion,
 - sending external messages,
 - payment or billing actions.
+
+An `execution_policy` may allow selected declared effects such as `commit` or
+`push`. Effects in `human_required_effects`, and undeclared effects, always
+require confirmation.
 
 After any approved external effect, read back the real target before reporting
 success.

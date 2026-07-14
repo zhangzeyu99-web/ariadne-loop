@@ -112,8 +112,14 @@
     "max_minutes": 90
   },
   "human_gates": [
-    "Ask for human confirmation before changing external state, publishing, sending, deleting, or paying."
+    "Follow execution_policy: only declared and permitted effects may run without confirmation.",
+    "Mode is assisted; effects allowed without confirmation: none."
   ],
+  "execution_policy": {
+    "mode": "assisted",
+    "allowed_effects": [],
+    "human_required_effects": []
+  },
   "agent_contract": {
     "output_format": "json",
     "required_fields": [

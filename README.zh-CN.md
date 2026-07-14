@@ -19,6 +19,14 @@ Ariadne 的意象是一根穿过迷宫的线。一个好 loop 也应该这样：
 
 ## 快速开始
 
+### 最简单用法
+
+1. 打开 [造梦构建器](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)，填目标和验证条件，再选清楚 Agent 哪些动作可以直接做。
+2. 下载 Run Kit ZIP，解压到项目里。
+3. 对 Codex 或其他 Agent 说：`执行这个 Loop Run Kit，直到 stop、needs_human 或 rollback。`
+
+只观察就选 `report_only`；允许少量明确动作就选 `assisted`；有真实运行证据后再用 `unattended`。
+
 可以先打开网页生成 snapshot：[Ariadne Loop Builder](https://zhangzeyu99-web.github.io/ariadne-loop/playground.html)。
 如果要直接复制给 Codex 或 Claude Code，用这页开始：[Agent Recipes](docs/agent-recipes.md)。
 如果想从常见场景开始，用 [Case Packs](docs/case-packs.md)。
@@ -37,6 +45,8 @@ ariadne-loop quickstart --output .ariadne/quickstart
 ```bash
 ariadne-loop audit --dir .ariadne/quickstart
 ```
+
+审计结果分 L0-L3：L0 是任务包有问题，L1 适合只报告，L2 可以在人监督下执行，L3 才表示具备白名单内无人值守的证据。
 
 生成下一轮可以直接粘给 Agent 的自然语言指令：
 

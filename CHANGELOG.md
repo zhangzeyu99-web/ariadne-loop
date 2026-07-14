@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added execution authority modes (`report_only`, `assisted`, and `unattended`) with explicit effect allowlists and mandatory human gates.
+- Added stagnation and no-progress circuit breakers so repeated non-progress pauses for review instead of running indefinitely.
+- Added evidence-based L0-L3 Run Kit readiness scoring to `ariadne-loop audit`.
+- Exposed execution authority in the browser Builder and documented the shortest Run Kit workflow in English and Chinese.
 - Hardened Run Kit supervision so `status: stop` is accepted only after verifier gates have current evidence, and budget exhaustion now pauses for human review instead of pretending the goal is complete.
 
 ## 0.10.3 - 2026-06-11

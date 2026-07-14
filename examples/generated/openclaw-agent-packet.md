@@ -35,6 +35,12 @@ Gateway 自启动已修复，备份由 OpenClaw 自己执行
 ## Harness
 - No extra harness was supplied. Use the repo, current files, and listed verifiers as the source of truth.
 
+## Execution Policy
+- mode: assisted
+- allowed effects: None
+- human-required effects: None
+- Undeclared external effects always require human confirmation.
+
 ## Cost Controls
 - verification debt: Do not accept self-graded completion; require concrete verifier evidence before stop.
 - comprehension rot: Keep summaries and changed-state notes current so a human can still explain what changed.
@@ -59,7 +65,8 @@ Gateway 自启动已修复，备份由 OpenClaw 自己执行
 Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.
 
 ## Human Gates
-- Ask for human confirmation before changing external state, publishing, sending, deleting, or paying.
+- Follow execution_policy: only declared and permitted effects may run without confirmation.
+- Mode is assisted; effects allowed without confirmation: none.
 
 ## Budget
 - max_iterations: 4

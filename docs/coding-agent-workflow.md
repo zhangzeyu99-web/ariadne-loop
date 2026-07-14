@@ -105,8 +105,9 @@ The decision is explicit:
 - `continue`: keep working.
 - `stop`: all verifier gates have current evidence and no unresolved failed gate remains.
 - `rollback`: the same verifier failed twice.
-- `needs_human`: the next step touches an external-impact action or the agent
-  requested help. Budget exhaustion before the gates pass also routes here.
+- `needs_human`: the agent requested help, or the next step touches an action
+  blocked by `execution_policy`. Budget exhaustion before the gates pass also
+  routes here.
 
 ## Copyable Agent Prompt
 
@@ -118,6 +119,6 @@ Do not skip verifiers.
 One verifiable change means one change per iteration, not one change total.
 If the refreshed decision is continue, immediately start the next inspect iteration.
 Only return stop when stop gates have current evidence. Pause and explain the reason on needs_human, rollback, or budget exhaustion.
-Do not take external-impact actions unless the packet allows them and a human has approved.
+Only take external-impact actions explicitly allowed by `execution_policy`. Always pause before actions listed in `human_required_effects`.
 At the end of this turn, return only the JSON report requested by the packet.
 ```

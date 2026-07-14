@@ -529,6 +529,41 @@ def test_assisted_execution_policy_allows_only_allowlisted_effects():
     assert release_decision["blocked_external_effects"] == ["release"]
 
 
+def test_specific_allowlisted_effect_is_not_blocked_by_generic_keyword():
+    loop = build_loop(
+        {
+            "title": "Specific delivery effect",
+            "goal": "Allow one named release action without widening authority",
+            "current_state": "Release evidence is ready",
+            "verifiers": ["release evidence passes"],
+            "external_effects": ["GitHub release"],
+            "execution_policy": {
+                "mode": "assisted",
+                "allowed_effects": ["GitHub release"],
+                "human_required_effects": [],
+            },
+        }
+    )
+
+    decision = supervise_loop(
+        loop,
+        [
+            {
+                "action_id": "decide",
+                "status": "continue",
+                "evidence": ["release evidence passes"],
+                "next_step": "create the GitHub release",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        ],
+    )
+
+    assert decision["decision"] == "continue"
+    assert decision["allowed_external_effects"] == ["GitHub release"]
+    assert decision["blocked_external_effects"] == []
+
+
 def test_human_required_effects_override_assisted_allowlist():
     loop = build_loop(
         {

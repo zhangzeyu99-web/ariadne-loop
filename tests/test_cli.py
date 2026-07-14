@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def run_cli(*args: str):
     return subprocess.run(
         [sys.executable, "-m", "loops_assistant", *args],
-        text=True,
+        encoding="utf-8",
         capture_output=True,
         check=False,
     )
@@ -729,6 +729,52 @@ def test_cli_prompt_outputs_natural_language_continue_instruction(tmp_path):
     assert "立刻开始下一轮 inspect" in result.stdout
 
 
+def test_cli_prompt_explains_allowlisted_and_human_required_effects(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+    loop_path = output_dir / "loop.json"
+    reports_path = output_dir / "reports.jsonl"
+    decision_path = output_dir / "decision.json"
+    loop = json.loads(loop_path.read_text(encoding="utf-8"))
+    loop["execution_policy"] = {
+        "mode": "assisted",
+        "allowed_effects": ["commit", "push"],
+        "human_required_effects": ["pull request", "release"],
+    }
+    loop_path.write_text(
+        json.dumps(loop, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    reports_path.write_text(
+        json.dumps(
+            {
+                "action_id": "verify",
+                "status": "continue",
+                "evidence": ["Regression test covers the reported bug"],
+                "next_step": "persist verifier evidence",
+                "passed_verifiers": ["gate-1"],
+                "failed_verifiers": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    run_cli(
+        "supervise",
+        "--loop",
+        str(loop_path),
+        "--reports",
+        str(reports_path),
+        "--output",
+        str(decision_path),
+    )
+
+    result = run_cli("prompt", "--dir", str(output_dir), "--lang", "zh")
+
+    assert result.returncode == 0, result.stderr
+    assert "可直接执行的外部动作：commit、push" in result.stdout
+    assert "必须先问人的外部动作：pull request、release" in result.stdout
+
+
 def test_cli_prompt_outputs_stop_instruction_for_completed_run_kit(tmp_path):
     output_dir = tmp_path / "quickstart"
     run_cli("quickstart", "--output", str(output_dir))
@@ -738,6 +784,29 @@ def test_cli_prompt_outputs_stop_instruction_for_completed_run_kit(tmp_path):
     assert result.returncode == 0, result.stderr
     assert "The loop can stop" in result.stdout
     assert "summarize the evidence" in result.stdout
+
+
+def test_cli_chinese_prompt_is_emitted_as_utf8(tmp_path):
+    output_dir = tmp_path / "quickstart"
+    run_cli("quickstart", "--output", str(output_dir))
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "loops_assistant",
+            "prompt",
+            "--dir",
+            str(output_dir),
+            "--lang",
+            "zh",
+        ],
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr.decode("utf-8")
+    assert "这个 Loop Run Kit 可以停止" in result.stdout.decode("utf-8")
 
 
 def test_cli_prompt_works_for_run_kit_without_control_file(tmp_path):

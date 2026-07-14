@@ -20,6 +20,7 @@ Ariadne Loop generates a small, explicit contract for coding agents and other AI
 | `cost_controls` | Guardrails for verification debt, comprehension rot, token blowout, and cognitive surrender. |
 | `budget` | Iteration and time limits. |
 | `human_gates` | Actions that require explicit human confirmation. |
+| `execution_policy` | Execution mode plus allowed and human-required external effects. |
 | `agent_contract` | Required JSON report shape for the agent. |
 
 ## Minimal Snapshot
@@ -32,9 +33,34 @@ Ariadne Loop generates a small, explicit contract for coding agents and other AI
   "constraints": ["Do not touch payment provider code"],
   "verifiers": ["checkout.spec.ts passes", "unit tests pass", "no payment API changes"],
   "external_effects": ["pull request"],
+  "execution_policy": {
+    "mode": "assisted",
+    "allowed_effects": ["commit", "push"],
+    "human_required_effects": ["pull request", "release"]
+  },
   "risk": "medium"
 }
 ```
+
+## Execution Policy
+
+- `report_only`: every external effect requires confirmation.
+- `assisted`: only `allowed_effects` may run without asking.
+- `unattended`: declared external effects may run except `human_required_effects`.
+- `human_required_effects` always wins, and undeclared external effects always require a human.
+
+Existing snapshots without `execution_policy` behave like assisted mode with an empty allowlist.
+
+## Circuit Breaker
+
+Supervision returns `needs_human` when the same normalized attempt repeats three times (`stagnation`) or three reports repeat the same next step without new verifier evidence (`no_progress`). Repeated failed verifier IDs still return `rollback` after two reports.
+
+## Audit Levels
+
+- `L0`: incomplete, invalid, or stale Run Kit.
+- `L1`: valid for report-only operation.
+- `L2`: verifier evidence supports supervised execution.
+- `L3`: an unattended allowlist, completed verifier evidence, and a current decision support bounded unattended execution.
 
 ## Agent Report Contract
 

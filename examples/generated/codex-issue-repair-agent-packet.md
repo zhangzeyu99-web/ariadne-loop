@@ -36,6 +36,12 @@ A public issue describes a reproducible CLI failure. The repository builds local
 ## Harness
 - No extra harness was supplied. Use the repo, current files, and listed verifiers as the source of truth.
 
+## Execution Policy
+- mode: assisted
+- allowed effects: None
+- human-required effects: commit, push, pull request
+- Undeclared external effects always require human confirmation.
+
 ## Cost Controls
 - verification debt: Do not accept self-graded completion; require concrete verifier evidence before stop.
 - comprehension rot: Keep summaries and changed-state notes current so a human can still explain what changed.
@@ -55,13 +61,16 @@ A public issue describes a reproducible CLI failure. The repository builds local
 - Stop when every verifier has current evidence and passes.
 - Stop and narrow the problem after the same verifier fails twice.
 - Stop and ask for confirmation when the goal, input, or permissions do not match the current context.
-- Ask for confirmation before external-impact actions: commit, push, pull request
+- Apply the execution policy before external-impact actions: commit, push, pull request
+- Ask for confirmation before human-required effects: commit, push, pull request
 
 ## Rollback
 Revert this turn's output or keep the prior state, record the failing evidence, then return to inspect with a narrower scope.
 
 ## Human Gates
-- Ask for human confirmation before changing external state, publishing, sending, deleting, or paying.
+- Follow execution_policy: only declared and permitted effects may run without confirmation.
+- Mode is assisted; effects allowed without confirmation: none.
+- Always ask before: commit, push, pull request.
 - Risk is medium; do not expand scope after failure.
 - After an external-impact action, read back the real target before reporting success.
 

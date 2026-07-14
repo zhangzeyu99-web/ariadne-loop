@@ -260,7 +260,7 @@ Current state:
 
 Constraints:
 - Keep edits scoped to {files/modules}.
-- Do not perform external effects without human approval.
+- Only perform external effects explicitly allowed by execution_policy; always pause for human_required_effects.
 - Preserve unrelated user changes.
 
 Loop:

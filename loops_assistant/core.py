@@ -941,8 +941,17 @@ def _evaluate_external_effects(
             *sorted(EXTERNAL_EFFECT_WORDS),
         ]
     )
-    requested = [
+    matched = [
         effect for effect in candidates if _text_mentions_effect(next_step, effect)
+    ]
+    requested = [
+        effect
+        for effect in matched
+        if not any(
+            other.lower() != effect.lower()
+            and _text_mentions_effect(other, effect)
+            for other in matched
+        )
     ]
     if not requested:
         return {"requested": [], "allowed": [], "blocked": []}

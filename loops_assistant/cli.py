@@ -21,7 +21,15 @@ from .core import (
 )
 
 
+def _configure_utf8_stdio() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _configure_utf8_stdio()
     parser = argparse.ArgumentParser(
         prog="ariadne-loop",
         description=(
@@ -458,6 +466,7 @@ Failed:
 
 
 def _render_quickstart_runbook(output_dir: Path, loop: dict[str, object]) -> str:
+    policy_text = _render_execution_policy_prompt(loop, "en")
     return f"""# Loop Run Kit Runbook
 
 Use this directory as a complete handoff package for a continuous coding-agent loop.
@@ -492,7 +501,9 @@ ariadne-loop supervise --loop {output_dir / "loop.json"} --reports {output_dir /
 - Return `stop` when all verifiers pass with current evidence.
 - Return `needs_human` when approval, missing access, or unclear product intent blocks the next turn.
 - Return `rollback` when a verifier fails repeatedly or a change crosses a constraint.
-- Do not push, publish, release, or open a pull request without human confirmation.
+
+## Execution Policy
+{policy_text}
 
 ## Current Loop
 - name: {loop["name"]}
@@ -542,7 +553,7 @@ ariadne-loop prompt --dir {output_dir} --lang zh
 - Ask for one verifiable change per iteration.
 - Require updates to `PROGRESS.md`, one appended JSON line in `reports.jsonl`, and a refreshed `decision.json`.
 - If `decision.json` says `continue`, require the agent to begin the next iteration instead of summarizing as done.
-- Use `needs_human` for missing access, unclear product intent, or external effects.
+- Use `needs_human` for missing access, unclear product intent, or external effects blocked by `execution_policy`.
 - Use `rollback` when the same verifier fails repeatedly or the change crosses a constraint.
 """
 
@@ -570,6 +581,7 @@ def _render_control_prompt(
     reason_text = "; ".join(str(reason) for reason in reasons) if isinstance(reasons, list) else str(reasons)
     goal = str(loop.get("goal", "complete the loop with current evidence"))
     directory_text = str(directory)
+    policy_text = _render_execution_policy_prompt(loop, lang)
 
     if lang == "zh":
         if decision_name == "stop":
@@ -600,7 +612,7 @@ def _render_control_prompt(
             "向 `reports.jsonl` 追加一行 JSON，再运行 `ariadne-loop supervise` 刷新 `decision.json`。"
             "如果刷新后仍是 `continue`，不要总结收工，立刻开始下一轮 inspect。"
             "只有 stop gate 有当前证据时才返回 `stop`；遇到 `needs_human`、`rollback` 或预算耗尽时暂停并说明原因。"
-            "如果需要 push、release、deploy、delete、send 或权限不清，返回 `needs_human`。"
+            f"{policy_text}"
         )
 
     if decision_name == "stop":
@@ -632,7 +644,43 @@ def _render_control_prompt(
         "refresh `decision.json`. If the refreshed decision is `continue`, immediately begin the next inspect "
         "iteration instead of summarizing as done. Return `stop` only when stop gates have current evidence; "
         "pause and explain the reason on `needs_human`, `rollback`, or budget exhaustion. "
-        "Return `needs_human` before push, release, deploy, delete, send, or unclear permissions."
+        f"{policy_text}"
+    )
+
+
+def _render_execution_policy_prompt(loop: dict[str, object], lang: str) -> str:
+    policy = loop.get("execution_policy", {})
+    if not isinstance(policy, dict):
+        policy = {}
+    mode = str(policy.get("mode", "assisted"))
+    allowed = policy.get("allowed_effects", [])
+    human_required = policy.get("human_required_effects", [])
+    allowed = [str(item) for item in allowed] if isinstance(allowed, list) else []
+    human_required = (
+        [str(item) for item in human_required]
+        if isinstance(human_required, list)
+        else []
+    )
+
+    if lang == "zh":
+        if mode == "report_only":
+            return "运行模式：只报告。所有外部动作都必须先问人。"
+        allowed_text = "、".join(allowed) or "无"
+        human_text = "、".join(human_required) or "未声明的外部动作"
+        mode_text = "无人值守" if mode == "unattended" else "辅助执行"
+        return (
+            f"运行模式：{mode_text}。可直接执行的外部动作：{allowed_text}。"
+            f"必须先问人的外部动作：{human_text}。未声明的外部动作也必须先问人。"
+        )
+
+    if mode == "report_only":
+        return "Mode: report only. Ask a human before every external effect."
+    allowed_text = ", ".join(allowed) or "none"
+    human_text = ", ".join(human_required) or "undeclared external effects"
+    return (
+        f"Mode: {mode}. External effects allowed without confirmation: {allowed_text}. "
+        f"External effects requiring a human: {human_text}. "
+        "Undeclared external effects also require a human."
     )
 
 
